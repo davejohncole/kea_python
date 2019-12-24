@@ -1,0 +1,7 @@
+$NAMESPACE isc::log
+
+% LOG_KEAPY_HOOK %1
+There was a problem loading keapyhook.so
+
+% LOG_KEAPY_PYTHON %1
+Log message from the Python module loaded by keapyhook.so

@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "../kea-1.7.3/**",
+                "${workspaceFolder}/**",
+                "/usr/include/**",
+                "${default}"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/cpp",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
