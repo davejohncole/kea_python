@@ -4,6 +4,7 @@
 #include <log/macros.h>
 
 #include "keapy_messages.h"
+#include "../keamodule/kea_capsule.h"
 
 using namespace std;
 using namespace isc::hooks;
@@ -15,10 +16,11 @@ extern "C" {
 #include <dlfcn.h>
 #include <Python.h>
 
-static isc::log::Logger logger("keapy");
+static Logger logger("keapy");
 
 static void *libpython;
-static PyObject *kea_module;
+
+static PyObject *python_module;
 
 static int load_libpython(const char *name) {
     libpython = dlopen(name, RTLD_NOW | RTLD_GLOBAL);
@@ -45,6 +47,7 @@ void      (*dl_Py_IncRef)(PyObject *);
 void      (*dl_Py_DecRef)(PyObject *);
 PyObject* (*dl_PyObject_GetAttrString)(PyObject *, const char *);
 int       (*dl_PyList_Insert)(PyObject *, Py_ssize_t, PyObject *);
+void*     (*dl_PyCapsule_Import)(const char *name, int no_block);
 
 static int find_symbol(void **sym, const char *name) {
     *sym = dlsym(libpython, name);
@@ -64,7 +67,8 @@ static int find_symbols() {
         || load_symbol(Py_IncRef)
         || load_symbol(Py_DecRef)
         || load_symbol(PyObject_GetAttrString)
-        || load_symbol(PyList_Insert)) {
+        || load_symbol(PyList_Insert)
+        || load_symbol(PyCapsule_Import)) {
         return (1);
     }
     return (0);
@@ -80,6 +84,50 @@ static int python_finalize() {
         dl_Py_Finalize();
     }
     return (0);
+}
+
+static void log_debug(const char *msg) {
+    LOG_DEBUG(logger, DBGLVL_TRACE_BASIC, LOG_KEAPY_PYTHON).arg(string(msg));
+}
+
+static void log_info(const char *msg) {
+    LOG_INFO(logger, LOG_KEAPY_PYTHON).arg(string(msg));
+}
+
+static void log_warn(const char *msg) {
+    LOG_WARN(logger, LOG_KEAPY_PYTHON).arg(string(msg));
+}
+
+static void log_error(const char *msg) {
+    LOG_ERROR(logger, LOG_KEAPY_PYTHON).arg(string(msg));
+}
+
+static void log_fatal(const char *msg) {
+    LOG_FATAL(logger, LOG_KEAPY_PYTHON).arg(string(msg));
+}
+
+static LogFunctions log_callbacks = {
+    log_debug,
+    log_info,
+    log_warn,
+    log_error,
+    log_fatal
+};
+
+static int load_kea_capsule() {
+    kea_capsule = (void **)dl_PyCapsule_Import("kea._C_API", 0);
+    if (!kea_capsule) {
+        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("PyCapsule_Import(\"kea._C_API\") failed");
+        return (1);
+    }
+    Kea_Bootstrap(&log_callbacks);
+    return (0);
+}
+
+static int unload_kea_capsule() {
+    if (kea_capsule) {
+        Kea_Shutdown();
+    }
 }
 
 static PyObject* make_python_string(const char *str) {
@@ -115,7 +163,6 @@ static int insert_python_path(const string module_path) {
     PyObject *path = 0;
     PyObject *cwd = 0;
 
-    LOG_INFO(logger, LOG_KEAPY_HOOK).arg("insert \"" + module_path + "\" into sys.path");
     sys = make_python_string("sys");
     if (!sys) {
         goto error;
@@ -148,14 +195,13 @@ error:
 static int import_python_module(string module_name) {
     PyObject *name = 0;
 
-    LOG_INFO(logger, LOG_KEAPY_HOOK).arg("import \"" + module_name + "\" module");
     name = make_python_string(module_name.c_str());
     if (!name) {
         return (1);
     }
-    kea_module = dl_PyImport_Import(name);
+    python_module = dl_PyImport_Import(name);
     dl_Py_DecRef(name);
-    if (!kea_module) {
+    if (!python_module) {
         LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("PyImport_Import(\"" + module_name + "\") failed");
         return (1);
     }
@@ -165,10 +211,10 @@ static int import_python_module(string module_name) {
     return (0);
 }
 
-static int unload_kea_module() {
-    if (kea_module) {
-        dl_Py_DecRef(kea_module);
-        kea_module = 0;
+static int unload_python_module() {
+    if (python_module) {
+        dl_Py_DecRef(python_module);
+        python_module = 0;
     }
     return (0);
 }
@@ -204,6 +250,11 @@ int load(LibraryHandle &handle) {
         return (1);
     }
     python_initialize();
+    // load the kea capsule
+    if (load_kea_capsule()) {
+        return (1);
+    }
+
     // split module into path and module
     string module_path;
     string module_name;
@@ -214,13 +265,15 @@ int load(LibraryHandle &handle) {
     if (import_python_module(module_name)) {
         return (1);
     }
+
     LOG_INFO(logger, LOG_KEAPY_HOOK).arg("keapyhook loaded");
 
     return (0);
 }
 
 int unload() {
-    unload_kea_module();
+    unload_kea_capsule();
+    unload_python_module();
     python_finalize();
     unload_libpython();
     LOG_INFO(logger, LOG_KEAPY_HOOK).arg("keapyhook unloaded");
