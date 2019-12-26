@@ -2,7 +2,8 @@ from distutils.core import setup, Extension
 
 
 kea = Extension('kea',
-                sources=['kea.cc'])
+                sources=['kea.cc',
+                         'logger.cc'])
 
 setup(name='kea',
       version='1.0',

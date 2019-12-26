@@ -4,7 +4,7 @@
 #include <log/macros.h>
 
 #include "keapy_messages.h"
-#include "../keamodule/kea_capsule.h"
+#include "../keamodule/keacapsule.h"
 
 using namespace std;
 using namespace isc::hooks;

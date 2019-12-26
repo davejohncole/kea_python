@@ -21,19 +21,14 @@ typedef struct {
 
 #define Kea_API_pointers 2
 
-
 #ifdef KEA_MODULE
-
 static Kea_Bootstrap_RETURN Kea_Bootstrap Kea_Bootstrap_PROTO;
 static Kea_Shutdown_RETURN Kea_Shutdown Kea_Shutdown_PROTO;
-
 #else
-
 static void **kea_capsule;
 
 #define Kea_Bootstrap (*(Kea_Bootstrap_RETURN (*)Kea_Bootstrap_PROTO) kea_capsule[Kea_Bootstrap_NUM])
 #define Kea_Shutdown (*(Kea_Shutdown_RETURN (*)Kea_Shutdown_PROTO) kea_capsule[Kea_Shutdown_NUM])
-
 #endif
 
 }

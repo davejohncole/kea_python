@@ -1,3 +1,4 @@
 import kea
 
-kea.info('log from python!')
+
+kea.logger.info('log from python!')
