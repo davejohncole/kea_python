@@ -7,12 +7,12 @@ extern "C" {
 #define KEA_MODULE
 #include "keacapsule.h"
 
-PyObject *hook_module;
+static PyObject *hook_module;
+static PyObject *traceback_module;
+static LogFunctions *log_callbacks;
 
 typedef struct {
     PyObject_HEAD
-
-    LogFunctions *log_functions;
 } LoggerObject;
 
 static PyObject *
@@ -22,7 +22,7 @@ Logger_debug(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    ((LoggerObject*) self)->log_functions->debug(msg);
+    log_callbacks->debug(msg);
 
     Py_RETURN_NONE;
 }
@@ -34,7 +34,7 @@ Logger_info(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    ((LoggerObject*) self)->log_functions->info(msg);
+    log_callbacks->info(msg);
 
     Py_RETURN_NONE;
 }
@@ -46,7 +46,7 @@ Logger_warn(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    ((LoggerObject*) self)->log_functions->warn(msg);
+    log_callbacks->warn(msg);
 
     Py_RETURN_NONE;
 }
@@ -59,7 +59,7 @@ Logger_error(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    ((LoggerObject*) self)->log_functions->error(msg);
+    log_callbacks->error(msg);
 
     Py_RETURN_NONE;
 }
@@ -71,7 +71,7 @@ Logger_fatal(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    ((LoggerObject*) self)->log_functions->fatal(msg);
+    log_callbacks->fatal(msg);
 
     Py_RETURN_NONE;
 }
@@ -136,21 +136,71 @@ static PyTypeObject LoggerType = {
     PyType_GenericNew                           /* tp_new */
 };
 
-static int
+static PyObject *
 import_python_module(const char *module_name) {
     PyObject *name = 0;
 
     name = PyUnicode_DecodeFSDefault(module_name);
     if (!name) {
-        return (1);
+        return NULL;
     }
-    hook_module = PyImport_Import(name);
+    PyObject *module = PyImport_Import(name);
     Py_DECREF(name);
-    if (!hook_module) {
-        return (1);
+
+    return (module);
+}
+
+static int
+format_python_traceback() {
+    // import traceback
+    // exc_type, exc_value, exc_traceback = sys.exc_info()
+    // return ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+    PyObject *exc_type, *exc_value, *exc_traceback;
+    PyObject *format_exception = NULL;
+    PyObject *line_list = NULL;
+    PyObject *empty_string = NULL;
+    PyObject *formatted_error = NULL;
+    int res = 1;
+
+    PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+
+    if (!traceback_module) {
+        traceback_module = import_python_module("traceback");
+        if (!traceback_module) {
+            goto error;
+        }
     }
 
-    return (0);
+    format_exception = PyObject_GetAttrString(traceback_module, "format_exception");
+    if (!format_exception) {
+        goto error;
+    }
+    line_list = PyObject_CallFunction(format_exception, "OOO", exc_type, exc_value, exc_traceback);
+    if (!line_list) {
+        goto error;
+    }
+    empty_string = PyUnicode_FromString("");
+    if (!empty_string) {
+        goto error;
+    }
+    formatted_error = PyUnicode_Join(empty_string, line_list);
+    if (!formatted_error) {
+        goto error;
+    }
+    log_callbacks->error(PyUnicode_AsUTF8(formatted_error));
+
+    res = 0;
+
+error:
+    Py_XDECREF(formatted_error);
+    Py_XDECREF(empty_string);
+    Py_XDECREF(line_list);
+    Py_XDECREF(format_exception);
+    Py_XDECREF(exc_type);
+    Py_XDECREF(exc_value);
+    Py_XDECREF(exc_traceback);
+
+    return (res);
 }
 
 static int
@@ -164,14 +214,16 @@ Kea_Bootstrap(LibraryHandle *handle, LogFunctions *log_functions, const char *mo
         Py_DECREF(&LoggerType);
         return (1);
     }
-    logger->log_functions = log_functions;
+    log_callbacks = log_functions;
     // PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "logger", (PyObject*)logger) < 0) {
         Py_DECREF(&LoggerType);
         Py_DECREF(logger);
         return (1);
     }
-    if (import_python_module(module_name)) {
+    hook_module = import_python_module(module_name);
+    if (hook_module == NULL) {
+        format_python_traceback();
         return (1);
     }
 
@@ -185,6 +237,10 @@ Kea_Shutdown() {
         Py_DECREF(Py_None);
     }
     Py_DECREF(&LoggerType);
+    if (hook_module) {
+        Py_DECREF(hook_module);
+        hook_module = NULL;
+    }
 
     return (0);
 }

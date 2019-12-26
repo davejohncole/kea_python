@@ -127,7 +127,10 @@ load_kea_capsule(LibraryHandle &handle, string module_name) {
         LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("PyCapsule_Import(\"kea._C_API\") failed");
         return (1);
     }
-    Kea_Bootstrap(&handle, &log_callbacks, module_name.c_str());
+    if (Kea_Bootstrap(&handle, &log_callbacks, module_name.c_str())) {
+        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("Kea_Bootstrap failed");
+        return (1);
+    }
     return (0);
 }
 
