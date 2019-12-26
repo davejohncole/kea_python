@@ -13,7 +13,7 @@ typedef struct {
 
 #define Kea_Bootstrap_NUM 0
 #define Kea_Bootstrap_RETURN int
-#define Kea_Bootstrap_PROTO (LogFunctions *log_functions)
+#define Kea_Bootstrap_PROTO (isc::hooks::LibraryHandle *handle, LogFunctions *log_functions, const char *module_name)
 
 #define Kea_Shutdown_NUM 1
 #define Kea_Shutdown_RETURN int

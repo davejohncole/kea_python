@@ -3,13 +3,13 @@ using namespace std;
 extern "C" {
 #include "keamodule.h"
 
-PyObject *module;
+PyObject *kea_module;
 
 static PyMethodDef kea_methods[] = {
     {NULL, NULL, 0, NULL}   /* sentinel */
 };
 
-static PyModuleDef kea_module = {
+static PyModuleDef kea_module_def = {
     PyModuleDef_HEAD_INIT,
     "kea",
     NULL,
@@ -19,17 +19,17 @@ static PyModuleDef kea_module = {
 
 PyMODINIT_FUNC
 PyInit_kea(void) {
-    module = PyModule_Create(&kea_module);
-    if (module == NULL) {
+    kea_module = PyModule_Create(&kea_module_def);
+    if (kea_module == NULL) {
         return NULL;
     }
 
-    if (Logger_define_capsule(module)) {
-        Py_DECREF(module);
+    if (Logger_define_capsule(kea_module)) {
+        Py_DECREF(kea_module);
         return NULL;
     }
 
-    return module;
+    return kea_module;
 }
 
 }

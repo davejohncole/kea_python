@@ -1,7 +1,13 @@
+#include <hooks/hooks.h>
+
+using namespace isc::hooks;
+
 extern "C" {
 #include "keamodule.h"
 #define KEA_MODULE
 #include "keacapsule.h"
+
+PyObject *hook_module;
 
 typedef struct {
     PyObject_HEAD
@@ -131,7 +137,24 @@ static PyTypeObject LoggerType = {
 };
 
 static int
-Kea_Bootstrap(LogFunctions *log_functions) {
+import_python_module(const char *module_name) {
+    PyObject *name = 0;
+
+    name = PyUnicode_DecodeFSDefault(module_name);
+    if (!name) {
+        return (1);
+    }
+    hook_module = PyImport_Import(name);
+    Py_DECREF(name);
+    if (!hook_module) {
+        return (1);
+    }
+
+    return (0);
+}
+
+static int
+Kea_Bootstrap(LibraryHandle *handle, LogFunctions *log_functions, const char *module_name) {
     if (PyType_Ready(&LoggerType) < 0) {
         return (1);
     }
@@ -143,9 +166,12 @@ Kea_Bootstrap(LogFunctions *log_functions) {
     }
     logger->log_functions = log_functions;
     // PyModule_AddObject steals reference on success
-    if (PyModule_AddObject(module, "logger", (PyObject*)logger) < 0) {
+    if (PyModule_AddObject(kea_module, "logger", (PyObject*)logger) < 0) {
         Py_DECREF(&LoggerType);
         Py_DECREF(logger);
+        return (1);
+    }
+    if (import_python_module(module_name)) {
         return (1);
     }
 
@@ -155,7 +181,7 @@ Kea_Bootstrap(LogFunctions *log_functions) {
 static int
 Kea_Shutdown() {
     Py_INCREF(Py_None);
-    if (PyModule_AddObject(module, "logger", Py_None) < 0) {
+    if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {
         Py_DECREF(Py_None);
     }
     Py_DECREF(&LoggerType);
