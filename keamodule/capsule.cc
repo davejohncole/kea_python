@@ -1,6 +1,11 @@
+#include <boost/algorithm/string/predicate.hpp>
 #include <hooks/hooks.h>
+#include <log/message_initializer.h>
+#include <log/macros.h>
 
 using namespace isc::hooks;
+using namespace isc::log;
+using namespace std;
 
 extern "C" {
 #include "keamodule.h"
@@ -9,7 +14,8 @@ extern "C" {
 
 static PyObject *hook_module;
 static PyObject *traceback_module;
-static LogFunctions *log_callbacks;
+static Logger *kea_logger = 0;
+static MessageID *kea_message_id = 0;
 
 typedef struct {
     PyObject_HEAD
@@ -22,7 +28,7 @@ Logger_debug(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    log_callbacks->debug(msg);
+    LOG_DEBUG(*kea_logger, DBGLVL_TRACE_BASIC, *kea_message_id).arg(string(msg));
 
     Py_RETURN_NONE;
 }
@@ -34,7 +40,7 @@ Logger_info(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    log_callbacks->info(msg);
+    LOG_INFO(*kea_logger, *kea_message_id).arg(string(msg));
 
     Py_RETURN_NONE;
 }
@@ -46,7 +52,7 @@ Logger_warn(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    log_callbacks->warn(msg);
+    LOG_WARN(*kea_logger, *kea_message_id).arg(string(msg));
 
     Py_RETURN_NONE;
 }
@@ -59,7 +65,7 @@ Logger_error(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    log_callbacks->error(msg);
+    LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
 
     Py_RETURN_NONE;
 }
@@ -71,7 +77,7 @@ Logger_fatal(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return NULL;
     }
-    log_callbacks->fatal(msg);
+    LOG_FATAL(*kea_logger, *kea_message_id).arg(string(msg));
 
     Py_RETURN_NONE;
 }
@@ -136,20 +142,6 @@ static PyTypeObject LoggerType = {
     PyType_GenericNew                           /* tp_new */
 };
 
-static PyObject *
-import_python_module(const char *module_name) {
-    PyObject *name = 0;
-
-    name = PyUnicode_DecodeFSDefault(module_name);
-    if (!name) {
-        return NULL;
-    }
-    PyObject *module = PyImport_Import(name);
-    Py_DECREF(name);
-
-    return (module);
-}
-
 static int
 format_python_traceback() {
     // import traceback
@@ -165,7 +157,7 @@ format_python_traceback() {
     PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
 
     if (!traceback_module) {
-        traceback_module = import_python_module("traceback");
+        traceback_module = PyImport_ImportModule("traceback");
         if (!traceback_module) {
             goto error;
         }
@@ -187,7 +179,7 @@ format_python_traceback() {
     if (!formatted_error) {
         goto error;
     }
-    log_callbacks->error(PyUnicode_AsUTF8(formatted_error));
+    LOG_ERROR(*kea_logger, *kea_message_id).arg(string(PyUnicode_AsUTF8(formatted_error)));
 
     res = 0;
 
@@ -203,8 +195,74 @@ error:
     return (res);
 }
 
+static void
+Kea_SetLogger(Logger &logger, MessageID& ident) {
+    kea_logger = &logger;
+    kea_message_id = &ident;
+}
+
 static int
-Kea_Bootstrap(LibraryHandle *handle, LogFunctions *log_functions, const char *module_name) {
+split_module_path(const string module, string &module_path, string &module_name) {
+    // extract the path portion of the module parameter
+    size_t slash_pos = module.find_last_of('/');
+    size_t basename_pos = 0;
+    if (slash_pos != string::npos) {
+        module_path = module.substr(0, slash_pos);
+        basename_pos = slash_pos + 1;
+    }
+    // extract module basename by removing .py if it is present
+    if (boost::algorithm::ends_with(module, ".py")) {
+        module_name = module.substr(basename_pos, module.size() - basename_pos - 3);
+    }
+    else {
+        module_name = module.substr(basename_pos, module.size() - basename_pos);
+    }
+    return (0);
+}
+
+static int
+insert_python_path(const string module_path) {
+    int res = 1;
+    PyObject *sys_module = 0;
+    PyObject *path = 0;
+    PyObject *cwd = 0;
+
+    sys_module = PyImport_ImportModule("sys");
+    if (!sys_module) {
+        LOG_ERROR(*kea_logger, *kea_message_id).arg("PyImport_ImportModule(\"sys\") failed");
+        goto error;
+    }
+    path = PyObject_GetAttrString(sys_module, "path");
+    if (!path) {
+        LOG_ERROR(*kea_logger, *kea_message_id).arg("PyObject_GetAttrString(sys_module, \"path\") failed");
+        goto error;
+    }
+    cwd = PyUnicode_DecodeFSDefault(module_path.c_str());
+    if (PyList_Insert(path, 0, cwd) < 0) {
+        LOG_ERROR(*kea_logger, *kea_message_id).arg("PyList_Insert(path, 0, cwd) failed");
+        goto error;
+    }
+    res = 0;
+
+error:
+    Py_XDECREF(cwd);
+    Py_XDECREF(path);
+    Py_XDECREF(sys_module);
+
+    return (res);
+}
+
+static int
+Kea_Bootstrap(LibraryHandle *handle, const char *module) {
+    // split module into path and module
+    string module_path;
+    string module_name;
+    split_module_path(module, module_path, module_name);
+
+    if (!module_path.empty() && insert_python_path(module_path)) {
+        return (1);
+    }
+
     if (PyType_Ready(&LoggerType) < 0) {
         return (1);
     }
@@ -214,14 +272,13 @@ Kea_Bootstrap(LibraryHandle *handle, LogFunctions *log_functions, const char *mo
         Py_DECREF(&LoggerType);
         return (1);
     }
-    log_callbacks = log_functions;
     // PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "logger", (PyObject*)logger) < 0) {
         Py_DECREF(&LoggerType);
         Py_DECREF(logger);
         return (1);
     }
-    hook_module = import_python_module(module_name);
+    hook_module = PyImport_ImportModule(module_name.c_str());
     if (hook_module == NULL) {
         format_python_traceback();
         return (1);
@@ -251,6 +308,7 @@ Logger_define_capsule(PyObject *module) {
     PyObject *c_api_object = 0;
 
     // initialize the C API pointer array
+    kea_capsule[Kea_SetLogger_NUM] = (void *)Kea_SetLogger;
     kea_capsule[Kea_Bootstrap_NUM] = (void *)Kea_Bootstrap;
     kea_capsule[Kea_Shutdown_NUM] = (void *)Kea_Shutdown;
     // create a Capsule containing the API pointer array's address
