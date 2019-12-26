@@ -20,8 +20,6 @@ static Logger logger("keapy");
 
 static void *libpython;
 
-static PyObject *python_module;
-
 void      (*dl_Py_Initialize)(void);
 void      (*dl_Py_Finalize)(void);
 PyObject* (*dl_PyUnicode_DecodeFSDefault)(const char *s);
