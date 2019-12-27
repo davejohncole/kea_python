@@ -35,9 +35,3 @@ def pkt4_send(handle):
     response.addOption(Option(DHO_DHCP_RENEWAL_TIME).setUint32(1800))
     response.addOption(Option(DHO_DHCP_REBINDING_TIME).setUint32(3600))
     return 0
-
-def load(handle):
-    return 0
-
-def unload():
-    return 0

@@ -3,3 +3,4 @@ keapyhook/keapyhook.so
 keapyhook/__pycache__/*
 keapyhook/kea.log
 keamodule/build
+keamodule/tests/__pycache__/*
