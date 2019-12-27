@@ -269,12 +269,10 @@ Kea_Bootstrap(LibraryHandle *handle, const char *module) {
     Py_INCREF(&LoggerType);
     LoggerObject *logger = PyObject_New(LoggerObject, &LoggerType);
     if (!logger) {
-        Py_DECREF(&LoggerType);
         return (1);
     }
     // PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "logger", (PyObject*)logger) < 0) {
-        Py_DECREF(&LoggerType);
         Py_DECREF(logger);
         return (1);
     }
