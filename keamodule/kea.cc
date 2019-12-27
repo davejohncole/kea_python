@@ -7,13 +7,13 @@ extern "C" {
 PyObject *kea_module;
 
 static PyMethodDef kea_methods[] = {
-    {NULL, NULL, 0, NULL}   // sentinel
+    {0, 0, 0, 0}   // sentinel
 };
 
 static PyModuleDef kea_module_def = {
     PyModuleDef_HEAD_INIT,
     "kea",
-    NULL,
+    0,
     -1,
     kea_methods
 };
@@ -21,8 +21,8 @@ static PyModuleDef kea_module_def = {
 PyMODINIT_FUNC
 PyInit_kea(void) {
     kea_module = PyModule_Create(&kea_module_def);
-    if (kea_module == NULL) {
-        return NULL;
+    if (!kea_module) {
+        return 0;
     }
 
     if (Capsule_define()
@@ -30,7 +30,7 @@ PyInit_kea(void) {
         || LibraryHandle_define()
         || CalloutManager_define()) {
         Py_DECREF(kea_module);
-        return NULL;
+        return 0;
     }
 
     return kea_module;

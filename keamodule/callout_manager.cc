@@ -6,7 +6,7 @@ using namespace isc::hooks;
 extern "C" {
 
 static PyMethodDef CalloutManager_methods[] = {
-    {NULL}  // Sentinel
+    {0}  // Sentinel
 };
 
 static int
@@ -39,7 +39,7 @@ CalloutManager_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 static PyTypeObject CalloutManagerType = {
-    PyVarObject_HEAD_INIT(NULL, 0)
+    PyVarObject_HEAD_INIT(0, 0)
     "kea.CalloutManager",                       // tp_name
     sizeof(CalloutManagerObject),               // tp_basicsize
     0,                                          // tp_itemsize
