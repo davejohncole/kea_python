@@ -120,7 +120,14 @@ register_callouts(LibraryHandle *handle) {
     return (0);
 }
 
-// TODO add unregister_callouts
+static int
+unregister_callouts() {
+    for (unsigned int i = 0; i < num_callout_proxies; i++) {
+        CalloutProxy *proxy = &callout_proxies[i];
+        proxy->is_registered = false;
+    }
+    return (0);
+}
 
 static int
 call_load_callout(LibraryHandle *handle) {
@@ -163,7 +170,7 @@ error:
 }
 
 int
-Callouts_define(LibraryHandle *handle) {
+Callouts_register(LibraryHandle *handle) {
     int res;
 
     res = call_load_callout(handle);
@@ -172,6 +179,11 @@ Callouts_define(LibraryHandle *handle) {
     }
 
     return (res);
+}
+
+int
+Callouts_unregister() {
+    return (unregister_callouts());
 }
 
 }

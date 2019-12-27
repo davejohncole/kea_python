@@ -206,7 +206,7 @@ error:
 }
 
 static int
-Kea_Bootstrap(LibraryHandle *handle, const char *module) {
+Kea_Load(LibraryHandle *handle, const char *module) {
     // split module into path and module
     string module_path;
     string module_name;
@@ -234,7 +234,7 @@ Kea_Bootstrap(LibraryHandle *handle, const char *module) {
         log_python_traceback();
         return (1);
     }
-    if (Callouts_define(handle)) {
+    if (Callouts_register(handle)) {
         return (1);
     }
 
@@ -242,7 +242,9 @@ Kea_Bootstrap(LibraryHandle *handle, const char *module) {
 }
 
 static int
-Kea_Shutdown() {
+Kea_Unload() {
+    Callouts_unregister();
+
     Py_INCREF(Py_None);
     if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {
         Py_DECREF(Py_None);
@@ -263,15 +265,15 @@ Capsule_define() {
 
     // initialize the C API pointer array
     kea_capsule[Kea_SetLogger_NUM] = (void *)Kea_SetLogger;
-    kea_capsule[Kea_Bootstrap_NUM] = (void *)Kea_Bootstrap;
-    kea_capsule[Kea_Shutdown_NUM] = (void *)Kea_Shutdown;
+    kea_capsule[Kea_Load_NUM] = (void *)Kea_Load;
+    kea_capsule[Kea_Unload_NUM] = (void *)Kea_Unload;
     // create a Capsule containing the API pointer array's address
     c_api_object = PyCapsule_New((void *)kea_capsule, "kea._C_API", 0);
     if (PyModule_AddObject(kea_module, "_C_API", c_api_object) < 0) {
         Py_XDECREF(c_api_object);
         return (1);
     }
-    // initialize logger of None - will be replaced with Capsule Kea_Bootstrap
+    // initialize logger of None - will be replaced with Capsule Kea_Load
     Py_INCREF(Py_None);
     if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {
         Py_DECREF(Py_None);

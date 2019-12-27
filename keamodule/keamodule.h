@@ -25,7 +25,8 @@ extern int Capsule_define();
 extern int Constants_define();
 
 // callouts.cc
-extern int Callouts_define(isc::hooks::LibraryHandle *handle);
+extern int Callouts_register(isc::hooks::LibraryHandle *handle);
+extern int Callouts_unregister();
 
 // library_handle.cc
 typedef struct {

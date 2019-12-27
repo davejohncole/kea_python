@@ -80,8 +80,8 @@ load_kea_capsule(LibraryHandle &handle, string module) {
         return (1);
     }
     Kea_SetLogger(logger, LOG_KEAPY_PYTHON);
-    if (Kea_Bootstrap(&handle, module.c_str())) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("Kea_Bootstrap failed");
+    if (Kea_Load(&handle, module.c_str())) {
+        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("Kea_Load failed");
         return (1);
     }
     return (0);
@@ -90,7 +90,7 @@ load_kea_capsule(LibraryHandle &handle, string module) {
 static int
 unload_kea_capsule() {
     if (kea_capsule) {
-        Kea_Shutdown();
+        Kea_Unload();
     }
 }
 
