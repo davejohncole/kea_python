@@ -1,21 +1,18 @@
+#include "keamodule.h"
+#define KEA_MODULE
+#include "keacapsule.h"
 #include <boost/algorithm/string/predicate.hpp>
-#include <hooks/hooks.h>
-#include <log/message_initializer.h>
-#include <log/macros.h>
 
 using namespace isc::hooks;
 using namespace isc::log;
 using namespace std;
 
 extern "C" {
-#include "keamodule.h"
-#define KEA_MODULE
-#include "keacapsule.h"
 
 static PyObject *hook_module;
-static PyObject *traceback_module;
-static Logger *kea_logger = 0;
-static MessageID *kea_message_id = 0;
+
+Logger *kea_logger = 0;
+MessageID *kea_message_id = 0;
 
 typedef struct {
     PyObject_HEAD
@@ -26,7 +23,7 @@ Logger_debug(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return NULL;
+        return 0;
     }
     LOG_DEBUG(*kea_logger, DBGLVL_TRACE_BASIC, *kea_message_id).arg(string(msg));
 
@@ -38,7 +35,7 @@ Logger_info(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return NULL;
+        return 0;
     }
     LOG_INFO(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -50,7 +47,7 @@ Logger_warn(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return NULL;
+        return 0;
     }
     LOG_WARN(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -63,7 +60,7 @@ Logger_error(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return NULL;
+        return 0;
     }
     LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -75,7 +72,7 @@ Logger_fatal(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return NULL;
+        return 0;
     }
     LOG_FATAL(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -93,7 +90,7 @@ static PyMethodDef Logger_methods[] = {
      "Log an error message to the kea logger."},
     {"fatal", (PyCFunction)(void(*)(void))Logger_fatal, METH_VARARGS,
      "Log a fatal message to the kea logger."},
-    {NULL}  /* Sentinel */
+    {0}  // Sentinel
 };
 
 static void
@@ -102,98 +99,45 @@ Logger_dealloc(LoggerObject *self) {
 }
 
 static PyTypeObject LoggerType = {
-    PyVarObject_HEAD_INIT(NULL, 0)
-    "kea.Logger",                               /* tp_name */
-    sizeof(LoggerObject),                       /* tp_basicsize */
-    0,                                          /* tp_itemsize */
-    (destructor)Logger_dealloc,                 /* tp_dealloc */
-    0,                                          /* tp_vectorcall_offset */
-    0,                                          /* tp_getattr */
-    0,                                          /* tp_setattr */
-    0,                                          /* tp_as_async */
-    (reprfunc)0,                                /* tp_repr */
-    0,                                          /* tp_as_number */
-    0,                                          /* tp_as_sequence */
-    0,                                          /* tp_as_mapping */
-    0,                                          /* tp_hash */
-    0,                                          /* tp_call */
-    0,                                          /* tp_str */
-    0,                                          /* tp_getattro */
-    0,                                          /* tp_setattro */
-    0,                                          /* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT,                         /* tp_flags */
-    "Kea server logging",                       /* tp_doc */
-    0,                                          /* tp_traverse */
-    0,                                          /* tp_clear */
-    0,                                          /* tp_richcompare */
-    0,                                          /* tp_weaklistoffset */
-    0,                                          /* tp_iter */
-    0,                                          /* tp_iternext */
-    Logger_methods,                             /* tp_methods */
-    0,                                          /* tp_members */
-    0,                                          /* tp_getset */
-    0,                                          /* tp_base */
-    0,                                          /* tp_dict */
-    0,                                          /* tp_descr_get */
-    0,                                          /* tp_descr_set */
-    0,                                          /* tp_dictoffset */
-    0,                                          /* tp_init */
-    PyType_GenericAlloc,                        /* tp_alloc */
-    PyType_GenericNew                           /* tp_new */
+    PyVarObject_HEAD_INIT(0, 0)
+    "kea.Logger",                               // tp_name
+    sizeof(LoggerObject),                       // tp_basicsize
+    0,                                          // tp_itemsize
+    (destructor)Logger_dealloc,                 // tp_dealloc
+    0,                                          // tp_vectorcall_offset
+    0,                                          // tp_getattr
+    0,                                          // tp_setattr
+    0,                                          // tp_as_async
+    0,                                          // tp_repr
+    0,                                          // tp_as_number
+    0,                                          // tp_as_sequence
+    0,                                          // tp_as_mapping
+    0,                                          // tp_hash
+    0,                                          // tp_call
+    0,                                          // tp_str
+    0,                                          // tp_getattro
+    0,                                          // tp_setattro
+    0,                                          // tp_as_buffer
+    Py_TPFLAGS_DEFAULT,                         // tp_flags
+    "Kea server logging",                       // tp_doc
+    0,                                          // tp_traverse
+    0,                                          // tp_clear
+    0,                                          // tp_richcompare
+    0,                                          // tp_weaklistoffset
+    0,                                          // tp_iter
+    0,                                          // tp_iternext
+    Logger_methods,                             // tp_methods
+    0,                                          // tp_members
+    0,                                          // tp_getset
+    0,                                          // tp_base
+    0,                                          // tp_dict
+    0,                                          // tp_descr_get
+    0,                                          // tp_descr_set
+    0,                                          // tp_dictoffset
+    0,                                          // tp_init
+    PyType_GenericAlloc,                        // tp_alloc
+    PyType_GenericNew                           // tp_new
 };
-
-static int
-format_python_traceback() {
-    // import traceback
-    // exc_type, exc_value, exc_traceback = sys.exc_info()
-    // return ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-    PyObject *exc_type, *exc_value, *exc_traceback;
-    PyObject *format_exception = NULL;
-    PyObject *line_list = NULL;
-    PyObject *empty_string = NULL;
-    PyObject *formatted_error = NULL;
-    int res = 1;
-
-    PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
-
-    if (!traceback_module) {
-        traceback_module = PyImport_ImportModule("traceback");
-        if (!traceback_module) {
-            goto error;
-        }
-    }
-
-    format_exception = PyObject_GetAttrString(traceback_module, "format_exception");
-    if (!format_exception) {
-        goto error;
-    }
-    line_list = PyObject_CallFunction(format_exception, "OOO", exc_type, exc_value, exc_traceback);
-    if (!line_list) {
-        goto error;
-    }
-    empty_string = PyUnicode_FromString("");
-    if (!empty_string) {
-        goto error;
-    }
-    formatted_error = PyUnicode_Join(empty_string, line_list);
-    if (!formatted_error) {
-        goto error;
-    }
-    LOG_ERROR(*kea_logger, *kea_message_id).arg(string(PyUnicode_AsUTF8(formatted_error)));
-
-    res = 0;
-
-error:
-    Py_XDECREF(formatted_error);
-    Py_XDECREF(empty_string);
-    Py_XDECREF(line_list);
-    Py_XDECREF(format_exception);
-    Py_XDECREF(exc_type);
-    Py_XDECREF(exc_value);
-    Py_XDECREF(exc_traceback);
-
-    return (res);
-}
 
 static void
 Kea_SetLogger(Logger &logger, MessageID& ident) {
@@ -277,8 +221,11 @@ Kea_Bootstrap(LibraryHandle *handle, const char *module) {
         return (1);
     }
     hook_module = PyImport_ImportModule(module_name.c_str());
-    if (hook_module == NULL) {
-        format_python_traceback();
+    if (!hook_module) {
+        log_python_traceback();
+        return (1);
+    }
+    if (Callouts_define(handle, hook_module)) {
         return (1);
     }
 
@@ -294,7 +241,7 @@ Kea_Shutdown() {
     Py_DECREF(&LoggerType);
     if (hook_module) {
         Py_DECREF(hook_module);
-        hook_module = NULL;
+        hook_module = 0;
     }
 
     return (0);
@@ -310,7 +257,7 @@ Capsule_define() {
     kea_capsule[Kea_Bootstrap_NUM] = (void *)Kea_Bootstrap;
     kea_capsule[Kea_Shutdown_NUM] = (void *)Kea_Shutdown;
     // create a Capsule containing the API pointer array's address
-    c_api_object = PyCapsule_New((void *)kea_capsule, "kea._C_API", NULL);
+    c_api_object = PyCapsule_New((void *)kea_capsule, "kea._C_API", 0);
     if (PyModule_AddObject(kea_module, "_C_API", c_api_object) < 0) {
         Py_XDECREF(c_api_object);
         return (1);

@@ -1,12 +1,13 @@
+#include "keamodule.h"
+
 using namespace std;
 
 extern "C" {
-#include "keamodule.h"
 
 PyObject *kea_module;
 
 static PyMethodDef kea_methods[] = {
-    {NULL, NULL, 0, NULL}   /* sentinel */
+    {NULL, NULL, 0, NULL}   // sentinel
 };
 
 static PyModuleDef kea_module_def = {
@@ -25,7 +26,9 @@ PyInit_kea(void) {
     }
 
     if (Capsule_define()
-        || Constants_define()) {
+        || Constants_define()
+        || LibraryHandle_define()
+        || CalloutManager_define()) {
         Py_DECREF(kea_module);
         return NULL;
     }

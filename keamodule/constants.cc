@@ -1,9 +1,9 @@
+#include "keamodule.h"
 #include <dhcp/dhcp4.h>
 
 using namespace isc::dhcp;
 
 extern "C" {
-#include "keamodule.h"
 
 typedef struct {
     const char *name;
