@@ -37,26 +37,25 @@ log_python_traceback() {
     if (!traceback_module) {
         traceback_module = PyImport_ImportModule("traceback");
         if (!traceback_module) {
-            LOG_ERROR(*kea_logger, *kea_message_id).arg("import traceback failed");
+            log_error("import traceback failed");
             goto error;
         }
     }
 
     if (!exc_traceback) {
-        LOG_ERROR(*kea_logger, *kea_message_id).arg(string(PyExceptionClass_Name(exc_type)) + ": " + to_string(exc_value));
-        // LOG_ERROR(*kea_logger, *kea_message_id).arg(to_string(exc_value));
+        log_error(string(PyExceptionClass_Name(exc_type)) + ": " + to_string(exc_value));
         res = 0;
         goto error;
     }
     else {
         format_exception = PyObject_GetAttrString(traceback_module, "format_exception");
         if (!format_exception) {
-            LOG_ERROR(*kea_logger, *kea_message_id).arg("traceback.format_exception not found");
+            log_error("traceback.format_exception not found");
             goto error;
         }
         line_list = PyObject_CallFunction(format_exception, "OOO", exc_type, exc_value, exc_traceback);
         if (!line_list) {
-            LOG_ERROR(*kea_logger, *kea_message_id).arg("traceback.format_exception(" + to_string(exc_type) + ", " + to_string(exc_value) + ", " + to_string(exc_traceback) + ") failed");
+            log_error("traceback.format_exception(" + to_string(exc_type) + ", " + to_string(exc_value) + ", " + to_string(exc_traceback) + ") failed");
             goto error;
         }
     }
@@ -66,10 +65,10 @@ log_python_traceback() {
     }
     formatted_error = PyUnicode_Join(empty_string, line_list);
     if (!formatted_error) {
-        LOG_ERROR(*kea_logger, *kea_message_id).arg("''.join(line_list) failed");
+        log_error("''.join(line_list) failed");
         goto error;
     }
-    LOG_ERROR(*kea_logger, *kea_message_id).arg(string(PyUnicode_AsUTF8(formatted_error)));
+    log_error(string(PyUnicode_AsUTF8(formatted_error)));
 
     res = 0;
 

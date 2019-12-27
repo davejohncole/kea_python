@@ -9,6 +9,22 @@ static PyMethodDef CalloutManager_methods[] = {
     {0}  // Sentinel
 };
 
+static PyObject *
+CalloutManager_use_count(CalloutManagerObject *self, void *closure) {
+    return PyLong_FromLong(self->manager.use_count());
+}
+
+static PyGetSetDef CalloutManager_getsetters[] = {
+    {(char *)"use_count", (getter) CalloutManager_use_count, (setter) 0, (char *)"shared_ptr use count", 0},
+    {0}  // Sentinel
+};
+
+static void
+CalloutManager_dealloc(CalloutManagerObject *self) {
+    self->manager.reset();
+    Py_TYPE(self)->tp_free((PyObject *) self);
+}
+
 static int
 CalloutManager_init(CalloutManagerObject *self, PyObject *args, PyObject *kwds) {
     static const char *kwlist[] = {0};
@@ -18,7 +34,7 @@ CalloutManager_init(CalloutManagerObject *self, PyObject *args, PyObject *kwds) 
     }
 
     try {
-        self->manager = new CalloutManager();
+        self->manager.reset(new CalloutManager());
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -33,7 +49,7 @@ CalloutManager_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CalloutManagerObject *self;
     self = (CalloutManagerObject *) type->tp_alloc(type, 0);
     if (self) {
-        self->manager = 0;
+        self->manager.reset();
     }
     return ((PyObject *) self);
 }
@@ -43,7 +59,7 @@ static PyTypeObject CalloutManagerType = {
     "kea.CalloutManager",                       // tp_name
     sizeof(CalloutManagerObject),               // tp_basicsize
     0,                                          // tp_itemsize
-    0,                                          // tp_dealloc
+    (destructor) CalloutManager_dealloc,        // tp_dealloc
     0,                                          // tp_vectorcall_offset
     0,                                          // tp_getattr
     0,                                          // tp_setattr
@@ -68,7 +84,7 @@ static PyTypeObject CalloutManagerType = {
     0,                                          // tp_iternext
     CalloutManager_methods,                     // tp_methods
     0,                                          // tp_members
-    0,                                          // tp_getset
+    CalloutManager_getsetters,                  // tp_getset
     0,                                          // tp_base
     0,                                          // tp_dict
     0,                                          // tp_descr_get

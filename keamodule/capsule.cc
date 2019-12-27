@@ -9,10 +9,19 @@ using namespace std;
 
 extern "C" {
 
-static PyObject *hook_module;
-
+PyObject *hook_module;
 Logger *kea_logger = 0;
 MessageID *kea_message_id = 0;
+
+void
+log_error(string msg) {
+    if (kea_logger) {
+        LOG_ERROR(*kea_logger, *kea_message_id).arg(msg);
+    }
+    else {
+        // TODO log via logger in kea module
+    }
+}
 
 typedef struct {
     PyObject_HEAD
@@ -173,17 +182,17 @@ insert_python_path(const string module_path) {
 
     sys_module = PyImport_ImportModule("sys");
     if (!sys_module) {
-        LOG_ERROR(*kea_logger, *kea_message_id).arg("PyImport_ImportModule(\"sys\") failed");
+        log_error("PyImport_ImportModule(\"sys\") failed");
         goto error;
     }
     path = PyObject_GetAttrString(sys_module, "path");
     if (!path) {
-        LOG_ERROR(*kea_logger, *kea_message_id).arg("PyObject_GetAttrString(sys_module, \"path\") failed");
+        log_error("PyObject_GetAttrString(sys_module, \"path\") failed");
         goto error;
     }
     cwd = PyUnicode_DecodeFSDefault(module_path.c_str());
     if (PyList_Insert(path, 0, cwd) < 0) {
-        LOG_ERROR(*kea_logger, *kea_message_id).arg("PyList_Insert(path, 0, cwd) failed");
+        log_error("PyList_Insert(path, 0, cwd) failed");
         goto error;
     }
     res = 0;
@@ -225,7 +234,7 @@ Kea_Bootstrap(LibraryHandle *handle, const char *module) {
         log_python_traceback();
         return (1);
     }
-    if (Callouts_define(handle, hook_module)) {
+    if (Callouts_define(handle)) {
         return (1);
     }
 

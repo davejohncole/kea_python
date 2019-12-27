@@ -5,12 +5,20 @@ using namespace isc::hooks;
 
 extern "C" {
 
-static PyMethodDef LibraryHandle_methods[] = {
+static PyMethodDef CalloutHandle_methods[] = {
     {0}  // Sentinel
 };
 
+static void
+CalloutHandle_dealloc(CalloutHandleObject *self) {
+    if (self->is_owner) {
+        delete self->handle;
+    }
+    Py_TYPE(self)->tp_free((PyObject *) self);
+}
+
 static int
-LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
+CalloutHandle_init(CalloutHandleObject *self, PyObject *args, PyObject *kwds) {
     static const char *kwlist[] = {"manager", 0};
     PyObject *manager = 0;
 
@@ -24,7 +32,8 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
     }
 
     try {
-        self->handle = new LibraryHandle(((CalloutManagerObject*)manager)->manager.get());
+        self->handle = new CalloutHandle(((CalloutManagerObject *)manager)->manager);
+        self->is_owner = true;
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -35,21 +44,21 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
 }
 
 static PyObject *
-LibraryHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    LibraryHandleObject *self;
-    self = (LibraryHandleObject *) type->tp_alloc(type, 0);
+CalloutHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    CalloutHandleObject *self;
+    self = (CalloutHandleObject *) type->tp_alloc(type, 0);
     if (self) {
         self->handle = 0;
     }
     return ((PyObject *) self);
 }
 
-static PyTypeObject LibraryHandleType = {
+static PyTypeObject CalloutHandleType = {
     PyVarObject_HEAD_INIT(0, 0)
-    "kea.LibraryHandle",                        // tp_name
-    sizeof(LibraryHandleObject),                // tp_basicsize
+    "kea.CalloutHandle",                        // tp_name
+    sizeof(CalloutHandleObject),                // tp_basicsize
     0,                                          // tp_itemsize
-    0,                                          // tp_dealloc
+    (destructor) CalloutHandle_dealloc,         // tp_dealloc
     0,                                          // tp_vectorcall_offset
     0,                                          // tp_getattr
     0,                                          // tp_setattr
@@ -65,14 +74,14 @@ static PyTypeObject LibraryHandleType = {
     0,                                          // tp_setattro
     0,                                          // tp_as_buffer
     Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server LibraryHandle",                 // tp_doc
+    "Kea server CalloutHandle",                 // tp_doc
     0,                                          // tp_traverse
     0,                                          // tp_clear
     0,                                          // tp_richcompare
     0,                                          // tp_weaklistoffset
     0,                                          // tp_iter
     0,                                          // tp_iternext
-    LibraryHandle_methods,                      // tp_methods
+    CalloutHandle_methods,                      // tp_methods
     0,                                          // tp_members
     0,                                          // tp_getset
     0,                                          // tp_base
@@ -80,33 +89,34 @@ static PyTypeObject LibraryHandleType = {
     0,                                          // tp_descr_get
     0,                                          // tp_descr_set
     0,                                          // tp_dictoffset
-    (initproc) LibraryHandle_init,              // tp_init
+    (initproc) CalloutHandle_init,              // tp_init
     PyType_GenericAlloc,                        // tp_alloc
-    LibraryHandle_new                           // tp_new
+    CalloutHandle_new                           // tp_new
 };
 
 int
-LibraryHandle_Check(PyObject *object) {
-    return (Py_TYPE(object) == &LibraryHandleType);
+CalloutHandle_Check(PyObject *object) {
+    return (Py_TYPE(object) == &CalloutHandleType);
 }
 
 PyObject *
-LibraryHandle_from_handle(LibraryHandle *handle) {
-    LibraryHandleObject *py_handle = PyObject_New(LibraryHandleObject, &LibraryHandleType);
+CalloutHandle_from_handle(CalloutHandle *handle) {
+    CalloutHandleObject *py_handle = PyObject_New(CalloutHandleObject, &CalloutHandleType);
     if (py_handle) {
         py_handle->handle = handle;
+        py_handle->is_owner = false;
     }
     return (PyObject *)py_handle;
 }
 
 int
-LibraryHandle_define() {
-    if (PyType_Ready(&LibraryHandleType) < 0) {
+CalloutHandle_define() {
+    if (PyType_Ready(&CalloutHandleType) < 0) {
         return (1);
     }
-    Py_INCREF(&LibraryHandleType);
-    if (PyModule_AddObject(kea_module, "LibraryHandle", (PyObject *) &LibraryHandleType) < 0) {
-        Py_DECREF(&LibraryHandleType);
+    Py_INCREF(&CalloutHandleType);
+    if (PyModule_AddObject(kea_module, "CalloutHandle", (PyObject *) &CalloutHandleType) < 0) {
+        Py_DECREF(&CalloutHandleType);
         return (1);
     }
 

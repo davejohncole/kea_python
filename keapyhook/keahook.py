@@ -38,3 +38,6 @@ def pkt4_send(handle):
 
 def load(handle):
     return 0
+
+def unload():
+    return 0

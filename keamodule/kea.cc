@@ -28,7 +28,8 @@ PyInit_kea(void) {
     if (Capsule_define()
         || Constants_define()
         || LibraryHandle_define()
-        || CalloutManager_define()) {
+        || CalloutManager_define()
+        || CalloutHandle_define()) {
         Py_DECREF(kea_module);
         return 0;
     }

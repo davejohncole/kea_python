@@ -14,16 +14,18 @@ extern PyObject *kea_module;
 extern int log_python_traceback();
 
 // capsule.cc
+extern PyObject *hook_module;
 extern isc::log::Logger *kea_logger;
 extern isc::log::MessageID *kea_message_id;
 
+extern void log_error(std::string msg);
 extern int Capsule_define();
 
 // constants.cc
 extern int Constants_define();
 
 // callouts.cc
-extern int Callouts_define(isc::hooks::LibraryHandle *handle, PyObject *hook_module);
+extern int Callouts_define(isc::hooks::LibraryHandle *handle);
 
 // library_handle.cc
 typedef struct {
@@ -40,10 +42,22 @@ extern int LibraryHandle_define();
 typedef struct {
     PyObject_HEAD
 
-    isc::hooks::CalloutManager *manager;
+    boost::shared_ptr<isc::hooks::CalloutManager> manager;
 } CalloutManagerObject;
 
 extern int CalloutManager_Check(PyObject *object);
 extern int CalloutManager_define();
+
+// callout_handle.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::hooks::CalloutHandle *handle;
+    bool is_owner;
+} CalloutHandleObject;
+
+extern int CalloutHandle_Check(PyObject *object);
+extern PyObject *CalloutHandle_from_handle(isc::hooks::CalloutHandle *handle);
+extern int CalloutHandle_define();
 
 }
