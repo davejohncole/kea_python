@@ -24,7 +24,8 @@ PyInit_kea(void) {
         return NULL;
     }
 
-    if (Logger_define_capsule(kea_module)) {
+    if (Capsule_define()
+        || Constants_define()) {
         Py_DECREF(kea_module);
         return NULL;
     }

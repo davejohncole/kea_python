@@ -3,7 +3,8 @@ from distutils.core import setup, Extension
 
 kea = Extension('kea',
                 sources=['kea.cc',
-                         'capsule.cc'],
+                         'capsule.cc',
+                         'constants.cc'],
                 include_dirs=['/usr/local/include/kea'])
 
 setup(name='kea',

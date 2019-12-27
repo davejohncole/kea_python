@@ -303,7 +303,7 @@ Kea_Shutdown() {
 }
 
 int
-Logger_define_capsule(PyObject *module) {
+Capsule_define() {
     static void *kea_capsule[Kea_API_pointers];
     PyObject *c_api_object = 0;
 
@@ -313,16 +313,14 @@ Logger_define_capsule(PyObject *module) {
     kea_capsule[Kea_Shutdown_NUM] = (void *)Kea_Shutdown;
     // create a Capsule containing the API pointer array's address
     c_api_object = PyCapsule_New((void *)kea_capsule, "kea._C_API", NULL);
-    if (PyModule_AddObject(module, "_C_API", c_api_object) < 0) {
+    if (PyModule_AddObject(kea_module, "_C_API", c_api_object) < 0) {
         Py_XDECREF(c_api_object);
-        Py_DECREF(module);
         return (1);
     }
     // initialize logger of None - will be replaced with Capsule Kea_Bootstrap
     Py_INCREF(Py_None);
-    if (PyModule_AddObject(module, "logger", Py_None) < 0) {
+    if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {
         Py_DECREF(Py_None);
-        Py_DECREF(module);
         return (1);
     }
 

@@ -5,6 +5,7 @@ extern "C" {
 
 extern PyObject *kea_module;
 
-extern int Logger_define_capsule(PyObject *module);
+extern int Capsule_define();
+extern int Constants_define();
 
 }
