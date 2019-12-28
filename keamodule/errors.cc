@@ -5,6 +5,27 @@ using namespace std;
 extern "C" {
 static PyObject *traceback_module;
 
+int
+Errors_initialize() {
+    traceback_module = PyImport_ImportModule("traceback");
+    if (!traceback_module) {
+        log_error("import traceback failed");
+        return (1);
+    }
+
+    return (0);
+}
+
+int
+Errors_finalize() {
+    if (traceback_module) {
+        Py_DECREF(traceback_module);
+        traceback_module = 0;
+    }
+
+    return (0);
+}
+
 static string
 to_string(PyObject *object) {
     if (!object) {
@@ -33,16 +54,9 @@ log_python_traceback() {
     int res = 1;
 
     PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+    PyErr_NormalizeException(&exc_type, &exc_value, &exc_traceback);
 
-    if (!traceback_module) {
-        traceback_module = PyImport_ImportModule("traceback");
-        if (!traceback_module) {
-            log_error("import traceback failed");
-            goto error;
-        }
-    }
-
-    if (!exc_traceback) {
+    if (!exc_traceback || !traceback_module) {
         log_error(string(PyExceptionClass_Name(exc_type)) + ": " + to_string(exc_value));
         res = 0;
         goto error;
@@ -68,8 +82,7 @@ log_python_traceback() {
         log_error("''.join(line_list) failed");
         goto error;
     }
-    log_error(string(PyUnicode_AsUTF8(formatted_error)));
-
+    log_error(PyUnicode_AsUTF8(formatted_error));
     res = 0;
 
 error:

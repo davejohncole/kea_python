@@ -15,6 +15,10 @@ MessageID *kea_message_id = 0;
 
 void
 log_error(string msg) {
+    // remove trailing '\n'
+    if (!msg.empty() && msg[msg.length() - 1] == '\n') {
+        msg.erase(msg.length() - 1);
+    }
     if (kea_logger) {
         LOG_ERROR(*kea_logger, *kea_message_id).arg(msg);
     }
@@ -234,6 +238,9 @@ Kea_Load(LibraryHandle *handle, const char *module) {
         log_python_traceback();
         return (1);
     }
+    if (Errors_initialize()) {
+        return (1);
+    }
     if (Callouts_register(handle)) {
         return (1);
     }
@@ -245,6 +252,7 @@ static int
 Kea_Unload() {
     Callouts_unregister();
 
+    Errors_finalize();
     Py_INCREF(Py_None);
     if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {
         Py_DECREF(Py_None);

@@ -10,7 +10,9 @@ extern "C" {
 // kea.cc
 extern PyObject *kea_module;
 
-// error.cc
+// errors.cc
+extern int Errors_initialize();
+extern int Errors_finalize();
 extern int log_python_traceback();
 
 // capsule.cc

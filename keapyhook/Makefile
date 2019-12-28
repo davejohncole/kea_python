@@ -5,4 +5,3 @@ keapyhook.so: load_unload.cc keapy_messages.cc version.cc
 
 keapy_messages.cc: keapy_messages.mes
 	kea-msg-compiler keapy_messages.mes
-
