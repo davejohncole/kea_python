@@ -45,7 +45,7 @@ LibraryHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 static PyTypeObject LibraryHandleType = {
-    PyVarObject_HEAD_INIT(0, 0)
+    PyObject_HEAD_INIT(0)
     "kea.LibraryHandle",                        // tp_name
     sizeof(LibraryHandleObject),                // tp_basicsize
     0,                                          // tp_itemsize
@@ -92,11 +92,11 @@ LibraryHandle_Check(PyObject *object) {
 
 PyObject *
 LibraryHandle_from_handle(LibraryHandle *handle) {
-    LibraryHandleObject *py_handle = PyObject_New(LibraryHandleObject, &LibraryHandleType);
-    if (py_handle) {
-        py_handle->handle = handle;
+    LibraryHandleObject *obj = PyObject_New(LibraryHandleObject, &LibraryHandleType);
+    if (obj) {
+        obj->handle = handle;
     }
-    return (PyObject *)py_handle;
+    return (PyObject *)obj;
 }
 
 int

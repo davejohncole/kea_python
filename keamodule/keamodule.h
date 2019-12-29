@@ -1,6 +1,7 @@
 #include <hooks/hooks.h>
 #include <hooks/callout_manager.h>
 #include <log/macros.h>
+#include <dhcpsrv/lease.h>
 
 extern "C" {
 
@@ -62,5 +63,16 @@ typedef struct {
 extern int CalloutHandle_Check(PyObject *object);
 extern PyObject *CalloutHandle_from_handle(isc::hooks::CalloutHandle *handle);
 extern int CalloutHandle_define();
+
+// lease4.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::Lease4Ptr ptr;
+} Lease4Object;
+
+extern int Lease4_Check(PyObject *object);
+extern PyObject *Lease4_from_handle(isc::dhcp::Lease4Ptr &ptr);
+extern int Lease4_define();
 
 }

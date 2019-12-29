@@ -22,19 +22,20 @@ PyMODINIT_FUNC
 PyInit_kea(void) {
     kea_module = PyModule_Create(&kea_module_def);
     if (!kea_module) {
-        return 0;
+        return (0);
     }
 
     if (Capsule_define()
         || Constants_define()
         || LibraryHandle_define()
         || CalloutManager_define()
-        || CalloutHandle_define()) {
+        || CalloutHandle_define()
+        || Lease4_define()) {
         Py_DECREF(kea_module);
-        return 0;
+        return (0);
     }
 
-    return kea_module;
+    return (kea_module);
 }
 
 }

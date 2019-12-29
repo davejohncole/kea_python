@@ -13,6 +13,9 @@
         "tuple": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "memory": "cpp",
+        "bitset": "cpp",
+        "atomic": "cpp"
     }
 }

@@ -29,7 +29,7 @@ find_symbol(void **sym, const char *name) {
     if (*sym == 0) {
         LOG_ERROR(logger, LOG_KEAPY_HOOK).arg(string("symbol ").append(name).append(" not found"));
     }
-    return *sym == 0;
+    return (*sym == 0);
 }
 
 #define load_symbol(name) find_symbol((void **)&dl_ ## name, #name)

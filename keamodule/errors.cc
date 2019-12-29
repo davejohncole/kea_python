@@ -29,11 +29,11 @@ Errors_finalize() {
 static string
 to_string(PyObject *object) {
     if (!object) {
-        return "NULL";
+        return ("NULL");
     }
     PyObject *str = PyObject_Str(object);
     if (!str) {
-        return "NULL";
+        return ("NULL");
     }
     string ret(PyUnicode_AsUTF8(str));
     Py_DECREF(str);

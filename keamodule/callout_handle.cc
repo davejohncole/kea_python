@@ -2,10 +2,67 @@
 
 using namespace std;
 using namespace isc::hooks;
+using namespace isc::dhcp;
 
 extern "C" {
 
+static PyObject *
+CalloutHandle_getArgument(PyObject *self, PyObject *args) {
+    char *name;
+
+    if (!PyArg_ParseTuple(args, "s", &name)) {
+        return (0);
+    }
+
+    if (strcmp(name, "lease4") == 0) {
+        try {
+            Lease4Ptr ptr;
+            ((CalloutHandleObject *)self)->handle->getArgument(name, ptr);
+            return (Lease4_from_handle(ptr));
+        }
+        catch (const exception &e) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+            return (0);
+        }
+    }
+
+    PyErr_SetString(PyExc_ValueError, "Unknown argument");
+    return (0);
+}
+
+static PyObject *
+CalloutHandle_setArgument(PyObject *self, PyObject *args) {
+    char *name;
+    PyObject *value;
+
+    if (!PyArg_ParseTuple(args, "sO", &name, &value)) {
+        return (0);
+    }
+
+    if (strcmp(name, "lease4") == 0) {
+        if (!Lease4_Check(value)) {
+            PyErr_SetString(PyExc_TypeError, "Expected Lease4 object");
+            return (0);
+        }
+        try {
+            ((CalloutHandleObject *)self)->handle->setArgument(name, ((Lease4Object *)value)->ptr);
+            Py_RETURN_NONE;
+        }
+        catch (const exception &e) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+            return (0);
+        }
+    }
+
+    PyErr_SetString(PyExc_ValueError, "Unknown argument");
+    return (0);
+}
+
 static PyMethodDef CalloutHandle_methods[] = {
+    {"getArgument", (PyCFunction) CalloutHandle_getArgument, METH_VARARGS,
+     "Gets the value of an argument."},
+    {"setArgument", (PyCFunction) CalloutHandle_setArgument, METH_VARARGS,
+     "Sets the value of an argument."},
     {0}  // Sentinel
 };
 
@@ -49,12 +106,13 @@ CalloutHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self = (CalloutHandleObject *) type->tp_alloc(type, 0);
     if (self) {
         self->handle = 0;
+        self->is_owner = false;
     }
     return ((PyObject *) self);
 }
 
 static PyTypeObject CalloutHandleType = {
-    PyVarObject_HEAD_INIT(0, 0)
+    PyObject_HEAD_INIT(0)
     "kea.CalloutHandle",                        // tp_name
     sizeof(CalloutHandleObject),                // tp_basicsize
     0,                                          // tp_itemsize
@@ -101,12 +159,12 @@ CalloutHandle_Check(PyObject *object) {
 
 PyObject *
 CalloutHandle_from_handle(CalloutHandle *handle) {
-    CalloutHandleObject *py_handle = PyObject_New(CalloutHandleObject, &CalloutHandleType);
-    if (py_handle) {
-        py_handle->handle = handle;
-        py_handle->is_owner = false;
+    CalloutHandleObject *obj = PyObject_New(CalloutHandleObject, &CalloutHandleType);
+    if (obj) {
+        obj->handle = handle;
+        obj->is_owner = false;
     }
-    return (PyObject *)py_handle;
+    return (PyObject *)obj;
 }
 
 int

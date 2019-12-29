@@ -11,7 +11,7 @@ static PyMethodDef CalloutManager_methods[] = {
 
 static PyObject *
 CalloutManager_use_count(CalloutManagerObject *self, void *closure) {
-    return PyLong_FromLong(self->manager.use_count());
+    return (PyLong_FromLong(self->manager.use_count()));
 }
 
 static PyGetSetDef CalloutManager_getsetters[] = {
@@ -55,7 +55,7 @@ CalloutManager_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 static PyTypeObject CalloutManagerType = {
-    PyVarObject_HEAD_INIT(0, 0)
+    PyObject_HEAD_INIT(0)
     "kea.CalloutManager",                       // tp_name
     sizeof(CalloutManagerObject),               // tp_basicsize
     0,                                          // tp_itemsize

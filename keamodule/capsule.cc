@@ -13,20 +13,6 @@ PyObject *hook_module;
 Logger *kea_logger = 0;
 MessageID *kea_message_id = 0;
 
-void
-log_error(string msg) {
-    // remove trailing '\n'
-    if (!msg.empty() && msg[msg.length() - 1] == '\n') {
-        msg.erase(msg.length() - 1);
-    }
-    if (kea_logger) {
-        LOG_ERROR(*kea_logger, *kea_message_id).arg(msg);
-    }
-    else {
-        // TODO log via logger in kea module
-    }
-}
-
 typedef struct {
     PyObject_HEAD
 } LoggerObject;
@@ -36,7 +22,7 @@ Logger_debug(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return 0;
+        return (0);
     }
     LOG_DEBUG(*kea_logger, DBGLVL_TRACE_BASIC, *kea_message_id).arg(string(msg));
 
@@ -48,7 +34,7 @@ Logger_info(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return 0;
+        return (0);
     }
     LOG_INFO(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -60,7 +46,7 @@ Logger_warn(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return 0;
+        return (0);
     }
     LOG_WARN(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -73,7 +59,7 @@ Logger_error(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return 0;
+        return (0);
     }
     LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -85,7 +71,7 @@ Logger_fatal(PyObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
-        return 0;
+        return (0);
     }
     LOG_FATAL(*kea_logger, *kea_message_id).arg(string(msg));
 
@@ -112,7 +98,7 @@ Logger_dealloc(LoggerObject *self) {
 }
 
 static PyTypeObject LoggerType = {
-    PyVarObject_HEAD_INIT(0, 0)
+    PyObject_HEAD_INIT(0)
     "kea.Logger",                               // tp_name
     sizeof(LoggerObject),                       // tp_basicsize
     0,                                          // tp_itemsize
@@ -151,6 +137,34 @@ static PyTypeObject LoggerType = {
     PyType_GenericAlloc,                        // tp_alloc
     PyType_GenericNew                           // tp_new
 };
+
+void
+log_error(string msg) {
+    // remove trailing '\n'
+    if (!msg.empty() && msg[msg.length() - 1] == '\n') {
+        msg.erase(msg.length() - 1);
+    }
+    if (kea_logger) {
+        LOG_ERROR(*kea_logger, *kea_message_id).arg(msg);
+    }
+    else {
+        PyObject *exc_type, *exc_value, *exc_traceback;
+        PyObject *logger = 0;
+        PyObject *res = 0;
+
+        PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+        logger = PyObject_GetAttrString(kea_module, "logger");
+        if (!logger) {
+            goto error;
+        }
+        res = PyObject_CallMethod(logger, "error", "s", msg.c_str());
+
+error:
+        Py_XDECREF(logger);
+        Py_XDECREF(res);
+        PyErr_Restore(exc_type, exc_value, exc_traceback);
+    }
+}
 
 static void
 Kea_SetLogger(Logger &logger, MessageID& ident) {
