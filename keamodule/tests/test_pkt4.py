@@ -54,3 +54,18 @@ class TestLease4_setType(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         p.setType(kea.DHCPNAK)
         self.assertEqual(kea.DHCPNAK, p.getType())
+
+
+class TestLease4_getRemoteAddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual('0.0.0.0', p.getRemoteAddr())
+
+
+class TestLease4_setRemoteAddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertIsNone(p.setRemoteAddr('1.2.3.4'))
+        self.assertEqual('1.2.3.4', p.getRemoteAddr())

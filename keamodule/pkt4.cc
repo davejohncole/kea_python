@@ -36,11 +36,45 @@ Pkt4_setType(PyObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+Pkt4_getRemoteAddr(PyObject *self, PyObject *args) {
+    try {
+        string addr = ((Pkt4Object *)self)->ptr->getRemoteAddr().toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setRemoteAddr(PyObject *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
+        return (0);
+    }
+
+    try {
+        ((Pkt4Object *)self)->ptr->setRemoteAddr(isc::asiolink::IOAddress(string(addr)));
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Pkt4_methods[] = {
     {"getType", (PyCFunction) Pkt4_getType, METH_NOARGS,
      "For packets without DHCP Message Type option, it returns DHCP_NOTYPE (0)."},
     {"setType", (PyCFunction) Pkt4_setType, METH_VARARGS,
      "Sets DHCP message type."},
+    {"getRemoteAddr", (PyCFunction) Pkt4_getRemoteAddr, METH_NOARGS,
+     "Returns remote IP address."},
+    {"setRemoteAddr", (PyCFunction) Pkt4_setRemoteAddr, METH_VARARGS,
+     "Sets remote IP address."},
     {0}  // Sentinel
 };
 
