@@ -20,9 +20,9 @@ def pkt4_send(handle):
     response = handle.getArgument('response4')
     if response.getType() == DHCPNAK:
         response.setType(DHCPACK)
-    addr = handle.getContext('addr')
-    response.setRemoteAddr(addr)
-    response.setYiaddr(addr)
+    elif response.getType() == DHCPOFFER:
+        addr = handle.getContext('addr')
+        response.setYiaddr(addr)
     for option in (DHO_SUBNET_MASK, DHO_ROUTERS, DHO_DOMAIN_NAME_SERVERS,
                    DHO_DOMAIN_NAME, DHO_DHCP_LEASE_TIME, DHO_DHCP_RENEWAL_TIME,
                    DHO_DHCP_REBINDING_TIME):

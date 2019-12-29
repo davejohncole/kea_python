@@ -95,7 +95,13 @@ class TestLease4_delOption(utils.BaseTestCase):
 
 class TestLease4_addOption(utils.BaseTestCase):
 
-    def test_ok(self):
+    def test_empty_option_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        o = kea.Option(25)
+        self.assertIsNone(p.addOption(o))
+        self.assertEqual(2, o.use_count)
+
+    def test_bytes_option_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         o = kea.Option(25)
         self.assertIsNone(p.addOption(o))

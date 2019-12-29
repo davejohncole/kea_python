@@ -6,7 +6,110 @@ using namespace isc::dhcp;
 
 extern "C" {
 
+static PyObject *
+Option_getBytes(OptionObject *self, PyObject *args) {
+    try {
+        vector<uint8_t> value = self->ptr->toBinary();
+        return (PyBytes_FromStringAndSize((const char *) &value[0], value.size()));
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_setBytes(OptionObject *self, PyObject *args) {
+    PyObject *data;
+
+    if (!PyArg_ParseTuple(args, "S", &data)) {
+        return (0);
+    }
+
+    try {
+        char *buff;
+        Py_ssize_t len;
+
+        PyBytes_AsStringAndSize(data, &buff, &len);
+        self->ptr->setData(&buff[0], &buff[len]);
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_getString(OptionObject *self, PyObject *args) {
+    try {
+        vector<uint8_t> value = self->ptr->toBinary();
+        return (PyUnicode_FromStringAndSize((const char *) &value[0], value.size()));
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_setString(OptionObject *self, PyObject *args) {
+    char *data;
+    Py_ssize_t len;
+
+    if (!PyArg_ParseTuple(args, "s#", &data, &len)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setData(&data[0], &data[len]);
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_getUint32(OptionObject *self, PyObject *args) {
+    try {
+        return (PyLong_FromLong(self->ptr->getUint32()));
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_setUint32(OptionObject *self, PyObject *args) {
+    long value;
+
+    if (!PyArg_ParseTuple(args, "i", &value)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setUint32(value);
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Option_methods[] = {
+    {"getBytes", (PyCFunction) Option_getBytes, METH_NOARGS,
+     "Returns option data."},
+    {"setBytes", (PyCFunction) Option_setBytes, METH_VARARGS,
+     "Sets content to data."},
+    {"getString", (PyCFunction) Option_getString, METH_NOARGS,
+     "Returns option data from UTF-8 decoded string."},
+    {"setString", (PyCFunction) Option_setString, METH_VARARGS,
+     "Sets content to UTF-8 encoded string."},
+    {"getUint32", (PyCFunction) Option_getUint32, METH_NOARGS,
+     "Returns content of first double word."},
+    {"setUint32", (PyCFunction) Option_setUint32, METH_VARARGS,
+     "Sets content to single uint32 value."},
     {0}  // Sentinel
 };
 

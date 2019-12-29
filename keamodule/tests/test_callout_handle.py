@@ -62,6 +62,13 @@ class TestCalloutHandle_getContext(utils.BaseTestCase):
         bar = h.getContext('foo')
         self.assertIs(foo, bar)
 
+    def test_notset(self):
+        m = kea.CalloutManager()
+        h = kea.CalloutHandle(m)
+        with self.assertRaises(TypeError) as cm:
+            h.getContext('foo')
+        self.assertEqual(("unable to find callout context associated with the current library index (-1)",), cm.exception.args)
+
 
 class TestCalloutHandle_deleteContext(utils.BaseTestCase):
     
