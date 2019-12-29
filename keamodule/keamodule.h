@@ -75,4 +75,13 @@ extern int Lease4_Check(PyObject *object);
 extern PyObject *Lease4_from_handle(isc::dhcp::Lease4Ptr &ptr);
 extern int Lease4_define();
 
+// object_holder.cc
+class ObjectHolder {
+public:
+    ObjectHolder(PyObject *obj): obj_(obj) { Py_INCREF(obj); }
+    ~ObjectHolder() { Py_DECREF(obj_); }
+    PyObject *obj_;
+};
+typedef boost::shared_ptr<ObjectHolder> ObjectHolderPtr;
+
 }

@@ -58,11 +58,74 @@ CalloutHandle_setArgument(PyObject *self, PyObject *args) {
     return (0);
 }
 
+static PyObject *
+CalloutHandle_setContext(PyObject *self, PyObject *args) {
+    char *name;
+    PyObject *value;
+
+    if (!PyArg_ParseTuple(args, "sO", &name, &value)) {
+        return (0);
+    }
+
+    try {
+        ((CalloutHandleObject *)self)->handle->setContext(name, ObjectHolderPtr(new ObjectHolder(value)));
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+CalloutHandle_getContext(PyObject *self, PyObject *args) {
+    char *name;
+
+    if (!PyArg_ParseTuple(args, "s", &name)) {
+        return (0);
+    }
+
+    try {
+        ObjectHolderPtr ptr;
+        ((CalloutHandleObject *)self)->handle->getContext(name, ptr);
+        Py_INCREF(ptr->obj_);
+        return (ptr->obj_);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+CalloutHandle_deleteContext(PyObject *self, PyObject *args) {
+    char *name;
+
+    if (!PyArg_ParseTuple(args, "s", &name)) {
+        return (0);
+    }
+
+    try {
+        ((CalloutHandleObject *)self)->handle->deleteContext(name);
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef CalloutHandle_methods[] = {
     {"getArgument", (PyCFunction) CalloutHandle_getArgument, METH_VARARGS,
      "Gets the value of an argument."},
     {"setArgument", (PyCFunction) CalloutHandle_setArgument, METH_VARARGS,
      "Sets the value of an argument."},
+    {"setContext", (PyCFunction) CalloutHandle_setContext, METH_VARARGS,
+     "Sets an element in the context associated with the current library."},
+    {"getContext", (PyCFunction) CalloutHandle_getContext, METH_VARARGS,
+     "Gets an element from the context associated with the current library."},
+    {"deleteContext", (PyCFunction) CalloutHandle_deleteContext, METH_VARARGS,
+     "Deletes an item of the given name from the context associated with the current library. If an item of that name does not exist, the method is a no-op."},
     {0}  // Sentinel
 };
 
