@@ -69,3 +69,25 @@ class TestLease4_setRemoteAddr(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         self.assertIsNone(p.setRemoteAddr('1.2.3.4'))
         self.assertEqual('1.2.3.4', p.getRemoteAddr())
+
+
+class TestLease4_getYiaddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual('0.0.0.0', p.getYiaddr())
+
+
+class TestLease4_setYiaddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertIsNone(p.setYiaddr('1.2.3.4'))
+        self.assertEqual('1.2.3.4', p.getYiaddr())
+
+
+class TestLease4_delOption(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertFalse(p.delOption(42))

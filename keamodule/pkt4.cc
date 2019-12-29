@@ -66,6 +66,54 @@ Pkt4_setRemoteAddr(PyObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+Pkt4_getYiaddr(PyObject *self, PyObject *args) {
+    try {
+        string addr = ((Pkt4Object *)self)->ptr->getYiaddr().toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setYiaddr(PyObject *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
+        return (0);
+    }
+
+    try {
+        ((Pkt4Object *)self)->ptr->setYiaddr(isc::asiolink::IOAddress(string(addr)));
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_delOption(PyObject *self, PyObject *args) {
+    long type;
+
+    if (!PyArg_ParseTuple(args, "i", &type)) {
+        return (0);
+    }
+
+    try {
+        bool res = ((Pkt4Object *)self)->ptr->delOption(type);
+        return (PyBool_FromLong(res));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Pkt4_methods[] = {
     {"getType", (PyCFunction) Pkt4_getType, METH_NOARGS,
      "For packets without DHCP Message Type option, it returns DHCP_NOTYPE (0)."},
@@ -75,6 +123,12 @@ static PyMethodDef Pkt4_methods[] = {
      "Returns remote IP address."},
     {"setRemoteAddr", (PyCFunction) Pkt4_setRemoteAddr, METH_VARARGS,
      "Sets remote IP address."},
+    {"getYiaddr", (PyCFunction) Pkt4_getYiaddr, METH_NOARGS,
+     "Returns yiaddr field."},
+    {"setYiaddr", (PyCFunction) Pkt4_setYiaddr, METH_VARARGS,
+     "Sets yiaddr field."},
+    {"delOption", (PyCFunction) Pkt4_delOption, METH_VARARGS,
+     "Attempts to delete first suboption of requested type."},
     {0}  // Sentinel
 };
 
