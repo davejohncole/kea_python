@@ -4,13 +4,13 @@ import kea
 import utils
 
 
-class TestCalloutManager(utils.BaseTestCase):
+class TestCalloutManager_new(utils.BaseTestCase):
 
-    def test_allocate_toomanyargs(self):
+    def test_toomanyargs(self):
         with self.assertRaises(TypeError) as cm:
             kea.CalloutManager(1)
-        self.assertEqual(('function takes at most 0 arguments (1 given)',), cm.exception.args)
+        self.assertEqual(('function takes exactly 0 arguments (1 given)',), cm.exception.args)
 
-    def test_allocate(self):
+    def test_ok(self):
         m = kea.CalloutManager()
         self.assertEqual(1, m.use_count)

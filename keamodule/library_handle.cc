@@ -11,10 +11,13 @@ static PyMethodDef LibraryHandle_methods[] = {
 
 static int
 LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
-    static const char *kwlist[] = {"manager", 0};
     PyObject *manager = 0;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O", (char**)kwlist, &manager)) {
+    if (kwds != 0) {
+        PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
+        return (0);
+    }
+    if (!PyArg_ParseTuple(args, "O", &manager)) {
         return (-1);
     }
 

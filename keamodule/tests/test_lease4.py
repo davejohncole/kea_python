@@ -4,13 +4,16 @@ import kea
 import utils
 
 
-class TestLease4(utils.BaseTestCase):
+class TestLease4_new(utils.BaseTestCase):
 
-    def test_allocate(self):
+    def test_ok(self):
         m = kea.Lease4()
         self.assertEqual(1, m.use_count)
 
-    def test_addr(self):
+
+class TestLease4_addr(utils.BaseTestCase):
+
+    def test_getset(self):
         m = kea.Lease4()
         self.assertEqual('0.0.0.0', m.addr)
         m.addr = '192.168.0.1'

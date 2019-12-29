@@ -2,6 +2,7 @@
 #include <hooks/callout_manager.h>
 #include <log/macros.h>
 #include <dhcpsrv/lease.h>
+#include <dhcp/pkt4.h>
 
 extern "C" {
 
@@ -83,5 +84,16 @@ public:
     PyObject *obj_;
 };
 typedef boost::shared_ptr<ObjectHolder> ObjectHolderPtr;
+
+// pkt4.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::Pkt4Ptr ptr;
+} Pkt4Object;
+
+extern int Pkt4_Check(PyObject *object);
+extern PyObject *Pkt4_from_handle(isc::dhcp::Pkt4Ptr &ptr);
+extern int Pkt4_define();
 
 }
