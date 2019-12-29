@@ -1,18 +1,10 @@
 import sys
-import unittest
 
 import kea
-
-class Logger:
-
-    def error(self, msg):
-        sys.stderr.write(msg + '\n')
+import utils
 
 
-kea.logger = Logger()
-
-
-class TestCalloutHandle(unittest.TestCase):
+class TestCalloutHandle(utils.BaseTestCase):
 
     def test_allocate(self):
         m = kea.CalloutManager()

@@ -1,9 +1,10 @@
 import unittest
 
 import kea
+import utils
 
 
-class TestLease4(unittest.TestCase):
+class TestLease4(utils.BaseTestCase):
 
     def test_allocate(self):
         m = kea.Lease4()

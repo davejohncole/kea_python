@@ -1,9 +1,10 @@
 import unittest
 
 import kea
+import utils
 
 
-class TestCalloutManager(unittest.TestCase):
+class TestCalloutManager(utils.BaseTestCase):
 
     def test_allocate(self):
         m = kea.CalloutManager()
