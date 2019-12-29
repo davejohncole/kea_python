@@ -31,7 +31,8 @@ PyInit_kea(void) {
         || CalloutManager_define()
         || CalloutHandle_define()
         || Lease4_define()
-        || Pkt4_define()) {
+        || Pkt4_define()
+        || Option_define()) {
         Py_DECREF(kea_module);
         return (0);
     }

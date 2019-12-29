@@ -96,4 +96,15 @@ extern int Pkt4_Check(PyObject *object);
 extern PyObject *Pkt4_from_handle(isc::dhcp::Pkt4Ptr &ptr);
 extern int Pkt4_define();
 
+// option.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::OptionPtr ptr;
+} OptionObject;
+
+extern int Option_Check(PyObject *object);
+extern PyObject *Option_from_handle(isc::dhcp::OptionPtr &ptr);
+extern int Option_define();
+
 }

@@ -114,6 +114,27 @@ Pkt4_delOption(PyObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+Pkt4_addOption(PyObject *self, PyObject *args) {
+    PyObject *opt;
+
+    if (!PyArg_ParseTuple(args, "O", &opt)) {
+        return (0);
+    }
+    if (!Option_Check(opt)) {
+        PyErr_SetString(PyExc_TypeError, "opt must be instance of Option");
+    }
+
+    try {
+        ((Pkt4Object *)self)->ptr->addOption(((OptionObject *)opt)->ptr);
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Pkt4_methods[] = {
     {"getType", (PyCFunction) Pkt4_getType, METH_NOARGS,
      "For packets without DHCP Message Type option, it returns DHCP_NOTYPE (0)."},
@@ -129,6 +150,8 @@ static PyMethodDef Pkt4_methods[] = {
      "Sets yiaddr field."},
     {"delOption", (PyCFunction) Pkt4_delOption, METH_VARARGS,
      "Attempts to delete first suboption of requested type."},
+    {"addOption", (PyCFunction) Pkt4_addOption, METH_VARARGS,
+     "Adds an option to this packet."},
     {0}  // Sentinel
 };
 
