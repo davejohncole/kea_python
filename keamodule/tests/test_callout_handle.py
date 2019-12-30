@@ -19,7 +19,7 @@ class TestCalloutHandle_new(utils.BaseTestCase):
     def test_badarg(self):
         with self.assertRaises(TypeError) as cm:
             kea.CalloutHandle(1)
-        self.assertEqual(("manager must be instance of CalloutManager",), cm.exception.args)
+        self.assertEqual(("argument 1 must be kea.CalloutManager, not int",), cm.exception.args)
 
     def test_ok(self):
         m = kea.CalloutManager()

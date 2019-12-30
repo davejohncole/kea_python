@@ -39,7 +39,8 @@ typedef struct {
     isc::hooks::LibraryHandle *handle;
 } LibraryHandleObject;
 
-extern int LibraryHandle_Check(PyObject *object);
+#define LibraryHandle_Check(op) (Py_TYPE(op) == &LibraryHandleType)
+extern PyTypeObject LibraryHandleType;
 extern PyObject *LibraryHandle_from_handle(isc::hooks::LibraryHandle *handle);
 extern int LibraryHandle_define();
 
@@ -50,7 +51,8 @@ typedef struct {
     boost::shared_ptr<isc::hooks::CalloutManager> manager;
 } CalloutManagerObject;
 
-extern int CalloutManager_Check(PyObject *object);
+#define CalloutManager_Check(op) (Py_TYPE(op) == &CalloutManagerType)
+extern PyTypeObject CalloutManagerType;
 extern int CalloutManager_define();
 
 // callout_handle.cc
@@ -61,7 +63,8 @@ typedef struct {
     bool is_owner;
 } CalloutHandleObject;
 
-extern int CalloutHandle_Check(PyObject *object);
+#define CalloutHandle_Check(op) (Py_TYPE(op) == &CalloutHandleType)
+extern PyTypeObject CalloutHandleType;
 extern PyObject *CalloutHandle_from_handle(isc::hooks::CalloutHandle *handle);
 extern int CalloutHandle_define();
 
@@ -72,7 +75,8 @@ typedef struct {
     isc::dhcp::Lease4Ptr ptr;
 } Lease4Object;
 
-extern int Lease4_Check(PyObject *object);
+#define Lease4_Check(op) (Py_TYPE(op) == &Lease4Type)
+extern PyTypeObject Lease4Type;
 extern PyObject *Lease4_from_handle(isc::dhcp::Lease4Ptr &ptr);
 extern int Lease4_define();
 
@@ -92,7 +96,8 @@ typedef struct {
     isc::dhcp::Pkt4Ptr ptr;
 } Pkt4Object;
 
-extern int Pkt4_Check(PyObject *object);
+#define Pkt4_Check(op) (Py_TYPE(op) == &Pkt4Type)
+extern PyTypeObject Pkt4Type;
 extern PyObject *Pkt4_from_handle(isc::dhcp::Pkt4Ptr &ptr);
 extern int Pkt4_define();
 
@@ -103,7 +108,8 @@ typedef struct {
     isc::dhcp::OptionPtr ptr;
 } OptionObject;
 
-extern int Option_Check(PyObject *object);
+#define Option_Check(op) (Py_TYPE(op) == &OptionType)
+extern PyTypeObject OptionType;
 extern PyObject *Option_from_handle(isc::dhcp::OptionPtr &ptr);
 extern int Option_define();
 

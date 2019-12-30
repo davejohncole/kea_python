@@ -56,7 +56,7 @@ CalloutManager_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     return ((PyObject *) self);
 }
 
-static PyTypeObject CalloutManagerType = {
+PyTypeObject CalloutManagerType = {
     PyObject_HEAD_INIT(0)
     "kea.CalloutManager",                       // tp_name
     sizeof(CalloutManagerObject),               // tp_basicsize
@@ -96,11 +96,6 @@ static PyTypeObject CalloutManagerType = {
     PyType_GenericAlloc,                        // tp_alloc
     CalloutManager_new                          // tp_new
 };
-
-int
-CalloutManager_Check(PyObject *object) {
-    return (Py_TYPE(object) == &CalloutManagerType);
-}
 
 int
 CalloutManager_define() {

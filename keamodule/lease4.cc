@@ -84,7 +84,7 @@ Lease4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     return ((PyObject *) self);
 }
 
-static PyTypeObject Lease4Type = {
+PyTypeObject Lease4Type = {
     PyObject_HEAD_INIT(0)
     "kea.Lease4",                               // tp_name
     sizeof(Lease4Object),                       // tp_basicsize
@@ -124,11 +124,6 @@ static PyTypeObject Lease4Type = {
     PyType_GenericAlloc,                        // tp_alloc
     Lease4_new                                  // tp_new
 };
-
-int
-Lease4_Check(PyObject *object) {
-    return (Py_TYPE(object) == &Lease4Type);
-}
 
 PyObject *
 Lease4_from_handle(Lease4Ptr &ptr) {

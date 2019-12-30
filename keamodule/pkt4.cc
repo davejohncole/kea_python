@@ -296,7 +296,7 @@ Pkt4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     return ((PyObject *) self);
 }
 
-static PyTypeObject Pkt4Type = {
+PyTypeObject Pkt4Type = {
     PyObject_HEAD_INIT(0)
     "kea.Pkt4",                                 // tp_name
     sizeof(Pkt4Object),                         // tp_basicsize
@@ -336,11 +336,6 @@ static PyTypeObject Pkt4Type = {
     PyType_GenericAlloc,                        // tp_alloc
     Pkt4_new                                    // tp_new
 };
-
-int
-Pkt4_Check(PyObject *object) {
-    return (Py_TYPE(object) == &Pkt4Type);
-}
 
 PyObject *
 Pkt4_from_handle(Pkt4Ptr &ptr) {

@@ -47,7 +47,7 @@ LibraryHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     return ((PyObject *) self);
 }
 
-static PyTypeObject LibraryHandleType = {
+PyTypeObject LibraryHandleType = {
     PyObject_HEAD_INIT(0)
     "kea.LibraryHandle",                        // tp_name
     sizeof(LibraryHandleObject),                // tp_basicsize
@@ -87,11 +87,6 @@ static PyTypeObject LibraryHandleType = {
     PyType_GenericAlloc,                        // tp_alloc
     LibraryHandle_new                           // tp_new
 };
-
-int
-LibraryHandle_Check(PyObject *object) {
-    return (Py_TYPE(object) == &LibraryHandleType);
-}
 
 PyObject *
 LibraryHandle_from_handle(LibraryHandle *handle) {

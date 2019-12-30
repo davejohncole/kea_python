@@ -153,6 +153,24 @@ Option_setUint32(OptionObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+Option_addOption(OptionObject *self, PyObject *args) {
+    PyObject *value;
+
+    if (!PyArg_ParseTuple(args, "O!", &OptionType, &value)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->addOption(((OptionObject *)value)->ptr);
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Option_methods[] = {
     {"getBytes", (PyCFunction) Option_getBytes, METH_NOARGS,
      "Returns option data."},
@@ -173,6 +191,8 @@ static PyMethodDef Option_methods[] = {
     {"getUint32", (PyCFunction) Option_getUint32, METH_NOARGS,
      "Returns content of first double word."},
     {"setUint32", (PyCFunction) Option_setUint32, METH_VARARGS,
+     "Sets content to single uint32 value."},
+    {"addOption", (PyCFunction) Option_addOption, METH_VARARGS,
      "Sets content to single uint32 value."},
     {0}  // Sentinel
 };
@@ -219,7 +239,7 @@ Option_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     return ((PyObject *) self);
 }
 
-static PyTypeObject OptionType = {
+PyTypeObject OptionType = {
     PyObject_HEAD_INIT(0)
     "kea.Option",                               // tp_name
     sizeof(OptionObject),                       // tp_basicsize
@@ -259,11 +279,6 @@ static PyTypeObject OptionType = {
     PyType_GenericAlloc,                        // tp_alloc
     Option_new                                  // tp_new
 };
-
-int
-Option_Check(PyObject *object) {
-    return (Py_TYPE(object) == &OptionType);
-}
 
 PyObject *
 Option_from_handle(OptionPtr &ptr) {

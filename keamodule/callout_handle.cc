@@ -190,12 +190,7 @@ CalloutHandle_init(CalloutHandleObject *self, PyObject *args, PyObject *kwds) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (0);
     }
-    if (!PyArg_ParseTuple(args, "O", &manager)) {
-        return (-1);
-    }
-
-    if (!CalloutManager_Check(manager)) {
-        PyErr_SetString(PyExc_TypeError, "manager must be instance of CalloutManager");
+    if (!PyArg_ParseTuple(args, "O!", &CalloutManagerType, &manager)) {
         return (-1);
     }
 
@@ -222,7 +217,7 @@ CalloutHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     return ((PyObject *) self);
 }
 
-static PyTypeObject CalloutHandleType = {
+PyTypeObject CalloutHandleType = {
     PyObject_HEAD_INIT(0)
     "kea.CalloutHandle",                        // tp_name
     sizeof(CalloutHandleObject),                // tp_basicsize
@@ -262,11 +257,6 @@ static PyTypeObject CalloutHandleType = {
     PyType_GenericAlloc,                        // tp_alloc
     CalloutHandle_new                           // tp_new
 };
-
-int
-CalloutHandle_Check(PyObject *object) {
-    return (Py_TYPE(object) == &CalloutHandleType);
-}
 
 PyObject *
 CalloutHandle_from_handle(CalloutHandle *handle) {
