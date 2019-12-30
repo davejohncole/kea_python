@@ -70,6 +70,62 @@ Option_setString(OptionObject *self, PyObject *args) {
 }
 
 static PyObject *
+Option_getUint8(OptionObject *self, PyObject *args) {
+    try {
+        return (PyLong_FromLong(self->ptr->getUint8()));
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_setUint8(OptionObject *self, PyObject *args) {
+    long value;
+
+    if (!PyArg_ParseTuple(args, "i", &value)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setUint8((uint8_t)value);
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_getUint16(OptionObject *self, PyObject *args) {
+    try {
+        return (PyLong_FromLong(self->ptr->getUint16()));
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Option_setUint16(OptionObject *self, PyObject *args) {
+    long value;
+
+    if (!PyArg_ParseTuple(args, "i", &value)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setUint16((uint16_t)value);
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Option_getUint32(OptionObject *self, PyObject *args) {
     try {
         return (PyLong_FromLong(self->ptr->getUint32()));
@@ -106,6 +162,14 @@ static PyMethodDef Option_methods[] = {
      "Returns option data from UTF-8 decoded string."},
     {"setString", (PyCFunction) Option_setString, METH_VARARGS,
      "Sets content to UTF-8 encoded string."},
+    {"getUint8", (PyCFunction) Option_getUint8, METH_NOARGS,
+     "Returns content of first byte."},
+    {"setUint8", (PyCFunction) Option_setUint8, METH_VARARGS,
+     "Sets content to single uint8 value."},
+    {"getUint16", (PyCFunction) Option_getUint16, METH_NOARGS,
+     "Returns content of first word."},
+    {"setUint16", (PyCFunction) Option_setUint16, METH_VARARGS,
+     "Sets content to single uint16 value."},
     {"getUint32", (PyCFunction) Option_getUint32, METH_NOARGS,
      "Returns content of first double word."},
     {"setUint32", (PyCFunction) Option_setUint32, METH_VARARGS,

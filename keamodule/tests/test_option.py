@@ -41,6 +41,38 @@ class TestOption_getString(utils.BaseTestCase):
         self.assertEqual('Pokémon', o.getString())
 
 
+class TestOption_setUint8(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42)
+        self.assertIs(o, o.setUint8(0xfe))
+
+
+class TestOption_getUint8(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42)
+        o.setUint8(0xfe)
+        self.assertEqual(0xfe, o.getUint8())
+        self.assertEqual(b'\xfe', o.getBytes())
+
+
+class TestOption_setUint16(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42)
+        self.assertIs(o, o.setUint16(0xfeed))
+
+
+class TestOption_getUint16(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42)
+        o.setUint16(0xfeed)
+        self.assertEqual(0xfeed, o.getUint16())
+        self.assertEqual(b'\xfe\xed', o.getBytes())
+
+
 class TestOption_setUint32(utils.BaseTestCase):
 
     def test_ok(self):
