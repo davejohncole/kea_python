@@ -139,6 +139,15 @@ class TestPkt4_addOption(utils.BaseTestCase):
         self.assertEqual(2, o.use_count)
 
 
+class TestPkt4_getOption(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        o = p.getOption(kea.DHO_DHCP_MESSAGE_TYPE)
+        self.assertIsInstance(o, kea.Option)
+        self.assertEqual(bytes([kea.DHCPREQUEST]), o.getBytes())
+
+
 class TestPkt4_toText(utils.BaseTestCase):
 
     def test_empty(self):

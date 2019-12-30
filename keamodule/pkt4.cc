@@ -179,16 +179,34 @@ static PyObject *
 Pkt4_addOption(PyObject *self, PyObject *args) {
     PyObject *opt;
 
-    if (!PyArg_ParseTuple(args, "O", &opt)) {
+    if (!PyArg_ParseTuple(args, "O!", &OptionType, &opt)) {
         return (0);
-    }
-    if (!Option_Check(opt)) {
-        PyErr_SetString(PyExc_TypeError, "opt must be instance of Option");
     }
 
     try {
         ((Pkt4Object *)self)->ptr->addOption(((OptionObject *)opt)->ptr);
         Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_getOption(PyObject *self, PyObject *args) {
+    long type;
+
+    if (!PyArg_ParseTuple(args, "i", &type)) {
+        return (0);
+    }
+
+    try {
+        OptionPtr ptr = ((Pkt4Object *)self)->ptr->getOption(type);
+        if (!ptr.get()) {
+            Py_RETURN_NONE;
+        }
+        return (Option_from_handle(ptr));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -245,6 +263,8 @@ static PyMethodDef Pkt4_methods[] = {
      "Attempts to delete first suboption of requested type."},
     {"addOption", (PyCFunction) Pkt4_addOption, METH_VARARGS,
      "Adds an option to this packet."},
+    {"getOption", (PyCFunction) Pkt4_getOption, METH_VARARGS,
+     "Returns the first option of specified type."},
     {"toText", (PyCFunction) Pkt4_toText, METH_NOARGS,
      "Returns text representation of the packet."},
     {"pack", (PyCFunction) Pkt4_pack, METH_NOARGS,
