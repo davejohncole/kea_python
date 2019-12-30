@@ -86,6 +86,21 @@ class TestLease4_setYiaddr(utils.BaseTestCase):
         self.assertEqual('1.2.3.4', p.getYiaddr())
 
 
+class TestLease4_getHWAddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual('', p.getHWAddr())
+
+
+class TestLease4_setHWAddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertIsNone(p.setHWAddr('01:02:03:04:05:06'))
+        self.assertEqual('01:02:03:04:05:06', p.getHWAddr())
+
+
 class TestLease4_delOption(utils.BaseTestCase):
 
     def test_ok(self):

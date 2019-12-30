@@ -97,6 +97,37 @@ Pkt4_setYiaddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
+Pkt4_getHWAddr(PyObject *self, PyObject *args) {
+    try {
+        string hwaddr = ((Pkt4Object *)self)->ptr->getHWAddr()->toText(false);
+        return (PyUnicode_FromString(hwaddr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setHWAddr(PyObject *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
+        return (0);
+    }
+
+    try {
+        HWAddr hw = HWAddr::fromText(addr);
+        ((Pkt4Object *)self)->ptr->setHWAddr(HWAddrPtr(new HWAddr(hw)));
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Pkt4_delOption(PyObject *self, PyObject *args) {
     long type;
 
@@ -148,6 +179,10 @@ static PyMethodDef Pkt4_methods[] = {
      "Returns yiaddr field."},
     {"setYiaddr", (PyCFunction) Pkt4_setYiaddr, METH_VARARGS,
      "Sets yiaddr field."},
+    {"getHWAddr", (PyCFunction) Pkt4_getHWAddr, METH_NOARGS,
+     "Returns hardware address."},
+    {"setHWAddr", (PyCFunction) Pkt4_setHWAddr, METH_VARARGS,
+     "Sets hardware address."},
     {"delOption", (PyCFunction) Pkt4_delOption, METH_VARARGS,
      "Attempts to delete first suboption of requested type."},
     {"addOption", (PyCFunction) Pkt4_addOption, METH_VARARGS,

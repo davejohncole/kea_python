@@ -127,6 +127,35 @@ CalloutHandle_deleteContext(PyObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+CalloutHandle_getStatus(PyObject *self, PyObject *args) {
+    try {
+        return PyLong_FromLong(((CalloutHandleObject *)self)->handle->getStatus());
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+CalloutHandle_setStatus(PyObject *self, PyObject *args) {
+    int status;
+
+    if (!PyArg_ParseTuple(args, "i", &status)) {
+        return (0);
+    }
+
+    try {
+        ((CalloutHandleObject *)self)->handle->setStatus(CalloutHandle::CalloutNextStep(status));
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef CalloutHandle_methods[] = {
     {"getArgument", (PyCFunction) CalloutHandle_getArgument, METH_VARARGS,
      "Gets the value of an argument."},
@@ -138,6 +167,10 @@ static PyMethodDef CalloutHandle_methods[] = {
      "Gets an element from the context associated with the current library."},
     {"deleteContext", (PyCFunction) CalloutHandle_deleteContext, METH_VARARGS,
      "Deletes an item of the given name from the context associated with the current library. If an item of that name does not exist, the method is a no-op."},
+    {"getStatus", (PyCFunction) CalloutHandle_getStatus, METH_NOARGS,
+     "Gets the next processing step."},
+    {"setStatus", (PyCFunction) CalloutHandle_setStatus, METH_VARARGS,
+     "Sets the next processing step."},
     {0}  // Sentinel
 };
 

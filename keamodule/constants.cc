@@ -2,6 +2,7 @@
 #include <dhcp/dhcp4.h>
 
 using namespace isc::dhcp;
+using namespace isc::hooks;
 
 extern "C" {
 
@@ -15,6 +16,11 @@ typedef struct {
 static KeaConstant constants[] = {
     constant(BOOTREQUEST),
     constant(BOOTREPLY),
+
+    {"NEXT_STEP_CONTINUE", CalloutHandle::NEXT_STEP_CONTINUE},
+    {"NEXT_STEP_SKIP", CalloutHandle::NEXT_STEP_SKIP},
+    {"NEXT_STEP_DROP", CalloutHandle::NEXT_STEP_DROP},
+    {"NEXT_STEP_PARK", CalloutHandle::NEXT_STEP_PARK},
 
     constant(DHO_PAD),
     constant(DHO_SUBNET_MASK),

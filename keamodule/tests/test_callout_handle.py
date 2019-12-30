@@ -78,5 +78,22 @@ class TestCalloutHandle_deleteContext(utils.BaseTestCase):
         foo = utils.Logger()
         h.setContext('foo', foo)
         self.assertEqual(3, sys.getrefcount(foo))
-        h.deleteContext('foo')
+        self.assertIsNone(h.deleteContext('foo'))
         self.assertEqual(2, sys.getrefcount(foo))
+
+
+class TestCalloutHandle_getStatus(utils.BaseTestCase):
+    
+    def test_ok(self):
+        m = kea.CalloutManager()
+        h = kea.CalloutHandle(m)
+        self.assertEqual(kea.NEXT_STEP_CONTINUE, h.getStatus())
+
+
+class TestCalloutHandle_setStatus(utils.BaseTestCase):
+    
+    def test_ok(self):
+        m = kea.CalloutManager()
+        h = kea.CalloutHandle(m)
+        self.assertIsNone(h.setStatus(kea.NEXT_STEP_SKIP))
+        self.assertEqual(kea.NEXT_STEP_SKIP, h.getStatus())
