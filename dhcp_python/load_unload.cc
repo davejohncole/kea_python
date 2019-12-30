@@ -2,7 +2,7 @@
 #include <log/message_initializer.h>
 #include <log/macros.h>
 
-#include "keapy_messages.h"
+#include "messages.h"
 
 using namespace std;
 using namespace isc::hooks;

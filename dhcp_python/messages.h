@@ -1,7 +1,7 @@
-// File created from keapy_messages.mes on Tue Dec 24 2019 00:30
+// File created from messages.mes on Mon Dec 30 2019 23:53
 
-#ifndef KEAPY_MESSAGES_H
-#define KEAPY_MESSAGES_H
+#ifndef MESSAGES_H
+#define MESSAGES_H
 
 #include <log/message_types.h>
 
@@ -14,4 +14,4 @@ extern const isc::log::MessageID LOG_KEAPY_PYTHON;
 } // namespace log
 } // namespace isc
 
-#endif // KEAPY_MESSAGES_H
+#endif // MESSAGES_H
