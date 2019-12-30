@@ -1,8 +1,6 @@
 kea-1.7.3.tar.gz
-keapyhook/keapyhook.so
-keapyhook/__pycache__/*
-keamodule/build
-keamodule/tests/__pycache__/*
-keapyhook/*.log
-keapyhook/*.log.lock
+libdhcp_python.so
+__pycache__
+build
 *.log
+*.log.lock
