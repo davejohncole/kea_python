@@ -87,3 +87,22 @@ class TestOption_getUint32(utils.BaseTestCase):
         o.setUint32(0x01020304)
         self.assertEqual(0x01020304, o.getUint32())
         self.assertEqual(b'\x01\x02\x03\x04', o.getBytes())
+
+
+class TestOption_toText(utils.BaseTestCase):
+
+    def test_empty(self):
+        o = kea.Option(42)
+        self.assertEqual('type=042, len=000: ', o.toText())
+
+    def test_uint8(self):
+        o = kea.Option(42).setUint8(5)
+        self.assertEqual('type=042, len=001: 05', o.toText())
+
+    def test_nested(self):
+        o = kea.Option(42).addOption(kea.Option(4).setUint16(5)).addOption(kea.Option(6).setString('hello'))
+        self.assertEqual("""\
+type=042, len=011: ,
+options:
+  type=004, len=002: 00:05
+  type=006, len=005: 68:65:6c:6c:6f""", o.toText())

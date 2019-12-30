@@ -171,6 +171,18 @@ Option_addOption(OptionObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+Option_toText(PyObject *self, PyObject *args) {
+    try {
+        string addr = ((OptionObject *)self)->ptr->toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Option_methods[] = {
     {"getBytes", (PyCFunction) Option_getBytes, METH_NOARGS,
      "Returns option data."},
@@ -194,6 +206,8 @@ static PyMethodDef Option_methods[] = {
      "Sets content to single uint32 value."},
     {"addOption", (PyCFunction) Option_addOption, METH_VARARGS,
      "Sets content to single uint32 value."},
+    {"toText", (PyCFunction) Option_toText, METH_NOARGS,
+     "Returns string representation of the option."},
     {0}  // Sentinel
 };
 
