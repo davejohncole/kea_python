@@ -1,4 +1,5 @@
 import unittest
+from ipaddress import IPv4Network
 
 import kea
 import utils
@@ -71,6 +72,21 @@ class TestPkt4_setRemoteAddr(utils.BaseTestCase):
         self.assertEqual('1.2.3.4', p.getRemoteAddr())
 
 
+class TestPkt4_getLocalAddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual('0.0.0.0', p.getLocalAddr())
+
+
+class TestPkt4_setLocalAddr(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertIsNone(p.setLocalAddr('1.2.3.4'))
+        self.assertEqual('1.2.3.4', p.getLocalAddr())
+
+
 class TestPkt4_getYiaddr(utils.BaseTestCase):
 
     def test_ok(self):
@@ -121,3 +137,35 @@ class TestPkt4_addOption(utils.BaseTestCase):
         o = kea.Option(25)
         self.assertIsNone(p.addOption(o))
         self.assertEqual(2, o.use_count)
+
+
+class TestPkt4_toText(utils.BaseTestCase):
+
+    def test_empty(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual("""\
+local_address=0.0.0.0:67, remote_address=0.0.0.0:68, msg_type=DHCPREQUEST (3), transid=0x2a,
+options:
+  type=053, len=001: 3 (uint8)""", p.toText())
+
+    def test_filled(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)                                               # 53
+        p.setLocalAddr('1.2.3.4')
+        p.setRemoteAddr('2.3.4.5')
+        subnet = IPv4Network('10.0.0.0/20')
+        p.addOption(kea.Option(kea.DHO_SUBNET_MASK).setBytes(subnet.netmask.packed))    # 1
+        p.addOption(kea.Option(kea.DHO_ROUTERS).setBytes(subnet[1].packed))             # 3
+        p.addOption(kea.Option(kea.DHO_DOMAIN_NAME).setString('test.org'))              # 15
+        p.addOption(kea.Option(kea.DHO_DHCP_LEASE_TIME).setUint32(7200))                # 51
+        p.addOption(kea.Option(kea.DHO_DHCP_RENEWAL_TIME).setUint32(1800))              # 58
+        p.addOption(kea.Option(kea.DHO_DHCP_REBINDING_TIME).setUint32(3600))            # 59
+        self.assertEqual("""\
+local_address=1.2.3.4:67, remote_address=2.3.4.5:68, msg_type=DHCPREQUEST (3), transid=0x2a,
+options:
+  type=001, len=004: ff:ff:f0:00
+  type=003, len=004: 0a:00:00:01
+  type=015, len=008: 74:65:73:74:2e:6f:72:67
+  type=051, len=004: 00:00:1c:20
+  type=053, len=001: 3 (uint8)
+  type=058, len=004: 00:00:07:08
+  type=059, len=004: 00:00:0e:10""", p.toText())

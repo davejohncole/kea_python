@@ -37,6 +37,36 @@ Pkt4_setType(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
+Pkt4_getLocalAddr(PyObject *self, PyObject *args) {
+    try {
+        string addr = ((Pkt4Object *)self)->ptr->getLocalAddr().toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setLocalAddr(PyObject *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
+        return (0);
+    }
+
+    try {
+        ((Pkt4Object *)self)->ptr->setLocalAddr(isc::asiolink::IOAddress(string(addr)));
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Pkt4_getRemoteAddr(PyObject *self, PyObject *args) {
     try {
         string addr = ((Pkt4Object *)self)->ptr->getRemoteAddr().toText();
@@ -166,11 +196,39 @@ Pkt4_addOption(PyObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+Pkt4_toText(PyObject *self, PyObject *args) {
+    try {
+        string addr = ((Pkt4Object *)self)->ptr->toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_pack(PyObject *self, PyObject *args) {
+    try {
+        ((Pkt4Object *)self)->ptr->pack();
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Pkt4_methods[] = {
     {"getType", (PyCFunction) Pkt4_getType, METH_NOARGS,
      "For packets without DHCP Message Type option, it returns DHCP_NOTYPE (0)."},
     {"setType", (PyCFunction) Pkt4_setType, METH_VARARGS,
      "Sets DHCP message type."},
+    {"getLocalAddr", (PyCFunction) Pkt4_getLocalAddr, METH_NOARGS,
+     "Returns local IP address."},
+    {"setLocalAddr", (PyCFunction) Pkt4_setLocalAddr, METH_VARARGS,
+     "Sets local IP address."},
     {"getRemoteAddr", (PyCFunction) Pkt4_getRemoteAddr, METH_NOARGS,
      "Returns remote IP address."},
     {"setRemoteAddr", (PyCFunction) Pkt4_setRemoteAddr, METH_VARARGS,
@@ -187,6 +245,10 @@ static PyMethodDef Pkt4_methods[] = {
      "Attempts to delete first suboption of requested type."},
     {"addOption", (PyCFunction) Pkt4_addOption, METH_VARARGS,
      "Adds an option to this packet."},
+    {"toText", (PyCFunction) Pkt4_toText, METH_NOARGS,
+     "Returns text representation of the packet."},
+    {"pack", (PyCFunction) Pkt4_pack, METH_NOARGS,
+     "Prepares on-wire format of DHCPv4 packet."},
     {0}  // Sentinel
 };
 
