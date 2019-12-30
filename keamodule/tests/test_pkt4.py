@@ -4,7 +4,7 @@ import kea
 import utils
 
 
-class TestLease4_new(utils.BaseTestCase):
+class TestPkt4_new(utils.BaseTestCase):
 
     def test_noargs(self):
         with self.assertRaises(TypeError) as cm:
@@ -29,7 +29,7 @@ class TestLease4_new(utils.BaseTestCase):
         self.assertEqual(1, p.use_count)
 
 
-class TestLease4_getType(utils.BaseTestCase):
+class TestPkt4_getType(utils.BaseTestCase):
 
     def test_toomanyargs(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -42,7 +42,7 @@ class TestLease4_getType(utils.BaseTestCase):
         self.assertEqual(kea.DHCPREQUEST, p.getType())
 
 
-class TestLease4_setType(utils.BaseTestCase):
+class TestPkt4_setType(utils.BaseTestCase):
 
     def test_noargs(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -56,14 +56,14 @@ class TestLease4_setType(utils.BaseTestCase):
         self.assertEqual(kea.DHCPNAK, p.getType())
 
 
-class TestLease4_getRemoteAddr(utils.BaseTestCase):
+class TestPkt4_getRemoteAddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         self.assertEqual('0.0.0.0', p.getRemoteAddr())
 
 
-class TestLease4_setRemoteAddr(utils.BaseTestCase):
+class TestPkt4_setRemoteAddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -71,14 +71,14 @@ class TestLease4_setRemoteAddr(utils.BaseTestCase):
         self.assertEqual('1.2.3.4', p.getRemoteAddr())
 
 
-class TestLease4_getYiaddr(utils.BaseTestCase):
+class TestPkt4_getYiaddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         self.assertEqual('0.0.0.0', p.getYiaddr())
 
 
-class TestLease4_setYiaddr(utils.BaseTestCase):
+class TestPkt4_setYiaddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -86,14 +86,14 @@ class TestLease4_setYiaddr(utils.BaseTestCase):
         self.assertEqual('1.2.3.4', p.getYiaddr())
 
 
-class TestLease4_getHWAddr(utils.BaseTestCase):
+class TestPkt4_getHWAddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         self.assertEqual('', p.getHWAddr())
 
 
-class TestLease4_setHWAddr(utils.BaseTestCase):
+class TestPkt4_setHWAddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -101,14 +101,14 @@ class TestLease4_setHWAddr(utils.BaseTestCase):
         self.assertEqual('01:02:03:04:05:06', p.getHWAddr())
 
 
-class TestLease4_delOption(utils.BaseTestCase):
+class TestPkt4_delOption(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         self.assertFalse(p.delOption(42))
 
 
-class TestLease4_addOption(utils.BaseTestCase):
+class TestPkt4_addOption(utils.BaseTestCase):
 
     def test_empty_option_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
