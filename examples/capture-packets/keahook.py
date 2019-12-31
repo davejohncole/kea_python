@@ -1,25 +1,20 @@
-import os
 from kea import *
+from capture import Capture
 
 
 def load(handle):
-    global fp
-    dirname = os.path.dirname(__file__)
-    fp = open(os.path.join(dirname, 'packets.log'), 'w')
+    global log
+    log = Capture()
     return 0
 
 def unload():
-    fp.close()
+    log.unload()
     return 0
 
 def pkt4_receive(handle):
-    fp.write('>> query4\n')
-    fp.write(handle.getArgument('query4').toText())
-    fp.write('\n\n')
+    log.pkt4_receive(handle)
     return 0
 
 def pkt4_send(handle):
-    fp.write('<< response4\n')
-    fp.write(handle.getArgument('response4').toText())
-    fp.write('\n\n')
+    log.pkt4_send(handle)
     return 0
