@@ -17,12 +17,7 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (0);
     }
-    if (!PyArg_ParseTuple(args, "O", &manager)) {
-        return (-1);
-    }
-
-    if (!CalloutManager_Check(manager)) {
-        PyErr_SetString(PyExc_TypeError, "manager must be instance of CalloutManager");
+    if (!PyArg_ParseTuple(args, "O!", &CalloutManagerType, &manager)) {
         return (-1);
     }
 

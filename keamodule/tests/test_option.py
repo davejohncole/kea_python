@@ -11,6 +11,13 @@ class TestOption_new(utils.BaseTestCase):
         self.assertEqual(1, o.use_count)
 
 
+class TestOption_getType(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42)
+        self.assertIs(42, o.getType())
+
+
 class TestOption_setBytes(utils.BaseTestCase):
 
     def test_ok(self):

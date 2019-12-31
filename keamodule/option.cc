@@ -7,6 +7,16 @@ using namespace isc::dhcp;
 extern "C" {
 
 static PyObject *
+Option_getType(OptionObject *self, PyObject *args) {
+    try {
+        return (PyLong_FromLong(self->ptr->getType()));
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Option_getBytes(OptionObject *self, PyObject *args) {
     try {
         vector<uint8_t> value = self->ptr->toBinary();
@@ -81,14 +91,14 @@ Option_getUint8(OptionObject *self, PyObject *args) {
 
 static PyObject *
 Option_setUint8(OptionObject *self, PyObject *args) {
-    long value;
+    unsigned char value;
 
-    if (!PyArg_ParseTuple(args, "i", &value)) {
+    if (!PyArg_ParseTuple(args, "b", &value)) {
         return (0);
     }
 
     try {
-        self->ptr->setUint8((uint8_t)value);
+        self->ptr->setUint8(value);
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -109,14 +119,14 @@ Option_getUint16(OptionObject *self, PyObject *args) {
 
 static PyObject *
 Option_setUint16(OptionObject *self, PyObject *args) {
-    long value;
+    unsigned short value;
 
-    if (!PyArg_ParseTuple(args, "i", &value)) {
+    if (!PyArg_ParseTuple(args, "H", &value)) {
         return (0);
     }
 
     try {
-        self->ptr->setUint16((uint16_t)value);
+        self->ptr->setUint16(value);
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -137,9 +147,9 @@ Option_getUint32(OptionObject *self, PyObject *args) {
 
 static PyObject *
 Option_setUint32(OptionObject *self, PyObject *args) {
-    long value;
+    unsigned long value;
 
-    if (!PyArg_ParseTuple(args, "i", &value)) {
+    if (!PyArg_ParseTuple(args, "k", &value)) {
         return (0);
     }
 
@@ -184,6 +194,8 @@ Option_toText(PyObject *self, PyObject *args) {
 }
 
 static PyMethodDef Option_methods[] = {
+    {"getType", (PyCFunction) Option_getType, METH_NOARGS,
+     "Returns option type."},
     {"getBytes", (PyCFunction) Option_getBytes, METH_NOARGS,
      "Returns option data."},
     {"setBytes", (PyCFunction) Option_setBytes, METH_VARARGS,
@@ -229,16 +241,16 @@ Option_dealloc(OptionObject *self) {
 
 static int
 Option_init(OptionObject *self, PyObject *args, PyObject *kwds) {
-    long type;
+    unsigned short type;
 
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (0);
     }
-    if (!PyArg_ParseTuple(args, "i", &type)) {
+    if (!PyArg_ParseTuple(args, "H", &type)) {
         return (-1);
     }
-    self->ptr.reset(new Option(Option::Universe::V4, (uint16_t)type));
+    self->ptr.reset(new Option(Option::Universe::V4, type));
 
     return (0);
 }

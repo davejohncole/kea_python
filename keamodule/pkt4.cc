@@ -20,9 +20,9 @@ Pkt4_getType(PyObject *self, PyObject *args) {
 
 static PyObject *
 Pkt4_setType(PyObject *self, PyObject *args) {
-    long type;
+    unsigned char type;
 
-    if (!PyArg_ParseTuple(args, "i", &type)) {
+    if (!PyArg_ParseTuple(args, "b", &type)) {
         return (0);
     }
 
@@ -159,9 +159,9 @@ Pkt4_setHWAddr(PyObject *self, PyObject *args) {
 
 static PyObject *
 Pkt4_delOption(PyObject *self, PyObject *args) {
-    long type;
+    unsigned short type;
 
-    if (!PyArg_ParseTuple(args, "i", &type)) {
+    if (!PyArg_ParseTuple(args, "H", &type)) {
         return (0);
     }
 
@@ -195,9 +195,9 @@ Pkt4_addOption(PyObject *self, PyObject *args) {
 
 static PyObject *
 Pkt4_getOption(PyObject *self, PyObject *args) {
-    long type;
+    unsigned short type;
 
-    if (!PyArg_ParseTuple(args, "i", &type)) {
+    if (!PyArg_ParseTuple(args, "H", &type)) {
         return (0);
     }
 
@@ -290,18 +290,18 @@ Pkt4_dealloc(Pkt4Object *self) {
 
 static int
 Pkt4_init(Pkt4Object *self, PyObject *args, PyObject *kwds) {
-    long msg_type;
-    long transid;
+    unsigned char msg_type;
+    unsigned long transid;
 
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (0);
     }
-    if (!PyArg_ParseTuple(args, "ii", &msg_type, &transid)) {
+    if (!PyArg_ParseTuple(args, "bk", &msg_type, &transid)) {
         return (-1);
     }
 
-    self->ptr.reset(new Pkt4((int8_t)msg_type, (uint32_t)transid));
+    self->ptr.reset(new Pkt4(msg_type, transid));
 
     return (0);
 }
