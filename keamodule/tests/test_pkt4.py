@@ -23,7 +23,7 @@ class TestPkt4_new(utils.BaseTestCase):
         self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             kea.Pkt4(1, '42')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual(("argument 2 must be int, not str",), cm.exception.args)
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)

@@ -18,7 +18,7 @@ docker-build:
 	docker build --tag kea:$(VER)
 
 docker-run-kea-base: kea-network
-	docker run --rm -it --network kea --privileged -v`pwd`:/keapy --name kea-base kea-base:1.7.3 bash
+	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/keapy --name kea-base kea-base:1.7.3 bash
 
 docker-run-dhtest: kea-network
 	docker run --rm -it --network kea --privileged -v`pwd`:/keapy dhtest bash

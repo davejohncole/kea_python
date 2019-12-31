@@ -3,6 +3,7 @@
 #include <log/macros.h>
 #include <dhcpsrv/lease.h>
 #include <dhcp/pkt4.h>
+#include <dhcpsrv/cfgmgr.h>
 
 extern "C" {
 
@@ -112,5 +113,16 @@ typedef struct {
 extern PyTypeObject OptionType;
 extern PyObject *Option_from_handle(isc::dhcp::OptionPtr &ptr);
 extern int Option_define();
+
+// srv_config.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::SrvConfigPtr ptr;
+} SrvConfigObject;
+
+#define SrvConfig_Check(op) (Py_TYPE(op) == &SrvConfigType)
+extern PyTypeObject SrvConfigType;
+extern int SrvConfig_define();
 
 }

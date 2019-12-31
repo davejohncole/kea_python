@@ -13,4 +13,5 @@ class Logger:
 class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.maxDiff = None
         kea.logger = Logger()
