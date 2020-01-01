@@ -3,6 +3,7 @@
 using namespace std;
 using namespace isc::hooks;
 using namespace isc::dhcp;
+using namespace isc::data;
 
 extern "C" {
 
@@ -38,6 +39,18 @@ CalloutHandle_getArgument(PyObject *self, PyObject *args) {
         }
     }
 
+    if (strcmp(name, "command") == 0) {
+        try {
+            ConstElementPtr ptr;
+            ((CalloutHandleObject *)self)->handle->getArgument(name, ptr);
+            return (element_to_object(ptr));
+        }
+        catch (const exception &e) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+            return (0);
+        }
+    }
+
     PyErr_SetString(PyExc_ValueError, "Unknown argument");
     return (0);
 }
@@ -58,6 +71,21 @@ CalloutHandle_setArgument(PyObject *self, PyObject *args) {
         }
         try {
             ((CalloutHandleObject *)self)->handle->setArgument(name, ((Lease4Object *)value)->ptr);
+            Py_RETURN_NONE;
+        }
+        catch (const exception &e) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+            return (0);
+        }
+    }
+
+    if (strcmp(name, "response") == 0) {
+        try {
+            ConstElementPtr ptr = object_to_element(value);
+            if (!ptr) {
+                return (0);
+            }
+            ((CalloutHandleObject *)self)->handle->setArgument(name, ptr);
             Py_RETURN_NONE;
         }
         catch (const exception &e) {

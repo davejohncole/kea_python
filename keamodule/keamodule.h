@@ -29,6 +29,10 @@ extern int Capsule_define();
 // constants.cc
 extern int Constants_define();
 
+// utils.cc
+extern PyObject *element_to_object(isc::data::ConstElementPtr ptr);
+extern isc::data::ElementPtr object_to_element(PyObject *obj);
+
 // callouts.cc
 extern int Callouts_register(isc::hooks::LibraryHandle *handle);
 extern int Callouts_unregister();

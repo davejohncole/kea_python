@@ -7,8 +7,10 @@ RUN apt-get update -y \
     && apt-get -y install \
         procps \
         make \
+        socat \
         g++ \
         gdb \
+        libffi-dev \
         libboost-dev \
         libboost-system-dev \
         libssl-dev \
