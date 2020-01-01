@@ -27,6 +27,7 @@ PyInit_kea(void) {
 
     if (Capsule_define()
         || Constants_define()
+        || CalloutClosure_define()
         || LibraryHandle_define()
         || CalloutManager_define()
         || CalloutHandle_define()

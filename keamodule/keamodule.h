@@ -1,3 +1,4 @@
+#include <ffi.h>
 #include <hooks/hooks.h>
 #include <hooks/callout_manager.h>
 #include <log/macros.h>
@@ -33,7 +34,22 @@ extern int Constants_define();
 extern PyObject *element_to_object(isc::data::ConstElementPtr ptr);
 extern isc::data::ElementPtr object_to_element(PyObject *obj);
 
+// callout_closure.cc
+extern PyObject *CalloutClosure_from_object(PyObject *name, PyObject *callout);
+extern int CalloutClosure_define();
+
 // callouts.cc
+typedef struct {
+    PyObject_HEAD
+
+    PyObject *name;
+    PyObject *callout;
+    ffi_cif cif;
+    ffi_type *args[1];
+    void *bound_callout;
+    ffi_closure *closure;
+} CalloutClosureObject;
+
 extern int Callouts_register(isc::hooks::LibraryHandle *handle);
 extern int Callouts_unregister();
 
