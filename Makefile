@@ -4,33 +4,33 @@ endif
 
 help:
 	@echo "run on host"
-	@echo "  docker-build-dev     - build kea-dev:$(VER) image"
-	@echo "  docker-build         - build kea:$(VER) image"
-	@echo "  docker-build-dhtest  - build dhtest image"
-	@echo "  docker-run-kea-dev   - run kea-dev:$(VER) shell"
-	@echo "  docker-run-kea       - run kea:$(VER) shell"
-	@echo "  docker-run-dhtest    - run dhtest shell"
+	@echo "  build-kea-dev   - build kea-dev:$(VER) image"
+	@echo "  build-kea       - build kea:$(VER) image"
+	@echo "  build-dhtest    - build dhtest image"
+	@echo "  run-kea-dev     - run kea-dev:$(VER) shell"
+	@echo "  run-kea         - run kea:$(VER) shell"
+	@echo "  run-dhtest      - run dhtest shell"
 	@echo "run inside kea-dev shell"
-	@echo "  build-hook           - build and install libkea_python"
-	@echo "  build-module         - build and install kea extension module"
-	@echo "  test-module          - run unit tests for kea extension module"
+	@echo "  build-hook      - build and install libkea_python"
+	@echo "  build-module    - build and install kea extension module"
+	@echo "  test-module     - run unit tests for kea extension module"
 
-docker-build-dev:
+build-kea-dev:
 	docker build --build-arg VER=$(VER) -f DockerfileDev --tag kea-dev:$(VER) .
 
-docker-build:
+build-kea:
 	docker build --build-arg VER=$(VER) --tag kea:$(VER) .
 
-docker-build-dhtest:
+build-dhtest:
 	cd dhtest && docker build --tag dhtest .
 
-docker-run-kea-dev: kea-network
+run-kea-dev: kea-network
 	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea-dev kea-dev:$(VER) bash
 
-docker-run-kea: kea-network
+run-kea: kea-network
 	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea kea:$(VER) bash
 
-docker-run-dhtest: kea-network
+run-dhtest: kea-network
 	docker run --rm -it --network kea --privileged -v`pwd`:/workdir --name dhtest dhtest bash
 
 kea-network:
@@ -44,3 +44,7 @@ build-module:
 
 test-module:
 	cd keamodule && nosetests3
+
+.PHONY: help \
+	build-kea-dev build-kea build-dhtest run-kea-dev run-kea run-dhtest kea-network \
+	build-hook build-module test-module

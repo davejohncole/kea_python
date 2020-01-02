@@ -1,4 +1,5 @@
 FROM debian:stretch-slim AS build
+ENV DEBIAN_FRONTEND noninteractive
 
 WORKDIR /source
 
@@ -14,5 +15,8 @@ RUN apt-get update -y \
     && make
 
 FROM debian:stretch-slim
+
+RUN apt-get update -y \
+    && apt-get -y install python3
 
 COPY --from=build /source/dhtest-master/dhtest /usr/local/bin

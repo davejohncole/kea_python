@@ -11,6 +11,7 @@ RUN make build-hook build-module \
     && tar cf - etc share/man bin sbin var | (cd /dist; tar xf -)
 
 FROM debian:stretch-slim
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update -y \
     && apt-get -y install \

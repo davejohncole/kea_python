@@ -17,16 +17,16 @@ by simply running `make`:
 ```
 djc:~/play/kea_python$ make
 run on host
-  docker-build-dev     - build kea-dev:1.6.1 image
-  docker-build         - build kea:1.6.1 image
-  docker-build-dhtest  - build dhtest image
-  docker-run-kea-dev   - run kea-dev:1.6.1 shell
-  docker-run-kea       - run kea:1.6.1 shell
-  docker-run-dhtest    - run dhtest shell
+  build-kea-dev   - build kea-dev:1.6.1 image
+  build-kea       - build kea:1.6.1 image
+  build-dhtest    - build dhtest image
+  run-kea-dev     - run kea-dev:1.6.1 shell
+  run-kea         - run kea:1.6.1 shell
+  run-dhtest      - run dhtest shell
 run inside kea-dev shell
-  build-hook           - build and install libkea_python
-  build-module         - build and install kea extension module
-  test-module          - run unit tests for kea extension module
+  build-hook      - build and install libkea_python
+  build-module    - build and install kea extension module
+  test-module     - run unit tests for kea extension module
 ```
 
 By default the project works with kea 1.6.1.  You can override that by specifying the version
@@ -34,22 +34,22 @@ in the environment:
 ```
 djc:~/play/kea_python$ VER=1.7.3 make
 run on host
-  docker-build-dev     - build kea-dev:1.7.3 image
-  docker-build         - build kea:1.7.3 image
-  docker-build-dhtest  - build dhtest image
-  docker-run-kea-dev   - run kea-dev:1.7.3 shell
-  docker-run-kea       - run kea:1.7.3 shell
-  docker-run-dhtest    - run dhtest shell
+  build-kea-dev   - build kea-dev:1.7.3 image
+  build-kea       - build kea:1.7.3 image
+  build-dhtest    - build dhtest image
+  run-kea-dev     - run kea-dev:1.7.3 shell
+  run-kea         - run kea:1.7.3 shell
+  run-dhtest      - run dhtest shell
 run inside kea-dev shell
-  build-hook           - build and install libkea_python
-  build-module         - build and install kea extension module
-  test-module          - run unit tests for kea extension module
+  build-hook      - build and install libkea_python
+  build-module    - build and install kea extension module
+  test-module     - run unit tests for kea extension module
 ```
 
 The first thing you need to do is build the `kea-dev` image.  This takes quite a while, but you
 will only need to do it once.
 ```
-djc:~/play/kea_python$ make docker-build-dev
+djc:~/play/kea_python$ make build-kea-dev
 ```
 The resulting image is close to 4G as it contains the Kea source, the installed Kea server and
 a complete development environment.
@@ -58,7 +58,7 @@ This image intended to be used for C/C++ development on the `kea_python` hook.  
 interested in working in Python then as soon as the build is complete you immediately build the
 `kea` image.
 ```
-djc:~/play/kea_python$ make docker-build
+djc:~/play/kea_python$ make build-kea
 ```
 The `kea` image uses `kea-dev` to compile the `kea_python` hook and then discards all of the
 development related files.  The saving is huge:
@@ -74,23 +74,22 @@ debian              stretch-slim        2b343cb3b772        5 weeks ago         
 Most of the examples rely on `dhtest` to perform DHCP transactions.  You can build an image
 containing `dhtest` using `make`:
 ```
-djc@dave:~/play/kea_python$ make docker-build-dhtest 
+djc@dave:~/play/kea_python$ make build-dhtest 
 ```
 
-Use `make` to run the `kea` image.  This will create a docker network and start a command
-shell inside the `kea` container.  Your working directory is mounted as `/workdir` inside
-the container.
+Use `make run-kea` to run the `kea` image.  This creates a docker network and runs a command
+shell.  Your working directory is mounted as `/workdir` inside the container.
 
 For example, to run the facebook-trick example:
 ```
-djc@dave:~/play/kea_python$ make docker-run-kea
+djc@dave:~/play/kea_python$ make run-kea
 root@92ddf6f5e9be:/# cd /workdir
 root@92ddf6f5e9be:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/facebook-trick/kea.conf 
 ```
 
 Then in another shell:
 ```
-djc:~/play/kea_python$ make docker-run-dhtest 
+djc:~/play/kea_python$ make run-dhtest 
 root@375f50ed4699:/# dhtest -i eth0
 ```
 
@@ -98,7 +97,7 @@ root@375f50ed4699:/# dhtest -i eth0
 The `kea-dev` image is used when making changes to the `kea_python.so` hook.  All you need
 to do is the following:
 ```
-djc@dave:~/play/kea_python$ make docker-run-kea-dev 
+djc@dave:~/play/kea_python$ make run-kea-dev 
 root@a742a1b8b485:/source# cd /workdir
 root@a742a1b8b485:/workdir# make build-hook build-module
 ```
