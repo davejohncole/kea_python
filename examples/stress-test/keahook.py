@@ -1,5 +1,9 @@
 from kea import *
 from ipaddress import IPv4Address, IPv4Network
+from prometheus_client import start_http_server, Counter
+
+PKT_RECEIVE = Counter('dhcp4_pkt_receive_total', 'Packets received', ['type'])
+PKT_SEND = Counter('dhcp4_pkt_send_total', 'Packets sent', ['type'])
 
 class Config:
     def __init__(self, conf):
@@ -19,12 +23,17 @@ class Config:
         self.options.append(Option(DHO_DOMAIN_NAME).setString('facebook.com'))
 
 def load(handle):
-    global config
+    global config, type_to_label
     config = Config(SrvConfig('staging').toElement())
+    type_to_label = dict([(v, k[4:].lower())
+                          for k, v in globals().items()
+                          if k.startswith('DHCP')])
+    start_http_server(9100)
     return 0
 
 def pkt4_receive(handle):
     query = handle.getArgument('query4')
+    PKT_RECEIVE.labels(type=type_to_label.get(query.getType(), 'unknown')).inc()
     # client must request address in Option 82, suboption 1.
     o = query.getOption(DHO_DHCP_AGENT_OPTIONS)
     if not o:
@@ -47,6 +56,7 @@ def pkt4_send(handle):
     response = handle.getArgument('response4')
     if response.getType() == DHCPNAK:
         response.setType(DHCPACK)
+    PKT_SEND.labels(type=type_to_label.get(response.getType(), 'unknown')).inc()
     addr = handle.getContext('requested-addr')
     response.setYiaddr(addr)
     for option in config.options:

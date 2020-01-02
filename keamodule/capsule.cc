@@ -12,6 +12,22 @@ extern "C" {
 PyObject *hook_module;
 Logger *kea_logger = 0;
 MessageID *kea_message_id = 0;
+static PyThreadState *thread_state;
+static bool allowed_threads;
+
+void
+begin_allow_threads() {
+    thread_state = PyEval_SaveThread();
+    allowed_threads = true;
+}
+
+void
+end_allow_threads() {
+    if (allowed_threads) {
+        PyEval_RestoreThread(thread_state);
+        allowed_threads = false;
+    }
+}
 
 typedef struct {
     PyObject_HEAD
@@ -259,13 +275,18 @@ Kea_Load(LibraryHandle *handle, const char *module) {
         return (1);
     }
 
+    // Everything loaded - give up the GIL.
+    begin_allow_threads();
+
     return (0);
 }
 
 static int
 Kea_Unload() {
-    Callouts_unregister();
+    // Kea calling us again - get the GIL.
+    end_allow_threads();
 
+    Callouts_unregister();
     Errors_finalize();
     Py_INCREF(Py_None);
     if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {

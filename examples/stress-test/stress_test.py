@@ -2,6 +2,7 @@ import os
 import time
 import re
 import codecs
+import argparse
 from ipaddress import IPv4Network
 
 
@@ -114,14 +115,20 @@ class Runner:
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--total', type=int, default=10000,
+                        help='total number of requests to perform')
+    parser.add_argument('--parallel', type=int, default=50,
+                        help='number of parallel requests to perform')
+    args = parser.parse_args()
+
     os.chdir('/tmp')
-    total = 10000
-    runner = Runner(50, total)
+    runner = Runner(args.parallel, args.total)
     start = time.time()
     runner.run()
     finish = time.time()
-    rate = total / (finish - start)
-    print('total %s at %.0f/sec with %s errors' % (total, rate, runner.num_errors))
+    rate = args.total / (finish - start)
+    print('total %s at %.0f/sec with %s errors' % (args.total, rate, runner.num_errors))
 
 
 if __name__ == '__main__':

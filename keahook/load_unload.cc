@@ -20,6 +20,7 @@ static Logger logger("python");
 static void *libpython;
 
 void      (*dl_Py_Initialize)(void);
+void      (*dl_PyEval_InitThreads)(void);
 void      (*dl_Py_Finalize)(void);
 void*     (*dl_PyCapsule_Import)(const char *name, int no_block);
 
@@ -42,6 +43,7 @@ load_libpython(string name) {
         return (1);
     }
     if (load_symbol(Py_Initialize)
+        || load_symbol(PyEval_InitThreads)
         || load_symbol(Py_Finalize)
         || load_symbol(PyCapsule_Import)) {
         return (1);
@@ -61,6 +63,7 @@ unload_libpython() {
 static int
 python_initialize() {
     dl_Py_Initialize();
+    dl_PyEval_InitThreads();
     return (0);
 }
 

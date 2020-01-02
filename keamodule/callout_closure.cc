@@ -13,6 +13,9 @@ CalloutClosure_binding(ffi_cif *cif, void *ret, void* args[], void *userdata) {
     CalloutClosureObject *obj = (CalloutClosureObject *)userdata;
     int res = 1;
 
+    // Kea calling us again - get the GIL.
+    end_allow_threads();
+
     handle = CalloutHandle_from_handle(*(CalloutHandle**)args[0]);
     if (!handle) {
         log_error("could not create CalloutHandle");
@@ -34,6 +37,9 @@ error:
     *(ffi_arg *)ret = res;
     Py_XDECREF(result);
     Py_XDECREF(handle);
+
+    // Going back into Kea - give up the GIL.
+    begin_allow_threads();
 }
 
 static void

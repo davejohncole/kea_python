@@ -98,6 +98,21 @@ CalloutHandle_setArgument(PyObject *self, PyObject *args) {
     return (0);
 }
 
+
+ObjectHolder::ObjectHolder(PyObject *obj): obj_(obj) {
+     Py_INCREF(obj);
+}
+
+ObjectHolder::~ObjectHolder() {
+    // Kea caused this - get the GIL.
+    end_allow_threads();
+
+    Py_DECREF(obj_);
+
+    // Going back into Kea - give up the GIL.
+    begin_allow_threads();
+}
+
 static PyObject *
 CalloutHandle_setContext(PyObject *self, PyObject *args) {
     char *name;

@@ -23,6 +23,8 @@ extern int log_python_traceback();
 extern PyObject *hook_module;
 extern isc::log::Logger *kea_logger;
 extern isc::log::MessageID *kea_message_id;
+extern void begin_allow_threads();
+extern void end_allow_threads();
 
 extern void log_error(std::string msg);
 extern int Capsule_define();
@@ -85,6 +87,14 @@ typedef struct {
     bool is_owner;
 } CalloutHandleObject;
 
+class ObjectHolder {
+public:
+    ObjectHolder(PyObject *obj);
+    ~ObjectHolder();
+    PyObject *obj_;
+};
+typedef boost::shared_ptr<ObjectHolder> ObjectHolderPtr;
+
 #define CalloutHandle_Check(op) (Py_TYPE(op) == &CalloutHandleType)
 extern PyTypeObject CalloutHandleType;
 extern PyObject *CalloutHandle_from_handle(isc::hooks::CalloutHandle *handle);
@@ -101,15 +111,6 @@ typedef struct {
 extern PyTypeObject Lease4Type;
 extern PyObject *Lease4_from_handle(isc::dhcp::Lease4Ptr &ptr);
 extern int Lease4_define();
-
-// object_holder.cc
-class ObjectHolder {
-public:
-    ObjectHolder(PyObject *obj): obj_(obj) { Py_INCREF(obj); }
-    ~ObjectHolder() { Py_DECREF(obj_); }
-    PyObject *obj_;
-};
-typedef boost::shared_ptr<ObjectHolder> ObjectHolderPtr;
 
 // pkt4.cc
 typedef struct {
