@@ -5,95 +5,25 @@ using namespace isc::hooks;
 
 extern "C" {
 
-static int
-call_callout(const char *name, CalloutHandle &handle) {
-    PyObject *callout;
-    PyObject *py_handle = 0;
-    PyObject *py_result = 0;
-    int res = 1;
-
-    callout = PyObject_GetAttrString(hook_module, name);
-    if (!callout) {
-        PyErr_Clear();
-        return (0);
-    }
-    if (!PyCallable_Check(callout)) {
-        log_error("load must be callable");
-        goto error;
-    }
-    py_handle = CalloutHandle_from_handle(&handle);
-    if (!py_handle) {
-        log_error("could not create CalloutHandle");
-        goto error;
-    }
-    py_result = PyObject_CallFunction(callout, "O", py_handle);
-    if (!py_result) {
-        log_python_traceback();
-        goto error;
-    }
-    if (!PyLong_CheckExact(py_result)) {
-        log_error("load must return integer");
-        goto error;
-    }
-
-    res = PyLong_AsLong(py_result);
-
-error:
-    Py_XDECREF(py_result);
-    Py_XDECREF(py_handle);
-    Py_XDECREF(callout);
-    return (res);
-}
-
-#define make_proxy_func(name) \
-static int \
-proxy_ ##name(CalloutHandle &handle) { \
-    return (call_callout(#name, handle)); \
-}
-
-make_proxy_func(dhcp4_srv_configured)
-make_proxy_func(cb4_updated)
-make_proxy_func(buffer4_receive)
-make_proxy_func(pkt4_receive)
-make_proxy_func(subnet4_select)
-make_proxy_func(host4_identifier)
-make_proxy_func(lease4_select)
-make_proxy_func(lease4_renew)
-make_proxy_func(lease4_release)
-make_proxy_func(lease4_decline)
-make_proxy_func(leases4_committed)
-make_proxy_func(pkt4_send)
-make_proxy_func(buffer4_send)
-make_proxy_func(lease4_expire)
-make_proxy_func(lease4_recover)
-make_proxy_func(command_processed)
-
-typedef struct {
-    const char *name;
-    int (*proxy_func)(CalloutHandle &handle);
-    bool is_registered;
-} CalloutProxy;
-#define callout_proxy(name) {#name, proxy_ ##name }
-
-static CalloutProxy callout_proxies[] = {
-    callout_proxy(dhcp4_srv_configured),
-    callout_proxy(cb4_updated),
-    callout_proxy(buffer4_receive),
-    callout_proxy(pkt4_receive),
-    callout_proxy(subnet4_select),
-    callout_proxy(host4_identifier),
-    callout_proxy(lease4_select),
-    callout_proxy(lease4_renew),
-    callout_proxy(lease4_release),
-    callout_proxy(lease4_decline),
-    callout_proxy(leases4_committed),
-    callout_proxy(pkt4_send),
-    callout_proxy(buffer4_send),
-    callout_proxy(lease4_expire),
-    callout_proxy(lease4_recover),
-    callout_proxy(command_processed)
+static const char *hooks[] = {
+    "dhcp4_srv_configured",
+    "cb4_updated",
+    "buffer4_receive",
+    "pkt4_receive",
+    "subnet4_select",
+    "host4_identifier",
+    "lease4_select",
+    "lease4_renew",
+    "lease4_release",
+    "lease4_decline",
+    "leases4_committed",
+    "pkt4_send",
+    "buffer4_send",
+    "lease4_expire",
+    "lease4_recover",
+    "command_processed"
 };
-#define num_callout_proxies (sizeof(callout_proxies) / sizeof(callout_proxies[0]))
+#define num_hooks (sizeof(hooks) / sizeof(hooks[0]))
 
 static PyObject *callout_closures;
 
@@ -104,25 +34,43 @@ Callouts_add_closure(CalloutClosureObject *obj) {
 
 static int
 register_callouts(LibraryHandle *handle) {
-    for (unsigned int i = 0; i < num_callout_proxies; i++) {
-        CalloutProxy *proxy = &callout_proxies[i];
-        PyObject *python_func;
+    for (unsigned int i = 0; i < num_hooks; i++) {
+        PyObject *callout;
 
-        python_func = PyObject_GetAttrString(hook_module, proxy->name);
-        if (!python_func) {
+        callout = PyObject_GetAttrString(hook_module, hooks[i]);
+        if (!callout) {
             PyErr_Clear();
-            proxy->is_registered = false;
             continue;
         }
-        if (!PyCallable_Check(python_func)) {
-            log_error(string(proxy->name) + " must be callable");
-            Py_DECREF(python_func);
-            proxy->is_registered = false;
+        if (!PyCallable_Check(callout)) {
+            log_error(string(hooks[i]) + " must be callable");
+            Py_DECREF(callout);
             return (1);
         }
-        Py_DECREF(python_func);
-        handle->registerCallout(proxy->name, proxy->proxy_func);
-        proxy->is_registered = true;
+        PyObject *name = PyUnicode_FromString(hooks[i]);
+        if (!name) {
+            return (1);
+        }
+        CalloutClosureObject *obj = (CalloutClosureObject *) CalloutClosure_from_object(name, callout);
+        if (!obj) {
+            Py_DECREF(callout);
+            Py_DECREF(name);
+            return (1);
+        }
+        Py_DECREF(callout);
+        Py_DECREF(name);
+        if (Callouts_add_closure(obj)) {
+            Py_DECREF(obj);
+            return (0);
+        }
+        Py_DECREF(obj);
+        try {
+            handle->registerCallout(hooks[i], (CalloutPtr)obj->bound_callout);
+        }
+        catch (const exception &e) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+            return (0);
+        }
     }
     return (0);
 }
@@ -131,10 +79,6 @@ static int
 unregister_callouts() {
     Py_XDECREF(callout_closures);
     callout_closures = 0;
-    for (unsigned int i = 0; i < num_callout_proxies; i++) {
-        CalloutProxy *proxy = &callout_proxies[i];
-        proxy->is_registered = false;
-    }
     return (0);
 }
 
