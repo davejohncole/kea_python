@@ -1,4 +1,4 @@
-// File created from messages.mes on Mon Dec 30 2019 23:53
+// File created from messages.mes on Thu Jan 02 2020 00:21
 
 #ifndef MESSAGES_H
 #define MESSAGES_H
@@ -8,8 +8,8 @@
 namespace isc {
 namespace log {
 
-extern const isc::log::MessageID LOG_KEAPY_HOOK;
-extern const isc::log::MessageID LOG_KEAPY_PYTHON;
+extern const isc::log::MessageID LOG_PYTHON;
+extern const isc::log::MessageID LOG_PYTHON_HOOK;
 
 } // namespace log
 } // namespace isc

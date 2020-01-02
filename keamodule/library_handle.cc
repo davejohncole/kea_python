@@ -23,6 +23,12 @@ LibraryHandle_registerCommandCallout(PyObject *self, PyObject *args) {
     if (!obj) {
         return (0);
     }
+    // give ownership of obj to dict in callouts.cc
+    if (Callouts_add_closure(obj)) {
+        Py_DECREF(obj);
+        return (0);
+    }
+    Py_DECREF(obj);
     try {
         ((LibraryHandleObject *)self)->handle->registerCommandCallout(PyUnicode_AsUTF8(name), (CalloutPtr)obj->bound_callout);
     }

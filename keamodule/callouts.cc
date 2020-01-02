@@ -95,6 +95,13 @@ static CalloutProxy callout_proxies[] = {
 };
 #define num_callout_proxies (sizeof(callout_proxies) / sizeof(callout_proxies[0]))
 
+static PyObject *callout_closures;
+
+int
+Callouts_add_closure(CalloutClosureObject *obj) {
+    return (PyDict_SetItem(callout_closures, obj->name, (PyObject *)obj));
+}
+
 static int
 register_callouts(LibraryHandle *handle) {
     for (unsigned int i = 0; i < num_callout_proxies; i++) {
@@ -122,6 +129,8 @@ register_callouts(LibraryHandle *handle) {
 
 static int
 unregister_callouts() {
+    Py_XDECREF(callout_closures);
+    callout_closures = 0;
     for (unsigned int i = 0; i < num_callout_proxies; i++) {
         CalloutProxy *proxy = &callout_proxies[i];
         proxy->is_registered = false;
@@ -173,6 +182,10 @@ int
 Callouts_register(LibraryHandle *handle) {
     int res;
 
+    callout_closures = PyDict_New();
+    if (!callout_closures) {
+        return (0);
+    }
     res = call_load_callout(handle);
     if (!res) {
         res = register_callouts(handle);

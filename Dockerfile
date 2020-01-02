@@ -1,20 +1,26 @@
-FROM kea-base:1.7.3 AS build
+FROM kea-dev:1.7.3 AS build
 
 WORKDIR /source
 COPY . .
 
-RUN cd keapyhook \
-    && make \
-    && cd ../keamodule \
-    && python3 setup.py install
+RUN make build-hook build-module \
+    && mkdir /dist \
+    && cd /usr/local \
+    && find lib -name \*.so\* | tar cf - -T - | (cd /dist; tar xf -) \
+    && tar cf - etc share/man bin sbin var | (cd /dist; tar xf -)
 
 FROM debian:stretch-slim
 
 RUN apt-get update -y \
     && apt-get -y install \
         procps \
+        socat \
         python3 \
-        ldconfig
+        libpython3.5 \
+        liblog4cplus-1.1-9 \
+        libboost-system1.62.0 \
+        libffi6
 
-COPY --from=build /usr/local/lib /usr/local/lib
-COPY --from=build /usr/local/lib/python3.5/dist-packages /usr/local/lib/python3.5/dist-packages
+COPY --from=build /dist /usr/local
+
+RUN ldconfig

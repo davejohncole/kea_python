@@ -1,0 +1,7 @@
+$NAMESPACE isc::log
+
+% LOG_PYTHON_HOOK %1
+There was a problem loading kea_python.so
+
+% LOG_PYTHON %1
+Log message from the Python module loaded by kea_python.so

@@ -15,7 +15,7 @@ extern "C" {
 #include <Python.h>
 #include "../keamodule/keacapsule.h"
 
-static Logger logger("keapy");
+static Logger logger("python");
 
 static void *libpython;
 
@@ -27,7 +27,7 @@ static int
 find_symbol(void **sym, const char *name) {
     *sym = dlsym(libpython, name);
     if (*sym == 0) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg(string("symbol ").append(name).append(" not found"));
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg(string("symbol ").append(name).append(" not found"));
     }
     return (*sym == 0);
 }
@@ -38,7 +38,7 @@ static int
 load_libpython(string name) {
     libpython = dlopen(name.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!libpython) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg(string("dlopen ").append(name).append(" failed"));
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg(string("dlopen ").append(name).append(" failed"));
         return (1);
     }
     if (load_symbol(Py_Initialize)
@@ -76,12 +76,12 @@ static int
 load_kea_capsule(LibraryHandle &handle, string module) {
     kea_capsule = (void **)dl_PyCapsule_Import("kea._C_API", 0);
     if (!kea_capsule) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("PyCapsule_Import(\"kea._C_API\") failed");
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg("PyCapsule_Import(\"kea._C_API\") failed");
         return (1);
     }
-    Kea_SetLogger(logger, LOG_KEAPY_PYTHON);
+    Kea_SetLogger(logger, LOG_PYTHON);
     if (Kea_Load(&handle, module.c_str())) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("Kea_Load failed");
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg("Kea_Load failed");
         return (1);
     }
     return (0);
@@ -101,20 +101,20 @@ load(LibraryHandle &handle) {
 
     // check libpython parameter
     if (!libpython) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("missing \"libpython\" parameter");
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg("missing \"libpython\" parameter");
         return (1);
     }
     if (libpython->getType() != Element::string) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("\"libpython\" parameter must be a string");
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg("\"libpython\" parameter must be a string");
         return (1);
     }
     // check module parameter
     if (!module) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("missing \"module\" parameter");
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg("missing \"module\" parameter");
         return (1);
     }
     if (module->getType() != Element::string) {
-        LOG_ERROR(logger, LOG_KEAPY_HOOK).arg("\"module\" parameter must be a string");
+        LOG_ERROR(logger, LOG_PYTHON_HOOK).arg("\"module\" parameter must be a string");
         return (1);
     }
 
@@ -126,7 +126,7 @@ load(LibraryHandle &handle) {
         return (1);
     }
 
-    LOG_INFO(logger, LOG_KEAPY_HOOK).arg("keapyhook loaded");
+    LOG_INFO(logger, LOG_PYTHON_HOOK).arg("kea_python loaded");
 
     return (0);
 }
@@ -136,7 +136,7 @@ unload() {
     unload_kea_capsule();
     python_finalize();
     unload_libpython();
-    LOG_INFO(logger, LOG_KEAPY_HOOK).arg("keapyhook unloaded");
+    LOG_INFO(logger, LOG_PYTHON_HOOK).arg("kea_python unloaded");
     return (0);
 }
 

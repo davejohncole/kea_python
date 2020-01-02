@@ -1,4 +1,4 @@
-// File created from messages.mes on Mon Dec 30 2019 23:53
+// File created from messages.mes on Thu Jan 02 2020 00:21
 
 #include <cstddef>
 #include <log/message_types.h>
@@ -7,8 +7,8 @@
 namespace isc {
 namespace log {
 
-extern const isc::log::MessageID LOG_KEAPY_HOOK = "LOG_KEAPY_HOOK";
-extern const isc::log::MessageID LOG_KEAPY_PYTHON = "LOG_KEAPY_PYTHON";
+extern const isc::log::MessageID LOG_PYTHON = "LOG_PYTHON";
+extern const isc::log::MessageID LOG_PYTHON_HOOK = "LOG_PYTHON_HOOK";
 
 } // namespace log
 } // namespace isc
@@ -16,8 +16,8 @@ extern const isc::log::MessageID LOG_KEAPY_PYTHON = "LOG_KEAPY_PYTHON";
 namespace {
 
 const char* values[] = {
-    "LOG_KEAPY_HOOK", "%1",
-    "LOG_KEAPY_PYTHON", "%1",
+    "LOG_PYTHON", "%1",
+    "LOG_PYTHON_HOOK", "%1",
     NULL
 };
 

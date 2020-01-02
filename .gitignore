@@ -1,5 +1,5 @@
 kea-1.7.3.tar.gz
-libdhcp_python.so
+libkea_python.so
 __pycache__
 build
 *.log
