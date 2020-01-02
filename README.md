@@ -63,7 +63,7 @@ djc:~/play/kea_python$ make build-kea
 The `kea` image uses `kea-dev` to compile the `kea_python` hook and then discards all of the
 development related files.  The saving is huge:
 ```
-djc@dave:~/play/kea_python$ docker images
+djc:~/play/kea_python$ docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 kea                 1.6.1               292b89ff6bc8        5 minutes ago       346MB
 kea-dev             1.6.1               bdd11aaa16eb        8 minutes ago       3.55GB
@@ -74,7 +74,7 @@ debian              stretch-slim        2b343cb3b772        5 weeks ago         
 Most of the examples rely on `dhtest` to perform DHCP transactions.  You can build an image
 containing `dhtest` using `make`:
 ```
-djc@dave:~/play/kea_python$ make build-dhtest 
+djc:~/play/kea_python$ make build-dhtest 
 ```
 
 Use `make run-kea` to run the `kea` image.  This creates a docker network and runs a command
@@ -82,7 +82,7 @@ shell.  Your working directory is mounted as `/workdir` inside the container.
 
 For example, to run the facebook-trick example:
 ```
-djc@dave:~/play/kea_python$ make run-kea
+djc:~/play/kea_python$ make run-kea
 root@92ddf6f5e9be:/# cd /workdir
 root@92ddf6f5e9be:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/facebook-trick/kea.conf 
 ```
@@ -97,7 +97,7 @@ root@375f50ed4699:/# dhtest -i eth0
 The `kea-dev` image is used when making changes to the `kea_python.so` hook.  All you need
 to do is the following:
 ```
-djc@dave:~/play/kea_python$ make run-kea-dev 
+djc:~/play/kea_python$ make run-kea-dev 
 root@a742a1b8b485:/source# cd /workdir
 root@a742a1b8b485:/workdir# make build-hook build-module
 ```
