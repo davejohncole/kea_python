@@ -12,18 +12,21 @@ extern "C" {
 PyObject *hook_module;
 Logger *kea_logger = 0;
 MessageID *kea_message_id = 0;
+static bool embedded_mode;
 static PyThreadState *thread_state;
 static bool allowed_threads;
 
 void
 begin_allow_threads() {
-    thread_state = PyEval_SaveThread();
-    allowed_threads = true;
+    if (embedded_mode) {
+        thread_state = PyEval_SaveThread();
+        allowed_threads = true;
+    }
 }
 
 void
 end_allow_threads() {
-    if (allowed_threads) {
+    if (embedded_mode && allowed_threads) {
         PyEval_RestoreThread(thread_state);
         allowed_threads = false;
     }
@@ -276,6 +279,7 @@ Kea_Load(LibraryHandle *handle, const char *module) {
     }
 
     // Everything loaded - give up the GIL.
+    embedded_mode = true;
     begin_allow_threads();
 
     return (0);
