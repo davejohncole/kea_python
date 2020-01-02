@@ -49,6 +49,7 @@ register_callouts(LibraryHandle *handle) {
         }
         PyObject *name = PyUnicode_FromString(hooks[i]);
         if (!name) {
+            Py_DECREF(callout);
             return (1);
         }
         CalloutClosureObject *obj = (CalloutClosureObject *) CalloutClosure_from_object(name, callout);
