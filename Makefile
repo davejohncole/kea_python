@@ -1,11 +1,14 @@
-VER=1.7.3
+ifeq "$(VER)" ""
+	VER=1.6.1
+endif
 
 help:
 	@echo "run on host"
-	@echo "  docker-build-dev     - build kea-dev image"
-	@echo "  docker-build         - build kea image"
-	@echo "  docker-run-kea-dev   - run kea-dev shell"
-	@echo "  docker-run-kea       - run kea shell"
+	@echo "  docker-build-dev     - build kea-dev:$(VER) image"
+	@echo "  docker-build         - build kea:$(VER) image"
+	@echo "  docker-build-dhtest  - build dhtest image"
+	@echo "  docker-run-kea-dev   - run kea-dev:$(VER) shell"
+	@echo "  docker-run-kea       - run kea:$(VER) shell"
 	@echo "  docker-run-dhtest    - run dhtest shell"
 	@echo "run inside kea-dev shell"
 	@echo "  build-hook           - build and install libkea_python"
@@ -13,10 +16,13 @@ help:
 	@echo "  test-module          - run unit tests for kea extension module"
 
 docker-build-dev:
-	docker build -f DockerfileDev --tag kea-dev:$(VER) .
+	docker build --build-arg VER=$(VER) -f DockerfileDev --tag kea-dev:$(VER) .
 
 docker-build:
-	docker build --tag kea:$(VER) .
+	docker build --build-arg VER=$(VER) --tag kea:$(VER) .
+
+docker-build-dhtest:
+	cd dhtest && docker build --tag dhtest .
 
 docker-run-kea-dev: kea-network
 	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea-dev kea-dev:$(VER) bash

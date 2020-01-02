@@ -1,4 +1,5 @@
-FROM kea-dev:1.7.3 AS build
+ARG VER
+FROM kea-dev:$VER AS build
 
 WORKDIR /source
 COPY . .
