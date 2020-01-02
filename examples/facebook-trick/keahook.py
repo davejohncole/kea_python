@@ -7,23 +7,16 @@ class Config:
         self.options = [Option(DHO_DHCP_LEASE_TIME).setUint32(dhcp4.get('valid-lifetime', 7200)),
                         Option(DHO_DHCP_RENEWAL_TIME).setUint32(dhcp4.get('renew-timer', 1800)),
                         Option(DHO_DHCP_REBINDING_TIME).setUint32(dhcp4.get('rebind-timer', 3600))]
-        subnet4 = dhcp4.get('subnet4', [])
-        logger.info('Dhcp4 %s' % dhcp4)
-        if subnet4:
-            subnet0 = subnet4[0]
-        else:
-            subnet0 = {}
-        self.subnet = IPv4Network(subnet0.get('subnet', '10.0.0.0/20'))
-        logger.info('using subnet %s' % self.subnet)
+        self.subnet = IPv4Network('10.0.0.0/20')
         self.options.append(Option(DHO_SUBNET_MASK).setBytes(self.subnet.netmask.packed))
         # hard code nameservers
-        servers = [IPv4Address('192.0.3.1'), IPv4Address('192.0.3.2')]
+        servers = [IPv4Address('192.168.3.1'), IPv4Address('192.168.3.2')]
         packed_servers = b''.join([addr.packed
                                    for addr in servers])
         self.options.append(Option(DHO_DOMAIN_NAME_SERVERS).setBytes(packed_servers))
         # hard code routers and domainname
         self.options.append(Option(DHO_ROUTERS).setBytes(self.subnet[1].packed))
-        self.options.append(Option(DHO_DOMAIN_NAME).setString('simplehook.org'))
+        self.options.append(Option(DHO_DOMAIN_NAME).setString('facebook.com'))
 
 class HostInfo:
     def __init__(self, hwaddr):

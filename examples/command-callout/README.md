@@ -4,7 +4,7 @@ Start the kea image:
 ```
 djc@dave:~/play/kea_python$ make docker-run-kea
 root@9b06fba64b09:/# cd /workdir/
-root@9b06fba64b09:/workdir# ./run-example examples/command-callout
+root@9b06fba64b09:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/command-callout/kea.conf
 ```
 
 Run a shell inside the kea image:

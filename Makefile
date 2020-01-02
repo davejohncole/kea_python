@@ -19,13 +19,13 @@ docker-build:
 	docker build --tag kea:$(VER) .
 
 docker-run-kea-dev: kea-network
-	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea-base kea-dev:$(VER) bash
+	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea-dev kea-dev:$(VER) bash
 
 docker-run-kea: kea-network
 	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea kea:$(VER) bash
 
 docker-run-dhtest: kea-network
-	docker run --rm -it --network kea --privileged -v`pwd`:/workdir dhtest bash
+	docker run --rm -it --network kea --privileged -v`pwd`:/workdir --name dhtest dhtest bash
 
 kea-network:
 	docker network ls | grep -q kea || docker network create --subnet=172.28.5.0/24 --ip-range=172.28.5.0/24 kea
