@@ -41,8 +41,9 @@ class Child:
 
 class RateReport:
 
-    def __init__(self, freq):
+    def __init__(self, freq, smooth):
         self.freq = freq
+        self.smooth = smooth
         self.last_report = time.time()
         self.times = []
         self.total = 0
@@ -51,30 +52,35 @@ class RateReport:
         self.total += 1
         now = time.time()
         if now - self.last_report >= self.freq:
-            # remove all times older than freq
+            # remove all times older than smooth
             pos = 0
-            cutoff = now - self.freq
+            cutoff = now - self.smooth
             while pos < len(self.times) and self.times[pos] < cutoff:
                 pos += 1
             self.times = self.times[pos:]
-            print('%s (%.1f / sec)' % (self.total, len(self.times) / self.freq))
+            if len(self.times) >= 2:
+                durn = self.times[-1] - self.times[0]
+                if durn:
+                    print('%s at %.0f/sec' % (self.total, len(self.times) / durn))
             self.last_report = now
         self.times.append(now)
 
 
 class Runner:
 
-    def __init__(self):
+    def __init__(self, parallel, total):
+        self.parallel = parallel
+        self.total = total
         self.children = {}
         self.network = IPv4Network('10.0.0.0/8')
         self.num_children = 0
-        self.errors = 0
+        self.num_errors = 0
         self.rate = None
 
     def run(self):
-        self.rate = RateReport(3)
-        while self.num_children < 10000:
-            if len(self.children) < 50:
+        self.rate = RateReport(1, 3)
+        while self.num_children < self.total:
+            if len(self.children) < self.parallel:
                 self.start_child()
             else:
                 self.wait_child()
@@ -98,15 +104,19 @@ class Runner:
         child = self.children[pid]
         addr = child.get_result()
         if addr != child.addr:
-            self.errors += 1
+            self.num_errors += 1
         del self.children[pid]
 
 
 def main():
     os.chdir('/tmp')
-    runner = Runner()
+    total = 10000
+    runner = Runner(50, total)
+    start = time.time()
     runner.run()
-    print('%s errors' % runner.errors)
+    finish = time.time()
+    rate = total / (finish - start)
+    print('total %s at %.0f/sec with %s errors' % (total, rate, runner.num_errors))
 
 
 if __name__ == '__main__':
