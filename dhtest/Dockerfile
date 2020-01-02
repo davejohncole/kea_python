@@ -17,6 +17,8 @@ RUN apt-get update -y \
 FROM debian:stretch-slim
 
 RUN apt-get update -y \
-    && apt-get -y install python3
+    && apt-get -y install \
+        python3 \
+        procps
 
 COPY --from=build /source/dhtest-master/dhtest /usr/local/bin
