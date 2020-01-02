@@ -5,7 +5,7 @@ To run this hook you will need to install `curl` and `python3-prometheus-client`
 
 Start the kea image:
 ```
-djc:~/play/kea_python$ make run-kea
+djc@laptop:~/play/kea_python$ make run-kea
 root@e55a47190d9c:/# cd /workdir/
 root@e55a47190d9c:/workdir# apt-get install curl python3-prometheus-client
 root@9b06fba64b09:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/stress-test/kea.conf
@@ -13,7 +13,7 @@ root@9b06fba64b09:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/stress-test/ke
 
 In another shell start bash in the kea container:
 ```
-djc:~/play/kea_python$ docker exec -it kea bash
+djc@laptop:~/play/kea_python$ docker exec -it kea bash
 root@e55a47190d9c:/# while true; do curl -s http://localhost:9100/ | grep ^dhcp && echo; sleep 0.2; done
 ```
 This will force the Python hook code to execute the prometheus client background thread every 0.2
@@ -22,7 +22,7 @@ can execute Python threads in Kea.
 
 Now the dhtest image:
 ```
-djc:~/play/kea_python$ make run-dhtest
+djc@laptop:~/play/kea_python$ make run-dhtest
 root@e01939ffd0f4:/# cd /workdir
 root@e01939ffd0f4:/workdir# python3 examples/stress-test/stress_test.py --help  
 usage: stress_test.py [-h] [--total TOTAL] [--parallel PARALLEL]

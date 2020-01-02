@@ -15,7 +15,7 @@ directory.
 Most of the commands you will need to run are in a `Makefile`.  You can view the targets
 by simply running `make`:
 ```
-djc:~/play/kea_python$ make
+djc@laptop:~/play/kea_python$ make
 run on host
   build-kea-dev   - build kea-dev:1.6.1 image
   build-kea       - build kea:1.6.1 image
@@ -32,7 +32,7 @@ run inside kea-dev shell
 By default the project works with kea 1.6.1.  You can override that by specifying the version
 in the environment:
 ```
-djc:~/play/kea_python$ VER=1.7.3 make
+djc@laptop:~/play/kea_python$ VER=1.7.3 make
 run on host
   build-kea-dev   - build kea-dev:1.7.3 image
   build-kea       - build kea:1.7.3 image
@@ -49,7 +49,7 @@ run inside kea-dev shell
 The first thing you need to do is build the `kea-dev` image.  This takes quite a while, but you
 will only need to do it once.
 ```
-djc:~/play/kea_python$ make build-kea-dev
+djc@laptop:~/play/kea_python$ make build-kea-dev
 ```
 The resulting image is close to 4G as it contains the Kea source, the installed Kea server and
 a complete development environment.
@@ -58,12 +58,12 @@ This image intended to be used for C/C++ development on the `kea_python` hook.  
 interested in working in Python then as soon as the build is complete you immediately build the
 `kea` image.
 ```
-djc:~/play/kea_python$ make build-kea
+djc@laptop:~/play/kea_python$ make build-kea
 ```
 The `kea` image uses `kea-dev` to compile the `kea_python` hook and then discards all of the
 development related files.  The saving is huge:
 ```
-djc:~/play/kea_python$ docker images
+djc@laptop:~/play/kea_python$ docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 kea                 1.6.1               292b89ff6bc8        5 minutes ago       346MB
 kea-dev             1.6.1               bdd11aaa16eb        8 minutes ago       3.55GB
@@ -74,7 +74,7 @@ debian              stretch-slim        2b343cb3b772        5 weeks ago         
 Most of the examples rely on `dhtest` to perform DHCP transactions.  You can build an image
 containing `dhtest` using `make`:
 ```
-djc:~/play/kea_python$ make build-dhtest 
+djc@laptop:~/play/kea_python$ make build-dhtest 
 ```
 
 Use `make run-kea` to run the `kea` image.  This creates a docker network and runs a command
@@ -82,14 +82,14 @@ shell.  Your working directory is mounted as `/workdir` inside the container.
 
 For example, to run the facebook-trick example:
 ```
-djc:~/play/kea_python$ make run-kea
+djc@laptop:~/play/kea_python$ make run-kea
 root@92ddf6f5e9be:/# cd /workdir
 root@92ddf6f5e9be:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/facebook-trick/kea.conf 
 ```
 
 Then in another shell:
 ```
-djc:~/play/kea_python$ make run-dhtest 
+djc@laptop:~/play/kea_python$ make run-dhtest 
 root@375f50ed4699:/# dhtest -i eth0
 ```
 
@@ -97,7 +97,7 @@ root@375f50ed4699:/# dhtest -i eth0
 The `kea-dev` image is used when making changes to the `kea_python.so` hook.  All you need
 to do is the following:
 ```
-djc:~/play/kea_python$ make run-kea-dev 
+djc@laptop:~/play/kea_python$ make run-kea-dev 
 root@a742a1b8b485:/source# cd /workdir
 root@a742a1b8b485:/workdir# make build-hook build-module
 ```

@@ -13,14 +13,14 @@ The `pkt4_send()` callout handles this by replacing the NAK with an ACK.
 
 Start the kea image:
 ```
-djc:~/play/kea_python$ make run-kea
+djc@laptop:~/play/kea_python$ make run-kea
 root@9b06fba64b09:/# cd /workdir/
 root@9b06fba64b09:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/facebook-trick/kea.conf
 ```
 
 Run the dhtest image:
 ```
-djc:~/play/kea_python$ make run-dhtest
+djc@laptop:~/play/kea_python$ make run-dhtest
 root@95d5aa56a590:/# dhtest -i eth0
 DHCP discover sent	 - Client MAC : 02:42:ac:1c:05:02
 DHCP offer received	 - Offered IP : 172.28.5.42
