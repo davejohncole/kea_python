@@ -44,8 +44,8 @@ class RateReport:
     def __init__(self, freq, smooth):
         self.freq = freq
         self.smooth = smooth
-        self.last_report = time.time()
-        self.times = []
+        self.start = self.last_report = time.time()
+        self.times = [self.last_report]
         self.total = 0
 
     def add_event(self):
@@ -61,7 +61,12 @@ class RateReport:
             if len(self.times) >= 2:
                 durn = self.times[-1] - self.times[0]
                 if durn:
-                    print('%s at %.0f/sec' % (self.total, len(self.times) / durn))
+                    elapsed = now - self.start
+                    if elapsed >= 3600:
+                        elapsed = '%02d:%02d:%02d' % (elapsed // 3600, (int(elapsed) % 3600) // 60, int(elapsed) % 60)
+                    else:
+                        elapsed = '%02d:%02d' % (int(elapsed) // 60, int(elapsed) % 60)
+                    print('%s: %s at %.0f/sec' % (elapsed, self.total, len(self.times) / durn))
             self.last_report = now
         self.times.append(now)
 
