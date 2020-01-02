@@ -182,6 +182,26 @@ Option_addOption(OptionObject *self, PyObject *args) {
 }
 
 static PyObject *
+Option_getOption(OptionObject *self, PyObject *args) {
+    unsigned int type;
+
+    if (!PyArg_ParseTuple(args, "H", &type)) {
+        return (0);
+    }
+
+    try {
+        OptionPtr ptr = self->ptr->getOption(type);
+        if (ptr) {
+            return Option_from_handle(ptr);
+        }
+        Py_RETURN_NONE;
+    } catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Option_toText(PyObject *self, PyObject *args) {
     try {
         string addr = ((OptionObject *)self)->ptr->toText();
@@ -217,7 +237,9 @@ static PyMethodDef Option_methods[] = {
     {"setUint32", (PyCFunction) Option_setUint32, METH_VARARGS,
      "Sets content to single uint32 value."},
     {"addOption", (PyCFunction) Option_addOption, METH_VARARGS,
-     "Sets content to single uint32 value."},
+     "Adds a sub-option."},
+    {"getOption", (PyCFunction) Option_getOption, METH_VARARGS,
+     "Returns suboption of specific type."},
     {"toText", (PyCFunction) Option_toText, METH_NOARGS,
      "Returns string representation of the option."},
     {0}  // Sentinel

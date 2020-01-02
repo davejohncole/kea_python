@@ -96,6 +96,24 @@ class TestOption_getUint32(utils.BaseTestCase):
         self.assertEqual(b'\x01\x02\x03\x04', o.getBytes())
 
 
+class TestOption_addOption(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42)
+        p = kea.Option(2).setUint8(0xef)
+        self.assertIs(o, o.addOption(p))
+
+
+class TestOption_getOption(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42).addOption(kea.Option(2).setUint8(0xef))
+        p = o.getOption(2)
+        self.assertIsInstance(p, kea.Option)
+        self.assertEqual(2, p.getType())
+        self.assertEqual(0xef, p.getUint8())
+
+
 class TestOption_toText(utils.BaseTestCase):
 
     def test_empty(self):

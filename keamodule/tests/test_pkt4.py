@@ -68,7 +68,7 @@ class TestPkt4_setRemoteAddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
-        self.assertIsNone(p.setRemoteAddr('1.2.3.4'))
+        self.assertIs(p, p.setRemoteAddr('1.2.3.4'))
         self.assertEqual('1.2.3.4', p.getRemoteAddr())
 
 
@@ -83,7 +83,7 @@ class TestPkt4_setLocalAddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
-        self.assertIsNone(p.setLocalAddr('1.2.3.4'))
+        self.assertIs(p, p.setLocalAddr('1.2.3.4'))
         self.assertEqual('1.2.3.4', p.getLocalAddr())
 
 
@@ -98,7 +98,7 @@ class TestPkt4_setYiaddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
-        self.assertIsNone(p.setYiaddr('1.2.3.4'))
+        self.assertIs(p, p.setYiaddr('1.2.3.4'))
         self.assertEqual('1.2.3.4', p.getYiaddr())
 
 
@@ -113,7 +113,7 @@ class TestPkt4_setHWAddr(utils.BaseTestCase):
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
-        self.assertIsNone(p.setHWAddr('01:02:03:04:05:06'))
+        self.assertIs(p, p.setHWAddr('01:02:03:04:05:06'))
         self.assertEqual('01:02:03:04:05:06', p.getHWAddr())
 
 
@@ -129,13 +129,13 @@ class TestPkt4_addOption(utils.BaseTestCase):
     def test_empty_option_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         o = kea.Option(25)
-        self.assertIsNone(p.addOption(o))
+        self.assertIs(p, p.addOption(o))
         self.assertEqual(2, o.use_count)
 
     def test_bytes_option_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         o = kea.Option(25)
-        self.assertIsNone(p.addOption(o))
+        self.assertIs(p, p.addOption(o))
         self.assertEqual(2, o.use_count)
 
 
@@ -146,6 +146,18 @@ class TestPkt4_getOption(utils.BaseTestCase):
         o = p.getOption(kea.DHO_DHCP_MESSAGE_TYPE)
         self.assertIsInstance(o, kea.Option)
         self.assertEqual(bytes([kea.DHCPREQUEST]), o.getBytes())
+
+
+class TestPkt4_addOption(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        o = kea.Option(kea.DHO_DHCP_AGENT_OPTIONS)
+        self.assertEqual(1, o.use_count)
+        self.assertIs(p, p.addOption(o))
+        self.assertEqual(2, o.use_count)
+        n = p.getOption(kea.DHO_DHCP_AGENT_OPTIONS)
+        self.assertEqual(kea.DHO_DHCP_AGENT_OPTIONS, n.getType())
 
 
 class TestPkt4_toText(utils.BaseTestCase):

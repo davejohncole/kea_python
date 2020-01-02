@@ -28,7 +28,8 @@ Pkt4_setType(PyObject *self, PyObject *args) {
 
     try {
         ((Pkt4Object *)self)->ptr->setType(type);
-        Py_RETURN_NONE;
+        Py_INCREF(self);
+        return (self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -58,7 +59,8 @@ Pkt4_setLocalAddr(PyObject *self, PyObject *args) {
 
     try {
         ((Pkt4Object *)self)->ptr->setLocalAddr(isc::asiolink::IOAddress(string(addr)));
-        Py_RETURN_NONE;
+        Py_INCREF(self);
+        return (self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -88,7 +90,8 @@ Pkt4_setRemoteAddr(PyObject *self, PyObject *args) {
 
     try {
         ((Pkt4Object *)self)->ptr->setRemoteAddr(isc::asiolink::IOAddress(string(addr)));
-        Py_RETURN_NONE;
+        Py_INCREF(self);
+        return (self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -118,7 +121,8 @@ Pkt4_setYiaddr(PyObject *self, PyObject *args) {
 
     try {
         ((Pkt4Object *)self)->ptr->setYiaddr(isc::asiolink::IOAddress(string(addr)));
-        Py_RETURN_NONE;
+        Py_INCREF(self);
+        return (self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -149,7 +153,8 @@ Pkt4_setHWAddr(PyObject *self, PyObject *args) {
     try {
         HWAddr hw = HWAddr::fromText(addr);
         ((Pkt4Object *)self)->ptr->setHWAddr(HWAddrPtr(new HWAddr(hw)));
-        Py_RETURN_NONE;
+        Py_INCREF(self);
+        return (self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -185,7 +190,8 @@ Pkt4_addOption(PyObject *self, PyObject *args) {
 
     try {
         ((Pkt4Object *)self)->ptr->addOption(((OptionObject *)opt)->ptr);
-        Py_RETURN_NONE;
+        Py_INCREF(self);
+        return (self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -230,7 +236,8 @@ static PyObject *
 Pkt4_pack(PyObject *self, PyObject *args) {
     try {
         ((Pkt4Object *)self)->ptr->pack();
-        Py_RETURN_NONE;
+        Py_INCREF(self);
+        return (self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
