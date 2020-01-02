@@ -1,4 +1,5 @@
 import unittest
+import codecs
 
 import kea
 import utils
@@ -112,6 +113,15 @@ class TestOption_getOption(utils.BaseTestCase):
         self.assertIsInstance(p, kea.Option)
         self.assertEqual(2, p.getType())
         self.assertEqual(0xef, p.getUint8())
+
+
+class TestOption_pack(utils.BaseTestCase):
+
+    def test_ok(self):
+        o = kea.Option(42).addOption(kea.Option(2).setUint8(0xef))
+        wire = o.pack()
+        self.assertIsInstance(wire, bytes)
+        self.assertEqual(b'2a030201ef', codecs.encode(wire, 'hex'))
 
 
 class TestOption_toText(utils.BaseTestCase):

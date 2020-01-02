@@ -3,6 +3,7 @@
 using namespace std;
 using namespace isc::hooks;
 using namespace isc::dhcp;
+using namespace isc::util;
 
 extern "C" {
 
@@ -202,6 +203,19 @@ Option_getOption(OptionObject *self, PyObject *args) {
 }
 
 static PyObject *
+Option_pack(PyObject *self, PyObject *args) {
+    try {
+        OutputBuffer buf(64);
+        ((OptionObject *)self)->ptr->pack(buf);
+        return (PyBytes_FromStringAndSize((char *)buf.getData(), buf.getLength()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Option_toText(PyObject *self, PyObject *args) {
     try {
         string addr = ((OptionObject *)self)->ptr->toText();
@@ -240,6 +254,8 @@ static PyMethodDef Option_methods[] = {
      "Adds a sub-option."},
     {"getOption", (PyCFunction) Option_getOption, METH_VARARGS,
      "Returns suboption of specific type."},
+    {"pack", (PyCFunction) Option_pack, METH_NOARGS,
+     "Return option in wire-format."},
     {"toText", (PyCFunction) Option_toText, METH_NOARGS,
      "Returns string representation of the option."},
     {0}  // Sentinel
