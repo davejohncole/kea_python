@@ -16,6 +16,9 @@ In another shell start bash in the kea container:
 djc:~/play/kea_python$ docker exec -it kea bash
 root@e55a47190d9c:/# while true; do curl -s http://localhost:9100/ | grep ^dhcp && echo; sleep 0.2; done
 ```
+This will force the Python hook code to execute the prometheus client background thread every 0.2
+seconds.  Doing this at the same time as performing a DHCP stress test is a nice way to see that you
+can execute Python threads in Kea.
 
 Now the dhtest image:
 ```
@@ -48,3 +51,11 @@ total 10000 at 715/sec with 0 errors
 As soon as you start the stress test you should start to see output from the `curl` commands.  You do not
 see any output initially because the metrics defined in the Python hook have labels.  The time-series for
 each metric cannot be created until a label value is defined.
+
+The output from the `curl | grep` should look something like:
+```
+dhcp4_pkt_send_total{type="offer"} 21182.0
+dhcp4_pkt_send_total{type="ack"} 21182.0
+dhcp4_pkt_receive_total{type="request"} 21182.0
+dhcp4_pkt_receive_total{type="discover"} 21182.0
+```
