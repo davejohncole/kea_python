@@ -3,6 +3,7 @@
 using namespace std;
 using namespace isc::hooks;
 using namespace isc::dhcp;
+using namespace isc::asiolink;
 
 extern "C" {
 
@@ -58,7 +59,7 @@ Pkt4_setLocalAddr(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->setLocalAddr(isc::asiolink::IOAddress(string(addr)));
+        ((Pkt4Object *)self)->ptr->setLocalAddr(IOAddress(string(addr)));
         Py_INCREF(self);
         return (self);
     }
@@ -89,7 +90,7 @@ Pkt4_setRemoteAddr(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->setRemoteAddr(isc::asiolink::IOAddress(string(addr)));
+        ((Pkt4Object *)self)->ptr->setRemoteAddr(IOAddress(string(addr)));
         Py_INCREF(self);
         return (self);
     }
@@ -120,7 +121,7 @@ Pkt4_setYiaddr(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->setYiaddr(isc::asiolink::IOAddress(string(addr)));
+        ((Pkt4Object *)self)->ptr->setYiaddr(IOAddress(string(addr)));
         Py_INCREF(self);
         return (self);
     }

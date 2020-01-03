@@ -42,22 +42,20 @@ to_string(PyObject *object) {
 }
 
 int
-log_python_traceback() {
+format_python_traceback(PyObject *exc_type, PyObject *exc_value, PyObject *exc_traceback, string &traceback) {
     // import traceback
     // exc_type, exc_value, exc_traceback = sys.exc_info()
     // return ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
-    PyObject *exc_type, *exc_value, *exc_traceback;
     PyObject *format_exception = 0;
     PyObject *line_list = 0;
     PyObject *empty_string = 0;
     PyObject *formatted_error = 0;
     int res = 1;
 
-    PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
     PyErr_NormalizeException(&exc_type, &exc_value, &exc_traceback);
 
     if (!exc_traceback || !traceback_module) {
-        log_error(string(PyExceptionClass_Name(exc_type)) + ": " + to_string(exc_value));
+        traceback = string(PyExceptionClass_Name(exc_type)) + ": " + to_string(exc_value);
         res = 0;
         goto error;
     }
@@ -82,7 +80,7 @@ log_python_traceback() {
         log_error("''.join(line_list) failed");
         goto error;
     }
-    log_error(PyUnicode_AsUTF8(formatted_error));
+    traceback = string(PyUnicode_AsUTF8(formatted_error));
     res = 0;
 
 error:
@@ -97,6 +95,20 @@ error:
     Py_XDECREF(exc_traceback);
 
     return (res);
+}
+
+int
+log_python_traceback() {
+    PyObject *exc_type, *exc_value, *exc_traceback;
+    string traceback;
+
+    PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+    if (!format_python_traceback(exc_type, exc_value, exc_traceback, traceback)) {
+        log_error(traceback);
+        return (0);
+    }
+
+    return (1);
 }
 
 }

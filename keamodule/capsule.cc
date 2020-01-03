@@ -97,6 +97,34 @@ Logger_fatal(PyObject *self, PyObject *args) {
     Py_RETURN_NONE;
 }
 
+static PyObject *
+Logger_exception(PyObject *self, PyObject *args) {
+    char *msg;
+
+    if (!PyArg_ParseTuple(args, "s", &msg)) {
+        return (0);
+    }
+    PyObject *exc_type, *exc_value, *exc_traceback;
+    string traceback;
+    PyErr_GetExcInfo(&exc_type, &exc_value, &exc_traceback);
+    if (!format_python_traceback(exc_type, exc_value, exc_traceback, traceback)) {
+        if (strlen(msg) == 0) {
+            LOG_ERROR(*kea_logger, *kea_message_id).arg(traceback);
+        }
+        else {
+            LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg) + "\n" + traceback);
+        }
+    }
+    else {
+        LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
+    }
+    Py_XDECREF(exc_type);
+    Py_XDECREF(exc_value);
+    Py_XDECREF(exc_traceback);
+
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef Logger_methods[] = {
     {"debug", (PyCFunction) Logger_debug, METH_VARARGS,
      "Log a debug message to the kea logger"},
@@ -108,6 +136,8 @@ static PyMethodDef Logger_methods[] = {
      "Log an error message to the kea logger."},
     {"fatal", (PyCFunction)(void(*)(void))Logger_fatal, METH_VARARGS,
      "Log a fatal message to the kea logger."},
+    {"exception", (PyCFunction)(void(*)(void))Logger_exception, METH_VARARGS,
+     "Log an error and traceback to the kea logger."},
     {0}  // Sentinel
 };
 

@@ -34,7 +34,8 @@ PyInit_kea(void) {
         || Lease4_define()
         || Pkt4_define()
         || Option_define()
-        || SrvConfig_define()) {
+        || SrvConfig_define()
+        || LeaseMgr_define()) {
         Py_DECREF(kea_module);
         return (0);
     }

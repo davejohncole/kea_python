@@ -5,6 +5,7 @@
 #include <dhcpsrv/lease.h>
 #include <dhcp/pkt4.h>
 #include <dhcpsrv/cfgmgr.h>
+#include <dhcpsrv/lease_mgr.h>
 
 extern "C" {
 
@@ -17,6 +18,7 @@ extern PyObject *kea_module;
 // errors.cc
 extern int Errors_initialize();
 extern int Errors_finalize();
+extern int format_python_traceback(PyObject *exc_type, PyObject *exc_value, PyObject *exc_traceback, std::string &traceback);
 extern int log_python_traceback();
 
 // capsule.cc
@@ -146,5 +148,16 @@ typedef struct {
 #define SrvConfig_Check(op) (Py_TYPE(op) == &SrvConfigType)
 extern PyTypeObject SrvConfigType;
 extern int SrvConfig_define();
+
+// lease_mgr.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::LeaseMgr *mgr;
+} LeaseMgrObject;
+
+#define LeaseMgr_Check(op) (Py_TYPE(op) == &LeaseMgrType)
+extern PyTypeObject LeaseMgrType;
+extern int LeaseMgr_define();
 
 }

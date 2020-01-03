@@ -3,10 +3,25 @@
 using namespace std;
 using namespace isc::hooks;
 using namespace isc::dhcp;
+using namespace isc::data;
 
 extern "C" {
 
+static PyObject *
+Lease4_toElement(Lease4Object *self, PyObject *args) {
+    try {
+        ElementPtr ptr = self->ptr->toElement();
+        return (element_to_object(ptr));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Lease4_methods[] = {
+    {"toElement", (PyCFunction) Lease4_toElement, METH_NOARGS,
+     "Return the JSON representation of a lease."},
     {0}  // Sentinel
 };
 
