@@ -8,6 +8,30 @@ using namespace isc::asiolink;
 extern "C" {
 
 static PyObject *
+lease_list_from_collection(Lease4Collection &leases) {
+    PyObject *list = PyList_New(0);
+    if (!list) {
+        return (0);
+    }
+    try {
+        for (auto lease : leases) {
+            PyObject *obj = Lease4_from_handle(lease);
+            if (!obj || PyList_Append(list, obj) < 0) {
+                Py_DECREF(list);
+                return (0);
+            }
+        }
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        Py_DECREF(list);
+        return (0);
+    }
+
+    return (list);
+}
+
+static PyObject *
 LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
     static const char *kwlist[] = {"addr", "hwaddr", "client_id", "subnet_id", NULL};
     char *addr = 0;
@@ -26,29 +50,38 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     try {
-        // Lease4Ptr getLease4(const IOAddress &addr)
-        // Lease4Ptr getLease4(const HWAddr &hwaddr, SubnetID subnet_id)
-        // Lease4Ptr getLease4(const ClientId &clientid, SubnetID subnet_id)
-        // Lease4Ptr getLease4(const ClientId &client_id, const HWAddr &hwaddr, SubnetID subnet_id)
-        // TODO
-        // Lease4Collection getLease4(const ClientId &clientid)
-        // Lease4Collection getLease4(const HWAddr &hwaddr)
         Lease4Ptr ptr;
         if (addr != 0 && !hwaddr && !client_id && !have_subnet_id) {
+            // Lease4Ptr getLease4(const IOAddress &addr)
             ptr = self->mgr->getLease4(IOAddress(string(addr)));
         }
         else if (!addr && hwaddr != 0 && !client_id && have_subnet_id) {
+            // Lease4Ptr getLease4(const HWAddr &hwaddr, SubnetID subnet_id)
             HWAddr hw = HWAddr::fromText(hwaddr);
             ptr = self->mgr->getLease4(hw, subnet_id);
         }
         else if (!addr && !hwaddr && client_id != 0 && have_subnet_id) {
+            // Lease4Ptr getLease4(const ClientId &clientid, SubnetID subnet_id)
             ClientIdPtr clientid_ptr = ClientId::fromText(client_id);
             ptr = self->mgr->getLease4(*clientid_ptr, subnet_id);
         }
         else if (!addr && hwaddr != 0 && client_id != 0 && have_subnet_id) {
+            // Lease4Ptr getLease4(const ClientId &client_id, const HWAddr &hwaddr, SubnetID subnet_id)
             ClientIdPtr clientid_ptr = ClientId::fromText(client_id);
             HWAddr hw = HWAddr::fromText(hwaddr);
             ptr = self->mgr->getLease4(*clientid_ptr, hw, subnet_id);
+        }
+        else if (!addr && hwaddr != 0 && !client_id && !have_subnet_id) {
+            // Lease4Collection getLease4(const HWAddr &hwaddr)
+            HWAddr hw = HWAddr::fromText(hwaddr);
+            Lease4Collection leases = self->mgr->getLease4(hw);
+            return (lease_list_from_collection(leases));
+        }
+        else if (!addr && !hwaddr && client_id != 0 && !have_subnet_id) {
+            // Lease4Collection getLease4(const ClientId &clientid)
+            ClientIdPtr clientid_ptr = ClientId::fromText(client_id);
+            Lease4Collection leases = self->mgr->getLease4(*clientid_ptr);
+            return (lease_list_from_collection(leases));
         }
         else {
             PyErr_SetString(PyExc_TypeError, "Invalid argument combination");
@@ -98,50 +131,58 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
         Py_DECREF(tmp);
     }
 
-    PyObject *list = PyList_New(0);
-    if (!list) {
-        return (0);
-    }
     try {
-        // Lease4Collection getLeases4(SubnetID subnet_id)
-        // Lease4Collection getLeases4(const std::string &hostname)
-        // Lease4Collection getLeases4()
-        // Lease4Collection getLeases4(const IOAddress &lower_bound_address, const LeasePageSize &page_size)
         Lease4Collection leases;
         if (have_subnet_id && !hostname && !lower_bound_address && !have_page_size) {
+            // Lease4Collection getLeases4(SubnetID subnet_id)
             leases = self->mgr->getLeases4((SubnetID) subnet_id);
         }
 #if HAVE_GETLEASES4_HOSTNAME
         else if (!have_subnet_id && hostname != 0 && !lower_bound_address && !have_page_size) {
+            // Lease4Collection getLeases4(const std::string &hostname)
             leases = self->mgr->getLeases4(string(hostname));
         }
 #endif
         else if (!have_subnet_id && !hostname && !lower_bound_address && !have_page_size) {
+            // Lease4Collection getLeases4()
             leases = self->mgr->getLeases4();
         }
         else if (!have_subnet_id && !hostname && lower_bound_address != 0 && have_page_size) {
+            // Lease4Collection getLeases4(const IOAddress &lower_bound_address, const LeasePageSize &page_size)
             leases = self->mgr->getLeases4(IOAddress(string(lower_bound_address)), LeasePageSize(page_size));
         }
         else {
             PyErr_SetString(PyExc_TypeError, "Invalid argument combination");
-            Py_DECREF(list);
             return (0);
         }
-        for (auto lease : leases) {
-            PyObject *obj = Lease4_from_handle(lease);
-            if (!obj || PyList_Append(list, obj) < 0) {
-                Py_DECREF(list);
-                return (0);
-            }
-        }
+
+        return (lease_list_from_collection(leases));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
-        Py_DECREF(list);
+        return (0);
+    }
+}
+
+static PyObject *
+LeaseMgr_deleteLease(LeaseMgrObject *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
         return (0);
     }
 
-    return (list);
+    try {
+        bool result = self->mgr->deleteLease(IOAddress(string(addr)));
+        if (result) {
+            Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
 }
 
 static PyMethodDef LeaseMgr_methods[] = {
@@ -149,6 +190,8 @@ static PyMethodDef LeaseMgr_methods[] = {
      "Returns an IPv4 lease for specified IPv4 address."},
     {"getLeases4", (PyCFunction) LeaseMgr_getLeases4, METH_VARARGS | METH_KEYWORDS,
      "Returns all IPv4 leases for the particular subnet identifier."},
+    {"deleteLease", (PyCFunction) LeaseMgr_deleteLease, METH_VARARGS,
+     "Deletes a lease."},
     {0}  // Sentinel
 };
 
