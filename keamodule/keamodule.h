@@ -139,6 +139,15 @@ extern PyTypeObject OptionType;
 extern PyObject *Option_from_handle(isc::dhcp::OptionPtr &ptr);
 extern int Option_define();
 
+// cfg_mgr.cc
+typedef struct {
+    PyObject_HEAD
+} CfgMgrObject;
+
+#define CfgMgr_Check(op) (Py_TYPE(op) == &CfgMgrType)
+extern PyTypeObject CfgMgrType;
+extern int CfgMgr_define();
+
 // srv_config.cc
 typedef struct {
     PyObject_HEAD
@@ -148,6 +157,7 @@ typedef struct {
 
 #define SrvConfig_Check(op) (Py_TYPE(op) == &SrvConfigType)
 extern PyTypeObject SrvConfigType;
+extern PyObject *SrvConfig_from_handle(isc::dhcp::SrvConfigPtr &ptr);
 extern int SrvConfig_define();
 
 // lease_mgr.cc

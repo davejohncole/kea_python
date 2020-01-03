@@ -1,17 +1,16 @@
 #include "keamodule.h"
+#include <dhcpsrv/cfgmgr.h>
 
 using namespace std;
-using namespace isc::hooks;
 using namespace isc::dhcp;
-using namespace isc::data;
 
 extern "C" {
 
 static PyObject *
-SrvConfig_toElement(SrvConfigObject *self, PyObject *args) {
+CfgMgr_getCurrentCfg(CfgMgrObject *self, PyObject *args) {
     try {
-        ElementPtr ptr = self->ptr->toElement();
-        return (element_to_object(ptr));
+        SrvConfigPtr ptr = CfgMgr::instance().getCurrentCfg();
+        return (SrvConfig_from_handle(ptr));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -19,44 +18,55 @@ SrvConfig_toElement(SrvConfigObject *self, PyObject *args) {
     }
 }
 
-static PyMethodDef SrvConfig_methods[] = {
-    {"toElement", (PyCFunction) SrvConfig_toElement, METH_NOARGS,
-     "Unparse configuration object."},
-    {0}  // Sentinel
-};
-
 static PyObject *
-SrvConfig_use_count(OptionObject *self, void *closure) {
-    return (PyLong_FromLong(self->ptr.use_count()));
+CfgMgr_getStagingCfg(CfgMgrObject *self, PyObject *args) {
+    try {
+        SrvConfigPtr ptr = CfgMgr::instance().getStagingCfg();
+        return (SrvConfig_from_handle(ptr));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
 }
 
-static PyGetSetDef SrvConfig_getsetters[] = {
-    {(char *)"use_count", (getter) SrvConfig_use_count, (setter) 0, (char *)"shared_ptr use count", 0},
+static PyMethodDef CfgMgr_methods[] = {
+    {"getCurrentCfg", (PyCFunction) CfgMgr_getCurrentCfg, METH_NOARGS,
+     "Returns the current configuration."},
+    {"getStagingCfg", (PyCFunction) CfgMgr_getStagingCfg, METH_NOARGS,
+     "Returns the staging configuration."},
     {0}  // Sentinel
 };
 
 static void
-SrvConfig_dealloc(SrvConfigObject *self) {
-    self->ptr.reset();
+CfgMgr_dealloc(CfgMgrObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
-static PyObject *
-SrvConfig_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    SrvConfigObject *self;
-    self = (SrvConfigObject *) type->tp_alloc(type, 0);
-    if (self) {
-        self->ptr.reset();
+static int
+CfgMgr_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
+    if (kwds != 0) {
+        PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
+        return (0);
     }
-    return ((PyObject *) self);
+    if (!PyArg_ParseTuple(args, "")) {
+        return (-1);
+    }
+
+    return (0);
 }
 
-PyTypeObject SrvConfigType = {
+static PyObject *
+CfgMgr_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    return (type->tp_alloc(type, 0));
+}
+
+PyTypeObject CfgMgrType = {
     PyObject_HEAD_INIT(0)
-    "kea.SrvConfig",                            // tp_name
-    sizeof(SrvConfigObject),                    // tp_basicsize
+    "kea.CfgMgr",                               // tp_name
+    sizeof(CfgMgrObject),                       // tp_basicsize
     0,                                          // tp_itemsize
-    (destructor) SrvConfig_dealloc,             // tp_dealloc
+    (destructor) CfgMgr_dealloc,                // tp_dealloc
     0,                                          // tp_vectorcall_offset
     0,                                          // tp_getattr
     0,                                          // tp_setattr
@@ -72,44 +82,34 @@ PyTypeObject SrvConfigType = {
     0,                                          // tp_setattro
     0,                                          // tp_as_buffer
     Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server SrvConfig",                     // tp_doc
+    "Kea server CfgMgr",                        // tp_doc
     0,                                          // tp_traverse
     0,                                          // tp_clear
     0,                                          // tp_richcompare
     0,                                          // tp_weaklistoffset
     0,                                          // tp_iter
     0,                                          // tp_iternext
-    SrvConfig_methods,                          // tp_methods
+    CfgMgr_methods,                             // tp_methods
     0,                                          // tp_members
-    SrvConfig_getsetters,                       // tp_getset
+    0,                                          // tp_getset
     0,                                          // tp_base
     0,                                          // tp_dict
     0,                                          // tp_descr_get
     0,                                          // tp_descr_set
     0,                                          // tp_dictoffset
-    0,                                          // tp_init
+    (initproc) CfgMgr_init,                     // tp_init
     PyType_GenericAlloc,                        // tp_alloc
-    SrvConfig_new                               // tp_new
+    CfgMgr_new                                  // tp_new
 };
 
-PyObject *
-SrvConfig_from_handle(SrvConfigPtr &ptr) {
-    SrvConfigObject *self = PyObject_New(SrvConfigObject, &SrvConfigType);
-    if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
-        self->ptr = ptr;
-    }
-    return (PyObject *)self;
-}
-
 int
-SrvConfig_define() {
-    if (PyType_Ready(&SrvConfigType) < 0) {
+CfgMgr_define() {
+    if (PyType_Ready(&CfgMgrType) < 0) {
         return (1);
     }
-    Py_INCREF(&SrvConfigType);
-    if (PyModule_AddObject(kea_module, "SrvConfig", (PyObject *) &SrvConfigType) < 0) {
-        Py_DECREF(&SrvConfigType);
+    Py_INCREF(&CfgMgrType);
+    if (PyModule_AddObject(kea_module, "CfgMgr", (PyObject *) &CfgMgrType) < 0) {
+        Py_DECREF(&CfgMgrType);
         return (1);
     }
 

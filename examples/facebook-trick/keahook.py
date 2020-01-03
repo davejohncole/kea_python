@@ -25,7 +25,7 @@ class HostInfo:
 
 def load(handle):
     global config
-    config = Config(SrvConfig('staging').toElement())
+    config = Config(CfgMgr().getStagingCfg().toElement())
     return 0
 
 def pkt4_receive(handle):

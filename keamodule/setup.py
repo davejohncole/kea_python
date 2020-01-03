@@ -17,6 +17,7 @@ def calc_macros():
 kea = Extension('kea',
                 define_macros=calc_macros(),
                 sources=['kea.cc',
+                         'cfg_mgr.cc',
                          'lease_mgr.cc',
                          'errors.cc',
                          'capsule.cc',
