@@ -9,9 +9,9 @@ using namespace isc::data;
 extern "C" {
 
 static PyObject *
-SrvConfig_toElement(PyObject *self, PyObject *args) {
+SrvConfig_toElement(SrvConfigObject *self, PyObject *args) {
     try {
-        ElementPtr ptr = ((SrvConfigObject *)self)->ptr->toElement();
+        ElementPtr ptr = self->ptr->toElement();
         return (element_to_object(ptr));
     }
     catch (const exception &e) {

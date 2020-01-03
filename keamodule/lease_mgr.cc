@@ -58,9 +58,41 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
     }
 }
 
+static PyObject *
+LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args) {
+    unsigned long subnet_id;
+
+    if (!PyArg_ParseTuple(args, "k", &subnet_id)) {
+        return (0);
+    }
+
+    PyObject *list = PyList_New(0);
+    if (!list) {
+        return (0);
+    }
+    try {
+        Lease4Collection leases = self->mgr->getLeases4(subnet_id);
+        for (auto lease : leases) {
+            PyObject *obj = Lease4_from_handle(lease);
+            if (!obj || PyList_Append(list, obj) < 0) {
+                Py_DECREF(list);
+                return (0);
+            }
+        }
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+
+    return (list);
+}
+
 static PyMethodDef LeaseMgr_methods[] = {
     {"getLease4", (PyCFunction) LeaseMgr_getLease4, METH_VARARGS | METH_KEYWORDS,
      "Returns an IPv4 lease for specified IPv4 address."},
+    {"getLeases4", (PyCFunction) LeaseMgr_getLeases4, METH_VARARGS | METH_KEYWORDS,
+     "Returns all IPv4 leases for the particular subnet identifier."},
     {0}  // Sentinel
 };
 

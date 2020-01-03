@@ -77,9 +77,23 @@ def lease4_get(handle):
 
 
 def lease4_get_all(handle):
-    cmd = handle.getArgument('command')
-    handle.setArgument('response', {'result': 0})
-    return 0
+    def get_response(args):
+        lease_mgr = LeaseMgr()
+        if 'subnets' not in args:
+            raise CommandError("'subnets' parameter not specified")
+        subnets = args['subnets']
+        if not isinstance(subnets, list):
+            raise CommandError("'subnets' parameter must be a list")
+        leases = []
+        for subnet_id in subnets:
+            if not isinstance(subnet_id, int):
+                raise CommandError("listed subnet identifiers must be numbers")
+            leases.extend(lease_mgr.getLeases4(subnet_id))
+        return {'result': 0,
+                'text': '%d IPv4 lease(s) found.' % len(leases),
+                'arguments': {'leases': [l.toElement() for l in leases]}}
+
+    return wrap_handler(handle, get_response)
 
 
 def lease4_get_page(handle):

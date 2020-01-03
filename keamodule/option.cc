@@ -203,10 +203,10 @@ Option_getOption(OptionObject *self, PyObject *args) {
 }
 
 static PyObject *
-Option_pack(PyObject *self, PyObject *args) {
+Option_pack(OptionObject *self, PyObject *args) {
     try {
         OutputBuffer buf(64);
-        ((OptionObject *)self)->ptr->pack(buf);
+        self->ptr->pack(buf);
         return (PyBytes_FromStringAndSize((char *)buf.getData(), buf.getLength()));
     }
     catch (const exception &e) {
@@ -216,9 +216,9 @@ Option_pack(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Option_toText(PyObject *self, PyObject *args) {
+Option_toText(OptionObject *self, PyObject *args) {
     try {
-        string addr = ((OptionObject *)self)->ptr->toText();
+        string addr = self->ptr->toText();
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {

@@ -8,9 +8,9 @@ using namespace isc::asiolink;
 extern "C" {
 
 static PyObject *
-Pkt4_getType(PyObject *self, PyObject *args) {
+Pkt4_getType(Pkt4Object *self, PyObject *args) {
     try {
-        uint8_t type = ((Pkt4Object *)self)->ptr->getType();
+        uint8_t type = self->ptr->getType();
         return (PyLong_FromLong(type));
     }
     catch (const exception &e) {
@@ -20,7 +20,7 @@ Pkt4_getType(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_setType(PyObject *self, PyObject *args) {
+Pkt4_setType(Pkt4Object *self, PyObject *args) {
     unsigned char type;
 
     if (!PyArg_ParseTuple(args, "b", &type)) {
@@ -28,9 +28,9 @@ Pkt4_setType(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->setType(type);
+        self->ptr->setType(type);
         Py_INCREF(self);
-        return (self);
+        return ((PyObject *)self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -39,9 +39,9 @@ Pkt4_setType(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_getLocalAddr(PyObject *self, PyObject *args) {
+Pkt4_getLocalAddr(Pkt4Object *self, PyObject *args) {
     try {
-        string addr = ((Pkt4Object *)self)->ptr->getLocalAddr().toText();
+        string addr = self->ptr->getLocalAddr().toText();
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -51,7 +51,7 @@ Pkt4_getLocalAddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_setLocalAddr(PyObject *self, PyObject *args) {
+Pkt4_setLocalAddr(Pkt4Object *self, PyObject *args) {
     char *addr;
 
     if (!PyArg_ParseTuple(args, "s", &addr)) {
@@ -59,9 +59,9 @@ Pkt4_setLocalAddr(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->setLocalAddr(IOAddress(string(addr)));
+        self->ptr->setLocalAddr(IOAddress(string(addr)));
         Py_INCREF(self);
-        return (self);
+        return ((PyObject *)self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -70,9 +70,9 @@ Pkt4_setLocalAddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_getRemoteAddr(PyObject *self, PyObject *args) {
+Pkt4_getRemoteAddr(Pkt4Object *self, PyObject *args) {
     try {
-        string addr = ((Pkt4Object *)self)->ptr->getRemoteAddr().toText();
+        string addr = self->ptr->getRemoteAddr().toText();
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -82,7 +82,7 @@ Pkt4_getRemoteAddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_setRemoteAddr(PyObject *self, PyObject *args) {
+Pkt4_setRemoteAddr(Pkt4Object *self, PyObject *args) {
     char *addr;
 
     if (!PyArg_ParseTuple(args, "s", &addr)) {
@@ -90,9 +90,9 @@ Pkt4_setRemoteAddr(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->setRemoteAddr(IOAddress(string(addr)));
+        self->ptr->setRemoteAddr(IOAddress(string(addr)));
         Py_INCREF(self);
-        return (self);
+        return ((PyObject *)self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -101,9 +101,9 @@ Pkt4_setRemoteAddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_getYiaddr(PyObject *self, PyObject *args) {
+Pkt4_getYiaddr(Pkt4Object *self, PyObject *args) {
     try {
-        string addr = ((Pkt4Object *)self)->ptr->getYiaddr().toText();
+        string addr = self->ptr->getYiaddr().toText();
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -113,7 +113,7 @@ Pkt4_getYiaddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_setYiaddr(PyObject *self, PyObject *args) {
+Pkt4_setYiaddr(Pkt4Object *self, PyObject *args) {
     char *addr;
 
     if (!PyArg_ParseTuple(args, "s", &addr)) {
@@ -121,9 +121,9 @@ Pkt4_setYiaddr(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->setYiaddr(IOAddress(string(addr)));
+        self->ptr->setYiaddr(IOAddress(string(addr)));
         Py_INCREF(self);
-        return (self);
+        return ((PyObject *)self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -132,9 +132,9 @@ Pkt4_setYiaddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_getHWAddr(PyObject *self, PyObject *args) {
+Pkt4_getHWAddr(Pkt4Object *self, PyObject *args) {
     try {
-        string hwaddr = ((Pkt4Object *)self)->ptr->getHWAddr()->toText(false);
+        string hwaddr = self->ptr->getHWAddr()->toText(false);
         return (PyUnicode_FromString(hwaddr.c_str()));
     }
     catch (const exception &e) {
@@ -144,7 +144,7 @@ Pkt4_getHWAddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_setHWAddr(PyObject *self, PyObject *args) {
+Pkt4_setHWAddr(Pkt4Object *self, PyObject *args) {
     char *addr;
 
     if (!PyArg_ParseTuple(args, "s", &addr)) {
@@ -153,9 +153,9 @@ Pkt4_setHWAddr(PyObject *self, PyObject *args) {
 
     try {
         HWAddr hw = HWAddr::fromText(addr);
-        ((Pkt4Object *)self)->ptr->setHWAddr(HWAddrPtr(new HWAddr(hw)));
+        self->ptr->setHWAddr(HWAddrPtr(new HWAddr(hw)));
         Py_INCREF(self);
-        return (self);
+        return ((PyObject *)self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -164,7 +164,7 @@ Pkt4_setHWAddr(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_delOption(PyObject *self, PyObject *args) {
+Pkt4_delOption(Pkt4Object *self, PyObject *args) {
     unsigned short type;
 
     if (!PyArg_ParseTuple(args, "H", &type)) {
@@ -172,7 +172,7 @@ Pkt4_delOption(PyObject *self, PyObject *args) {
     }
 
     try {
-        bool res = ((Pkt4Object *)self)->ptr->delOption(type);
+        bool res = self->ptr->delOption(type);
         return (PyBool_FromLong(res));
     }
     catch (const exception &e) {
@@ -182,7 +182,7 @@ Pkt4_delOption(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_addOption(PyObject *self, PyObject *args) {
+Pkt4_addOption(Pkt4Object *self, PyObject *args) {
     PyObject *opt;
 
     if (!PyArg_ParseTuple(args, "O!", &OptionType, &opt)) {
@@ -190,9 +190,9 @@ Pkt4_addOption(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((Pkt4Object *)self)->ptr->addOption(((OptionObject *)opt)->ptr);
+        self->ptr->addOption(((OptionObject *)opt)->ptr);
         Py_INCREF(self);
-        return (self);
+        return ((PyObject *)self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -201,7 +201,7 @@ Pkt4_addOption(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_getOption(PyObject *self, PyObject *args) {
+Pkt4_getOption(Pkt4Object *self, PyObject *args) {
     unsigned short type;
 
     if (!PyArg_ParseTuple(args, "H", &type)) {
@@ -209,7 +209,7 @@ Pkt4_getOption(PyObject *self, PyObject *args) {
     }
 
     try {
-        OptionPtr ptr = ((Pkt4Object *)self)->ptr->getOption(type);
+        OptionPtr ptr = self->ptr->getOption(type);
         if (!ptr.get()) {
             Py_RETURN_NONE;
         }
@@ -222,9 +222,9 @@ Pkt4_getOption(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_toText(PyObject *self, PyObject *args) {
+Pkt4_toText(Pkt4Object *self, PyObject *args) {
     try {
-        string addr = ((Pkt4Object *)self)->ptr->toText();
+        string addr = self->ptr->toText();
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -234,11 +234,11 @@ Pkt4_toText(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Pkt4_pack(PyObject *self, PyObject *args) {
+Pkt4_pack(Pkt4Object *self, PyObject *args) {
     try {
-        ((Pkt4Object *)self)->ptr->pack();
+        self->ptr->pack();
         Py_INCREF(self);
-        return (self);
+        return ((PyObject *)self);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());

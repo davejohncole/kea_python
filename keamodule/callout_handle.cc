@@ -8,7 +8,7 @@ using namespace isc::data;
 extern "C" {
 
 static PyObject *
-CalloutHandle_getArgument(PyObject *self, PyObject *args) {
+CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
     char *name;
 
     if (!PyArg_ParseTuple(args, "s", &name)) {
@@ -18,7 +18,7 @@ CalloutHandle_getArgument(PyObject *self, PyObject *args) {
     if (strcmp(name, "lease4") == 0) {
         try {
             Lease4Ptr ptr;
-            ((CalloutHandleObject *)self)->handle->getArgument(name, ptr);
+            self->handle->getArgument(name, ptr);
             return (Lease4_from_handle(ptr));
         }
         catch (const exception &e) {
@@ -30,7 +30,7 @@ CalloutHandle_getArgument(PyObject *self, PyObject *args) {
     if (strcmp(name, "query4") == 0 || strcmp(name, "response4") == 0) {
         try {
             Pkt4Ptr ptr;
-            ((CalloutHandleObject *)self)->handle->getArgument(name, ptr);
+            self->handle->getArgument(name, ptr);
             return (Pkt4_from_handle(ptr));
         }
         catch (const exception &e) {
@@ -42,7 +42,7 @@ CalloutHandle_getArgument(PyObject *self, PyObject *args) {
     if (strcmp(name, "command") == 0) {
         try {
             ConstElementPtr ptr;
-            ((CalloutHandleObject *)self)->handle->getArgument(name, ptr);
+            self->handle->getArgument(name, ptr);
             return (element_to_object(ptr));
         }
         catch (const exception &e) {
@@ -56,7 +56,7 @@ CalloutHandle_getArgument(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-CalloutHandle_setArgument(PyObject *self, PyObject *args) {
+CalloutHandle_setArgument(CalloutHandleObject *self, PyObject *args) {
     char *name;
     PyObject *value;
 
@@ -70,7 +70,7 @@ CalloutHandle_setArgument(PyObject *self, PyObject *args) {
             return (0);
         }
         try {
-            ((CalloutHandleObject *)self)->handle->setArgument(name, ((Lease4Object *)value)->ptr);
+            self->handle->setArgument(name, ((Lease4Object *)value)->ptr);
             Py_RETURN_NONE;
         }
         catch (const exception &e) {
@@ -85,7 +85,7 @@ CalloutHandle_setArgument(PyObject *self, PyObject *args) {
             if (!ptr) {
                 return (0);
             }
-            ((CalloutHandleObject *)self)->handle->setArgument(name, ptr);
+            self->handle->setArgument(name, ptr);
             Py_RETURN_NONE;
         }
         catch (const exception &e) {
