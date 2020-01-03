@@ -1,4 +1,5 @@
 #include <ffi.h>
+#include <config.h>
 #include <hooks/hooks.h>
 #include <hooks/callout_manager.h>
 #include <log/macros.h>

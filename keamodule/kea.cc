@@ -25,7 +25,8 @@ PyInit_kea(void) {
         return (0);
     }
 
-    if (Capsule_define()
+    if (PyModule_AddStringConstant(kea_module, "__version__", VERSION) < 0
+        || Capsule_define()
         || Constants_define()
         || CalloutClosure_define()
         || LibraryHandle_define()
