@@ -185,6 +185,24 @@ LeaseMgr_deleteLease(LeaseMgrObject *self, PyObject *args) {
     }
 }
 
+static PyObject *
+LeaseMgr_wipeLeases4(LeaseMgrObject *self, PyObject *args) {
+    unsigned long subnet_id;
+
+    if (!PyArg_ParseTuple(args, "k", &subnet_id)) {
+        return (0);
+    }
+
+    try {
+        size_t result = self->mgr->wipeLeases4((SubnetID) subnet_id);
+        return (PyLong_FromLong(result));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef LeaseMgr_methods[] = {
     {"getLease4", (PyCFunction) LeaseMgr_getLease4, METH_VARARGS | METH_KEYWORDS,
      "Returns an IPv4 lease for specified IPv4 address."},
@@ -192,6 +210,8 @@ static PyMethodDef LeaseMgr_methods[] = {
      "Returns all IPv4 leases for the particular subnet identifier."},
     {"deleteLease", (PyCFunction) LeaseMgr_deleteLease, METH_VARARGS,
      "Deletes a lease."},
+    {"wipeLeases4", (PyCFunction) LeaseMgr_wipeLeases4, METH_VARARGS,
+     "Virtual method which removes specified leases."},
     {0}  // Sentinel
 };
 
