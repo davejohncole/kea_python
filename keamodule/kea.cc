@@ -37,6 +37,8 @@ PyInit_kea(void) {
         || Option_define()
         || CfgMgr_define()
         || SrvConfig_define()
+        || CfgSubnets4_define()
+        || Subnet4_define()
         || LeaseMgr_define()) {
         Py_DECREF(kea_module);
         return (0);

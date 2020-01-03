@@ -8,7 +8,19 @@ using namespace isc::data;
 extern "C" {
 
 static PyObject *
-SrvConfig_toElement(SrvConfigObject *self, PyObject *args) {
+Subnet4_getID(Subnet4Object *self, PyObject *args) {
+    try {
+        SubnetID subnet_id = self->ptr->getID();
+        return (PyLong_FromLong(subnet_id));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Subnet4_toElement(Subnet4Object *self, PyObject *args) {
     try {
         ElementPtr ptr = self->ptr->toElement();
         return (element_to_object(ptr));
@@ -19,58 +31,46 @@ SrvConfig_toElement(SrvConfigObject *self, PyObject *args) {
     }
 }
 
-static PyObject *
-SrvConfig_getCfgSubnets4(SrvConfigObject *self, PyObject *args) {
-    try {
-        CfgSubnets4Ptr ptr = self->ptr->getCfgSubnets4();
-        return (CfgSubnets4_from_ptr(ptr));
-    }
-    catch (const exception &e) {
-        PyErr_SetString(PyExc_TypeError, e.what());
-        return (0);
-    }
-}
-
-static PyMethodDef SrvConfig_methods[] = {
-    {"toElement", (PyCFunction) SrvConfig_toElement, METH_NOARGS,
+static PyMethodDef Subnet4_methods[] = {
+    {"getID", (PyCFunction) Subnet4_getID, METH_NOARGS,
+     "Return unique ID for subnet."},
+    {"toElement", (PyCFunction) Subnet4_toElement, METH_NOARGS,
      "Unparse configuration object."},
-    {"getCfgSubnets4", (PyCFunction) SrvConfig_getCfgSubnets4, METH_NOARGS,
-     "Returns object holding subnets configuration for DHCPv4."},
     {0}  // Sentinel
 };
 
 static PyObject *
-SrvConfig_use_count(OptionObject *self, void *closure) {
+Subnet4_use_count(OptionObject *self, void *closure) {
     return (PyLong_FromLong(self->ptr.use_count()));
 }
 
-static PyGetSetDef SrvConfig_getsetters[] = {
-    {(char *)"use_count", (getter) SrvConfig_use_count, (setter) 0, (char *)"shared_ptr use count", 0},
+static PyGetSetDef Subnet4_getsetters[] = {
+    {(char *)"use_count", (getter) Subnet4_use_count, (setter) 0, (char *)"shared_ptr use count", 0},
     {0}  // Sentinel
 };
 
 static void
-SrvConfig_dealloc(SrvConfigObject *self) {
+Subnet4_dealloc(Subnet4Object *self) {
     self->ptr.reset();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static PyObject *
-SrvConfig_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    SrvConfigObject *self;
-    self = (SrvConfigObject *) type->tp_alloc(type, 0);
+Subnet4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+    Subnet4Object *self;
+    self = (Subnet4Object *) type->tp_alloc(type, 0);
     if (self) {
         self->ptr.reset();
     }
     return ((PyObject *) self);
 }
 
-PyTypeObject SrvConfigType = {
+PyTypeObject Subnet4Type = {
     PyObject_HEAD_INIT(0)
-    "kea.SrvConfig",                            // tp_name
-    sizeof(SrvConfigObject),                    // tp_basicsize
+    "kea.Subnet4",                              // tp_name
+    sizeof(Subnet4Object),                      // tp_basicsize
     0,                                          // tp_itemsize
-    (destructor) SrvConfig_dealloc,             // tp_dealloc
+    (destructor) Subnet4_dealloc,               // tp_dealloc
     0,                                          // tp_vectorcall_offset
     0,                                          // tp_getattr
     0,                                          // tp_setattr
@@ -86,16 +86,16 @@ PyTypeObject SrvConfigType = {
     0,                                          // tp_setattro
     0,                                          // tp_as_buffer
     Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server SrvConfig",                     // tp_doc
+    "Kea server Subnet4",                       // tp_doc
     0,                                          // tp_traverse
     0,                                          // tp_clear
     0,                                          // tp_richcompare
     0,                                          // tp_weaklistoffset
     0,                                          // tp_iter
     0,                                          // tp_iternext
-    SrvConfig_methods,                          // tp_methods
+    Subnet4_methods,                            // tp_methods
     0,                                          // tp_members
-    SrvConfig_getsetters,                       // tp_getset
+    Subnet4_getsetters,                         // tp_getset
     0,                                          // tp_base
     0,                                          // tp_dict
     0,                                          // tp_descr_get
@@ -103,12 +103,12 @@ PyTypeObject SrvConfigType = {
     0,                                          // tp_dictoffset
     0,                                          // tp_init
     PyType_GenericAlloc,                        // tp_alloc
-    SrvConfig_new                               // tp_new
+    Subnet4_new                                 // tp_new
 };
 
 PyObject *
-SrvConfig_from_ptr(SrvConfigPtr &ptr) {
-    SrvConfigObject *self = PyObject_New(SrvConfigObject, &SrvConfigType);
+Subnet4_from_ptr(Subnet4Ptr &ptr) {
+    Subnet4Object *self = PyObject_New(Subnet4Object, &Subnet4Type);
     if (self) {
         memset(&self->ptr, 0 , sizeof(self->ptr));
         self->ptr = ptr;
@@ -117,13 +117,13 @@ SrvConfig_from_ptr(SrvConfigPtr &ptr) {
 }
 
 int
-SrvConfig_define() {
-    if (PyType_Ready(&SrvConfigType) < 0) {
+Subnet4_define() {
+    if (PyType_Ready(&Subnet4Type) < 0) {
         return (1);
     }
-    Py_INCREF(&SrvConfigType);
-    if (PyModule_AddObject(kea_module, "SrvConfig", (PyObject *) &SrvConfigType) < 0) {
-        Py_DECREF(&SrvConfigType);
+    Py_INCREF(&Subnet4Type);
+    if (PyModule_AddObject(kea_module, "Subnet4", (PyObject *) &Subnet4Type) < 0) {
+        Py_DECREF(&Subnet4Type);
         return (1);
     }
 

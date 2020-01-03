@@ -157,8 +157,20 @@ typedef struct {
 
 #define SrvConfig_Check(op) (Py_TYPE(op) == &SrvConfigType)
 extern PyTypeObject SrvConfigType;
-extern PyObject *SrvConfig_from_handle(isc::dhcp::SrvConfigPtr &ptr);
+extern PyObject *SrvConfig_from_ptr(isc::dhcp::SrvConfigPtr &ptr);
 extern int SrvConfig_define();
+
+// cfg_subnets4.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::CfgSubnets4Ptr ptr;
+} CfgSubnets4Object;
+
+#define CfgSubnets4_Check(op) (Py_TYPE(op) == &CfgSubnets4Type)
+extern PyTypeObject CfgSubnets4Type;
+extern PyObject *CfgSubnets4_from_ptr(isc::dhcp::CfgSubnets4Ptr &ptr);
+extern int CfgSubnets4_define();
 
 // lease_mgr.cc
 typedef struct {
@@ -170,5 +182,17 @@ typedef struct {
 #define LeaseMgr_Check(op) (Py_TYPE(op) == &LeaseMgrType)
 extern PyTypeObject LeaseMgrType;
 extern int LeaseMgr_define();
+
+// subnet4.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::Subnet4Ptr ptr;
+} Subnet4Object;
+
+#define Subnet4_Check(op) (Py_TYPE(op) == &Subnet4Type)
+extern PyTypeObject Subnet4Type;
+extern PyObject *Subnet4_from_ptr(isc::dhcp::Subnet4Ptr &ptr);
+extern int Subnet4_define();
 
 }

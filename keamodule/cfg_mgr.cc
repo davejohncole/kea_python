@@ -10,7 +10,7 @@ static PyObject *
 CfgMgr_getCurrentCfg(CfgMgrObject *self, PyObject *args) {
     try {
         SrvConfigPtr ptr = CfgMgr::instance().getCurrentCfg();
-        return (SrvConfig_from_handle(ptr));
+        return (SrvConfig_from_ptr(ptr));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -22,7 +22,7 @@ static PyObject *
 CfgMgr_getStagingCfg(CfgMgrObject *self, PyObject *args) {
     try {
         SrvConfigPtr ptr = CfgMgr::instance().getStagingCfg();
-        return (SrvConfig_from_handle(ptr));
+        return (SrvConfig_from_ptr(ptr));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());

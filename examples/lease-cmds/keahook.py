@@ -105,7 +105,7 @@ def get_lease4_kwargs(args):
 
 def lease4_add(handle):
     def get_response(args):
-        return {'result': 0'}
+        return {'result': 0}
 
     return wrap_handler(handle, get_response)
 
@@ -202,8 +202,23 @@ def lease4_update(handle):
 
 def lease4_wipe(handle):
     def get_response(args):
-        subnet_id = get_int_arg(args, 'subnet-id', None)
-        return {'result': 0}
+        subnet_id = get_arg(args, 'subnet-id', None)
+        if subnet_id is None:
+            config = kea.CfgMgr().getCurrentCfg()
+            subnet_ids = [s.getID() for s in config.getCfgSubnets4().getAll()]
+        elif not isinstance(subnet_id, int):
+            raise CommandError("'subnet-id' is not integer.")
+        else:
+            subnet_ids = [subnet_id]
+        num = 0
+        lease_mgr = kea.LeaseMgr()
+        for s in subnet_ids:
+            num += lease_mgr.wipeLeases4(s)
+        msg = 'Deleted %d IPv4 lease(s) from subnet(s)' % num
+        if num:
+            msg += ' ' + ' '.join([str(s) for s in subnet_ids])
+        return {'result': 0 if num else 3,
+                'text': msg}
 
     return wrap_handler(handle, get_response)
 
@@ -215,7 +230,7 @@ def load(handle):
     handle.registerCommandCallout('lease4-get-page', lease4_get_page)
     handle.registerCommandCallout('lease4-get-by-hw-address', lease4_get_by_hw_address)
     handle.registerCommandCallout('lease4-get-by-client-id', lease4_get_by_client_id)
-    if kea.__version__ >= '1.7.1'
+    if kea.__version__ >= '1.7.1':
         handle.registerCommandCallout('lease4-get-by-hostname', lease4_get_by_hostname)
     handle.registerCommandCallout('lease4-del', lease4_del)
     handle.registerCommandCallout('lease4-update', lease4_update)
