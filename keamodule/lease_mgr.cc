@@ -14,10 +14,17 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
     char *hwaddr = 0;
     char *client_id = 0;
     unsigned long subnet_id = 0;
+    bool have_subnet_id = false;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|sssk", (char **)kwlist, &addr, &hwaddr, &client_id, &subnet_id)) {
         return (0);
     }
+    PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
+    if (tmp) {
+        have_subnet_id = true;
+        Py_DECREF(tmp);
+    }
+
     try {
         // Lease4Ptr getLease4(const IOAddress &addr)
         // Lease4Ptr getLease4(const HWAddr &hwaddr, SubnetID subnet_id)
@@ -27,18 +34,18 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
         // Lease4Collection getLease4(const ClientId &clientid)
         // Lease4Collection getLease4(const HWAddr &hwaddr)
         Lease4Ptr ptr;
-        if (addr != 0 && !hwaddr && !client_id && !subnet_id) {
+        if (addr != 0 && !hwaddr && !client_id && !have_subnet_id) {
             ptr = self->mgr->getLease4(IOAddress(string(addr)));
         }
-        else if (!addr && hwaddr != 0 && !client_id && subnet_id != 0) {
+        else if (!addr && hwaddr != 0 && !client_id && have_subnet_id) {
             HWAddr hw = HWAddr::fromText(hwaddr);
             ptr = self->mgr->getLease4(hw, subnet_id);
         }
-        else if (!addr && !hwaddr && client_id != 0 && subnet_id != 0) {
+        else if (!addr && !hwaddr && client_id != 0 && have_subnet_id) {
             ClientIdPtr clientid_ptr = ClientId::fromText(client_id);
             ptr = self->mgr->getLease4(*clientid_ptr, subnet_id);
         }
-        else if (!addr && hwaddr != 0 && client_id != 0 && subnet_id != 0) {
+        else if (!addr && hwaddr != 0 && client_id != 0 && have_subnet_id) {
             ClientIdPtr clientid_ptr = ClientId::fromText(client_id);
             HWAddr hw = HWAddr::fromText(hwaddr);
             ptr = self->mgr->getLease4(*clientid_ptr, hw, subnet_id);
@@ -59,11 +66,36 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
 }
 
 static PyObject *
-LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args) {
-    unsigned long subnet_id;
+LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
+#if HAVE_GETLEASES4_HOSTNAME
+    #define KWLIST {"subnet_id", "hostname", "lower_bound_address", "page_size", NULL}
+    #define KWFORMAT "|kssk"
+    #define KWVARS &subnet_id, &hostname, &lower_bound_address, &page_size
+#else
+    #define KWLIST {"subnet_id", "lower_bound_address", "page_size", NULL}
+    #define KWFORMAT "|ksk"
+    #define KWVARS &subnet_id, &lower_bound_address, &page_size
+#endif
+    static const char *kwlist[] = KWLIST;
+    unsigned long subnet_id = 0;
+    char *hostname = 0;
+    char *lower_bound_address = 0;
+    unsigned long page_size = 0;
+    bool have_subnet_id = false;
+    bool have_page_size = false;
 
-    if (!PyArg_ParseTuple(args, "k", &subnet_id)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, KWFORMAT, (char **)kwlist, KWVARS)) {
         return (0);
+    }
+    PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
+    if (tmp) {
+        have_subnet_id = true;
+        Py_DECREF(tmp);
+    }
+    tmp = PyDict_GetItemString(kwargs, "page_size");
+    if (tmp) {
+        have_page_size = true;
+        Py_DECREF(tmp);
     }
 
     PyObject *list = PyList_New(0);
@@ -71,7 +103,30 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args) {
         return (0);
     }
     try {
-        Lease4Collection leases = self->mgr->getLeases4(subnet_id);
+        // Lease4Collection getLeases4(SubnetID subnet_id)
+        // Lease4Collection getLeases4(const std::string &hostname)
+        // Lease4Collection getLeases4()
+        // Lease4Collection getLeases4(const IOAddress &lower_bound_address, const LeasePageSize &page_size)
+        Lease4Collection leases;
+        if (have_subnet_id && !hostname && !lower_bound_address && !have_page_size) {
+            leases = self->mgr->getLeases4((SubnetID) subnet_id);
+        }
+#if HAVE_GETLEASES4_HOSTNAME
+        else if (!have_subnet_id && hostname != 0 && !lower_bound_address && !have_page_size) {
+            leases = self->mgr->getLeases4(string(hostname));
+        }
+#endif
+        else if (!have_subnet_id && !hostname && !lower_bound_address && !have_page_size) {
+            leases = self->mgr->getLeases4();
+        }
+        else if (!have_subnet_id && !hostname && lower_bound_address != 0 && have_page_size) {
+            leases = self->mgr->getLeases4(IOAddress(string(lower_bound_address)), LeasePageSize(page_size));
+        }
+        else {
+            PyErr_SetString(PyExc_TypeError, "Invalid argument combination");
+            Py_DECREF(list);
+            return (0);
+        }
         for (auto lease : leases) {
             PyObject *obj = Lease4_from_handle(lease);
             if (!obj || PyList_Append(list, obj) < 0) {
@@ -82,6 +137,7 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args) {
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
+        Py_DECREF(list);
         return (0);
     }
 

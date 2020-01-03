@@ -1,8 +1,23 @@
+import re
 from distutils.core import setup, Extension
 
 
+def calc_macros():
+    config_h = open('/usr/local/include/kea/config.h').read()
+    m = re.search(r'^#define VERSION "([^"]*)"\n', config_h, re.M)
+    if not m:
+        raise RuntimeError('could not determine kea version')
+    version = m.group(1)
+    macros = []
+    if version >= '1.7.1':
+        macros.append(('HAVE_GETLEASES4_HOSTNAME', None))
+    return macros
+
+
 kea = Extension('kea',
+                define_macros=calc_macros(),
                 sources=['kea.cc',
+                         'lease_mgr.cc',
                          'errors.cc',
                          'capsule.cc',
                          'constants.cc',
@@ -15,8 +30,7 @@ kea = Extension('kea',
                          'lease4.cc',
                          'pkt4.cc',
                          'option.cc',
-                         'srv_config.cc',
-                         'lease_mgr.cc'],
+                         'srv_config.cc'],
                 include_dirs=['/usr/local/include/kea'],
                 libraries=['kea-exceptions',
                            'kea-log',

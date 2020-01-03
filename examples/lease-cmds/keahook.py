@@ -1,6 +1,9 @@
 from kea import *
 
 
+class UNSPECIFIED: pass
+
+
 class CommandError(Exception):
 
     def __init__(self, reason):
@@ -26,6 +29,41 @@ def wrap_handler(handle, get_response):
     return 0
 
 
+def get_arg(args, name, default=UNSPECIFIED):
+    if name not in args:
+        if default is not UNSPECIFIED:
+            return default
+        raise CommandError("'%s' parameter not specified" % name)
+    return args[name]
+
+
+def get_string_arg(args, name, default=UNSPECIFIED, error_msg=None):
+    value = get_arg(args, name, default)
+    if not isinstance(value, str):
+        if error_msg:
+            raise CommandError(error_msg)
+        raise CommandError("'%s' is not a string." % name)
+    return value
+
+
+def get_int_arg(args, name, default=UNSPECIFIED, error_msg=None):
+    value = get_arg(args, name, default)
+    if not isinstance(value, int):
+        if error_msg:
+            raise CommandError(error_msg)
+        raise CommandError("'%s' is not integer." % name)
+    return value
+
+
+def get_list_arg(args, name, default=UNSPECIFIED, error_msg=None):
+    value = get_arg(args, name, default)
+    if not isinstance(value, list):
+        if error_msg:
+            raise CommandError(error_msg)
+        raise CommandError("'%s' is not list." % name)
+    return value
+
+
 def lease4_add(handle):
     cmd = handle.getArgument('command')
     handle.setArgument('response', {'result': 0})
@@ -43,52 +81,39 @@ def lease4_get(handle):
                     'text': 'Lease not found.'}
 
     def get_response(args):
-        lease_mgr = LeaseMgr()
-        if 'ip-address' in args:
-            addr = args['ip-address']
-            if not isinstance(addr, str):
-                raise CommandError("'ip-address' is not a string.")
-            return make_response(lease_mgr.getLease4(addr=addr))
-            
-        if 'subnet-id' not in args:
-            raise CommandError("Mandatory 'subnet-id' parameter missing.")
-        subnet_id = args['subnet-id']
-        if not isinstance(subnet_id, int):
-            raise CommandError("'subnet-id' parameter is not integer.")
+        addr = get_string_arg(args, 'ip-address', None)
+        if addr:
+            return make_response(LeaseMgr().getLease4(addr=addr))
 
-        id_type = args.get('identifier-type')
-        if not isinstance(id_type, str):
-            raise CommandError("No 'ip-address' provided"
-                               " and 'identifier-type' is either missing or not a string.")
+        subnet_id = get_int_arg(args, 'subnet-id')
+        id_type = get_string_arg(args, 'identifier-type', None,
+                                 "No 'ip-address' provided"
+                                 " and 'identifier-type' is either missing or not a string.")
         if id_type not in ('address', 'hw-address', 'client-id'):
             # duid not supported for IPv4
             raise CommandError('Identifier type %s is not supported.' % id_type)
-        ident = args.get('identifier')
-        if not isinstance(ident, str):
-            raise CommandError("No 'ip-address' provided"
+        ident = get_string_arg(args, 'identifier', None,
+                               "No 'ip-address' provided"
                                " and 'identifier' is either missing or not a string.")
 
         if id_type == 'hw-address':
-            return make_response(lease_mgr.getLease4(hwaddr=ident, subnet_id=subnet_id))
+            return make_response(LeaseMgr().getLease4(hwaddr=ident, subnet_id=subnet_id))
         elif id_type == 'client-id':
-            return make_response(lease_mgr.getLease4(client_id=ident, subnet_id=subnet_id))
+            return make_response(LeaseMgr().getLease4(client_id=ident, subnet_id=subnet_id))
 
     return wrap_handler(handle, get_response)
 
 
 def lease4_get_all(handle):
     def get_response(args):
+        subnets = get_list_arg(args, 'subnets')
+
         lease_mgr = LeaseMgr()
-        if 'subnets' not in args:
-            raise CommandError("'subnets' parameter not specified")
-        subnets = args['subnets']
-        if not isinstance(subnets, list):
-            raise CommandError("'subnets' parameter must be a list")
         leases = []
         for subnet_id in subnets:
             if not isinstance(subnet_id, int):
                 raise CommandError("listed subnet identifiers must be numbers")
-            leases.extend(lease_mgr.getLeases4(subnet_id))
+            leases.extend(lease_mgr.getLeases4(subnet_id=subnet_id))
         return {'result': 0,
                 'text': '%d IPv4 lease(s) found.' % len(leases),
                 'arguments': {'leases': [l.toElement() for l in leases]}}
@@ -97,9 +122,20 @@ def lease4_get_all(handle):
 
 
 def lease4_get_page(handle):
-    cmd = handle.getArgument('command')
-    handle.setArgument('response', {'result': 0})
-    return 0
+    def get_response(args):
+        lower = get_string_arg(args, 'from')
+        if lower == 'start':
+            lower = '0.0.0.0'
+        limit = get_int_arg(args, 'limit')
+
+        lease_mgr = LeaseMgr()
+        leases = lease_mgr.getLeases4(lower_bound_address=lower, page_size=limit)
+        return {'result': 0 if leases else 3,
+                'text': '%d IPv4 lease(s) found.' % len(leases),
+                'arguments': {'leases': [l.toElement() for l in leases],
+                              'count': len(leases)}}
+
+    return wrap_handler(handle, get_response)
 
 
 def lease4_get_by_hw_address(handle):
