@@ -37,7 +37,7 @@ typedef struct {
 } LoggerObject;
 
 static PyObject *
-Logger_debug(PyObject *self, PyObject *args) {
+Logger_debug(LoggerObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
@@ -49,7 +49,7 @@ Logger_debug(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Logger_info(PyObject *self, PyObject *args) {
+Logger_info(LoggerObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
@@ -61,7 +61,7 @@ Logger_info(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Logger_warn(PyObject *self, PyObject *args) {
+Logger_warn(LoggerObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
@@ -74,7 +74,7 @@ Logger_warn(PyObject *self, PyObject *args) {
 
 
 static PyObject *
-Logger_error(PyObject *self, PyObject *args) {
+Logger_error(LoggerObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
@@ -86,7 +86,7 @@ Logger_error(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Logger_fatal(PyObject *self, PyObject *args) {
+Logger_fatal(LoggerObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
@@ -98,7 +98,7 @@ Logger_fatal(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-Logger_exception(PyObject *self, PyObject *args) {
+Logger_exception(LoggerObject *self, PyObject *args) {
     char *msg;
 
     if (!PyArg_ParseTuple(args, "s", &msg)) {
@@ -128,15 +128,15 @@ Logger_exception(PyObject *self, PyObject *args) {
 static PyMethodDef Logger_methods[] = {
     {"debug", (PyCFunction) Logger_debug, METH_VARARGS,
      "Log a debug message to the kea logger"},
-    {"info", (PyCFunction)(void(*)(void))Logger_info, METH_VARARGS,
+    {"info", (PyCFunction) Logger_info, METH_VARARGS,
      "Log an info message to the kea logger."},
-    {"warn", (PyCFunction)(void(*)(void))Logger_warn, METH_VARARGS,
+    {"warn", (PyCFunction) Logger_warn, METH_VARARGS,
      "Log an warn message to the kea logger."},
-    {"error", (PyCFunction)(void(*)(void))Logger_error, METH_VARARGS,
+    {"error", (PyCFunction) Logger_error, METH_VARARGS,
      "Log an error message to the kea logger."},
-    {"fatal", (PyCFunction)(void(*)(void))Logger_fatal, METH_VARARGS,
+    {"fatal", (PyCFunction) Logger_fatal, METH_VARARGS,
      "Log a fatal message to the kea logger."},
-    {"exception", (PyCFunction)(void(*)(void))Logger_exception, METH_VARARGS,
+    {"exception", (PyCFunction) Logger_exception, METH_VARARGS,
      "Log an error and traceback to the kea logger."},
     {0}  // Sentinel
 };
@@ -292,7 +292,7 @@ Kea_Load(LibraryHandle *handle, const char *module) {
         return (1);
     }
     // PyModule_AddObject steals reference on success
-    if (PyModule_AddObject(kea_module, "logger", (PyObject*)logger) < 0) {
+    if (PyModule_AddObject(kea_module, "logger", (PyObject *)logger) < 0) {
         Py_DECREF(logger);
         return (1);
     }

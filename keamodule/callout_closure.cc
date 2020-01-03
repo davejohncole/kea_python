@@ -16,7 +16,7 @@ CalloutClosure_binding(ffi_cif *cif, void *ret, void* args[], void *userdata) {
     // Kea calling us again - get the GIL.
     end_allow_threads();
 
-    handle = CalloutHandle_from_handle(*(CalloutHandle**)args[0]);
+    handle = CalloutHandle_from_handle(*(CalloutHandle **)args[0]);
     if (!handle) {
         log_error("could not create CalloutHandle");
         goto error;

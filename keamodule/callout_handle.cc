@@ -114,7 +114,7 @@ ObjectHolder::~ObjectHolder() {
 }
 
 static PyObject *
-CalloutHandle_setContext(PyObject *self, PyObject *args) {
+CalloutHandle_setContext(CalloutHandleObject *self, PyObject *args) {
     char *name;
     PyObject *value;
 
@@ -123,7 +123,7 @@ CalloutHandle_setContext(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((CalloutHandleObject *)self)->handle->setContext(name, ObjectHolderPtr(new ObjectHolder(value)));
+        self->handle->setContext(name, ObjectHolderPtr(new ObjectHolder(value)));
         Py_RETURN_NONE;
     }
     catch (const exception &e) {
@@ -133,7 +133,7 @@ CalloutHandle_setContext(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-CalloutHandle_getContext(PyObject *self, PyObject *args) {
+CalloutHandle_getContext(CalloutHandleObject *self, PyObject *args) {
     char *name;
 
     if (!PyArg_ParseTuple(args, "s", &name)) {
@@ -142,7 +142,7 @@ CalloutHandle_getContext(PyObject *self, PyObject *args) {
 
     try {
         ObjectHolderPtr ptr;
-        ((CalloutHandleObject *)self)->handle->getContext(name, ptr);
+        self->handle->getContext(name, ptr);
         Py_INCREF(ptr->obj_);
         return (ptr->obj_);
     }
@@ -153,7 +153,7 @@ CalloutHandle_getContext(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-CalloutHandle_deleteContext(PyObject *self, PyObject *args) {
+CalloutHandle_deleteContext(CalloutHandleObject *self, PyObject *args) {
     char *name;
 
     if (!PyArg_ParseTuple(args, "s", &name)) {
@@ -161,7 +161,7 @@ CalloutHandle_deleteContext(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((CalloutHandleObject *)self)->handle->deleteContext(name);
+        self->handle->deleteContext(name);
         Py_RETURN_NONE;
     }
     catch (const exception &e) {
@@ -171,9 +171,9 @@ CalloutHandle_deleteContext(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-CalloutHandle_getStatus(PyObject *self, PyObject *args) {
+CalloutHandle_getStatus(CalloutHandleObject *self, PyObject *args) {
     try {
-        return PyLong_FromLong(((CalloutHandleObject *)self)->handle->getStatus());
+        return PyLong_FromLong(self->handle->getStatus());
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -182,7 +182,7 @@ CalloutHandle_getStatus(PyObject *self, PyObject *args) {
 }
 
 static PyObject *
-CalloutHandle_setStatus(PyObject *self, PyObject *args) {
+CalloutHandle_setStatus(CalloutHandleObject *self, PyObject *args) {
     int status;
 
     if (!PyArg_ParseTuple(args, "i", &status)) {
@@ -190,7 +190,7 @@ CalloutHandle_setStatus(PyObject *self, PyObject *args) {
     }
 
     try {
-        ((CalloutHandleObject *)self)->handle->setStatus(CalloutHandle::CalloutNextStep(status));
+        self->handle->setStatus(CalloutHandle::CalloutNextStep(status));
         Py_RETURN_NONE;
     }
     catch (const exception &e) {

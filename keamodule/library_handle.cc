@@ -7,7 +7,7 @@ using namespace isc::hooks;
 extern "C" {
 
 static PyObject *
-LibraryHandle_registerCommandCallout(PyObject *self, PyObject *args) {
+LibraryHandle_registerCommandCallout(LibraryHandleObject *self, PyObject *args) {
     PyObject *name;
     PyObject *callout;
 
@@ -30,7 +30,7 @@ LibraryHandle_registerCommandCallout(PyObject *self, PyObject *args) {
     }
     Py_DECREF(obj);
     try {
-        ((LibraryHandleObject *)self)->handle->registerCommandCallout(PyUnicode_AsUTF8(name), (CalloutPtr)obj->bound_callout);
+        self->handle->registerCommandCallout(PyUnicode_AsUTF8(name), (CalloutPtr)obj->bound_callout);
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -48,7 +48,7 @@ static PyMethodDef LibraryHandle_methods[] = {
 
 static int
 LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
-    PyObject *manager = 0;
+    CalloutManagerObject *manager = 0;
 
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
@@ -59,7 +59,7 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
     }
 
     try {
-        self->handle = new LibraryHandle(((CalloutManagerObject*)manager)->manager.get());
+        self->handle = new LibraryHandle(manager->manager.get());
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());

@@ -43,7 +43,7 @@ def lease4_get(handle):
                     'text': 'Lease not found.'}
 
     def get_response(args):
-        lease_mgr = LeaseMgr(22)
+        lease_mgr = LeaseMgr()
         if 'ip-address' in args:
             addr = args['ip-address']
             if not isinstance(addr, str):
