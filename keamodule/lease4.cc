@@ -8,6 +8,25 @@ using namespace isc::data;
 extern "C" {
 
 static PyObject *
+Lease4_setContext(Lease4Object *self, PyObject *args) {
+    PyObject *ctx;
+
+    if (!PyArg_ParseTuple(args, "O", &ctx)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setContext(object_to_element(ctx));
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Lease4_toElement(Lease4Object *self, PyObject *args) {
     try {
         ElementPtr ptr = self->ptr->toElement();
@@ -20,6 +39,8 @@ Lease4_toElement(Lease4Object *self, PyObject *args) {
 }
 
 static PyMethodDef Lease4_methods[] = {
+    {"setContext", (PyCFunction) Lease4_setContext, METH_VARARGS,
+     "Sets user context."},
     {"toElement", (PyCFunction) Lease4_toElement, METH_NOARGS,
      "Return the JSON representation of a lease."},
     {0}  // Sentinel
@@ -44,13 +65,8 @@ Lease4_get_addr(Lease4Object *self, void *closure) {
 
 static int
 Lease4_set_addr(Lease4Object *self, PyObject *value, void *closure) {
-    if (value == NULL) {
-        PyErr_SetString(PyExc_TypeError, "Cannot delete the addr attribute");
-        return (-1);
-    }
-    if (!PyUnicode_Check(value)) {
-        PyErr_SetString(PyExc_TypeError, "The addr attribute value must be a string");
-        return (-1);
+    if (assert_long_value(value, "addr")) {
+        return (1);
     }
     try {
         const char *addr = PyUnicode_AsUTF8(value);
@@ -63,9 +79,242 @@ Lease4_set_addr(Lease4Object *self, PyObject *value, void *closure) {
     }
 }
 
+static PyObject *
+Lease4_get_valid_lft(Lease4Object *self, void *closure) {
+    try {
+        return (PyLong_FromLong(self->ptr->valid_lft_));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_valid_lft(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_long_value(value, "valid_lft")) {
+        return (1);
+    }
+    try {
+        self->ptr->valid_lft_ = PyLong_AsLong(value);
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
+Lease4_get_cltt(Lease4Object *self, void *closure) {
+    try {
+        return (PyLong_FromLong(self->ptr->cltt_));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_cltt(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_long_value(value, "cltt")) {
+        return (1);
+    }
+    try {
+        self->ptr->cltt_ = PyLong_AsLong(value);
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
+Lease4_get_subnet_id(Lease4Object *self, void *closure) {
+    try {
+        return (PyLong_FromLong(self->ptr->subnet_id_));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_subnet_id(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_long_value(value, "subnet_id")) {
+        return (1);
+    }
+    try {
+        self->ptr->subnet_id_ = PyLong_AsLong(value);
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
+Lease4_get_hostname(Lease4Object *self, void *closure) {
+    try {
+        if (self->ptr->hostname_.empty()) {
+            Py_RETURN_NONE;
+        }
+        return (PyUnicode_FromString(self->ptr->hostname_.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_hostname(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_string_value(value, "hostname", true)) {
+        return (1);
+    }
+    try {
+        if (value == Py_None) {
+            self->ptr->hostname_.clear();
+        }
+        else {
+            self->ptr->hostname_ = PyUnicode_AsUTF8(value);
+            boost::algorithm::to_lower(self->ptr->hostname_);
+        }
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
+Lease4_get_fqdn_fwd(Lease4Object *self, void *closure) {
+    try {
+        if (self->ptr->fqdn_fwd_) {
+            Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_fqdn_fwd(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_bool_value(value, "fqdn_fwd")) {
+        return (1);
+    }
+    try {
+        self->ptr->fqdn_fwd_ = value == Py_True;
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
+Lease4_get_fqdn_rev(Lease4Object *self, void *closure) {
+    try {
+        if (self->ptr->fqdn_rev_) {
+            Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_fqdn_rev(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_bool_value(value, "fqdn_rev")) {
+        return (1);
+    }
+    try {
+        self->ptr->fqdn_rev_ = value == Py_True;
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
+Lease4_get_hwaddr(Lease4Object *self, void *closure) {
+    try {
+        string hwaddr = self->ptr->hwaddr_->toText(false);
+        return (PyUnicode_FromString(hwaddr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_hwaddr(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_string_value(value, "hwaddr", false)) {
+        return (1);
+    }
+    try {
+        HWAddr hw = HWAddr::fromText(PyUnicode_AsUTF8(value));
+        self->ptr->hwaddr_ = HWAddrPtr(new HWAddr(hw));
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
+Lease4_get_state(Lease4Object *self, void *closure) {
+    try {
+        return (PyLong_FromLong(self->ptr->state_));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_state(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_long_value(value, "state")) {
+        return (1);
+    }
+    try {
+        self->ptr->state_ = PyLong_AsLong(value);
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
 static PyGetSetDef Lease4_getsetters[] = {
     {(char *)"use_count", (getter) Lease4_use_count, (setter) 0, (char *)"shared_ptr use count", 0},
-    {(char *)"addr", (getter) Lease4_get_addr, (setter) Lease4_set_addr, (char *)"address in string form", 0},
+    {(char *)"addr", (getter) Lease4_get_addr, (setter) Lease4_set_addr, (char *)"Address in string form", 0},
+    {(char *)"valid_lft", (getter) Lease4_get_valid_lft, (setter) Lease4_set_valid_lft, (char *)"Valid lifetime", 0},
+    {(char *)"cltt", (getter) Lease4_get_cltt, (setter) Lease4_set_cltt, (char *)"Client last transmission time", 0},
+    {(char *)"subnet_id", (getter) Lease4_get_subnet_id, (setter) Lease4_set_subnet_id, (char *)"Subnet identifier", 0},
+    {(char *)"hostname", (getter) Lease4_get_hostname, (setter) Lease4_set_hostname, (char *)"Client hostname", 0},
+    {(char *)"fqdn_fwd", (getter) Lease4_get_fqdn_fwd, (setter) Lease4_set_fqdn_fwd, (char *)"Forward zone updated?", 0},
+    {(char *)"fqdn_rev", (getter) Lease4_get_fqdn_rev, (setter) Lease4_set_fqdn_rev, (char *)"Reverse zone updated?", 0},
+    {(char *)"hwaddr", (getter) Lease4_get_hwaddr, (setter) Lease4_set_hwaddr, (char *)"Client's MAC/hardware address", 0},
+    {(char *)"state", (getter) Lease4_get_state, (setter) Lease4_set_state, (char *)"Holds the lease state(s)", 0},
     {0}  // Sentinel
 };
 

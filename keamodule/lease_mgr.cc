@@ -165,6 +165,24 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
 }
 
 static PyObject *
+LeaseMgr_addLease(LeaseMgrObject *self, PyObject *args) {
+    Lease4Object *lease;
+
+    if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
+        return (0);
+    }
+
+    try {
+        self->mgr->addLease(lease->ptr);
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 LeaseMgr_deleteLease(LeaseMgrObject *self, PyObject *args) {
     char *addr;
 
@@ -178,6 +196,24 @@ LeaseMgr_deleteLease(LeaseMgrObject *self, PyObject *args) {
             Py_RETURN_TRUE;
         }
         Py_RETURN_FALSE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+LeaseMgr_updateLease4(LeaseMgrObject *self, PyObject *args) {
+    Lease4Object *lease;
+
+    if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
+        return (0);
+    }
+
+    try {
+        self->mgr->updateLease4(lease->ptr);
+        Py_RETURN_NONE;
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -208,8 +244,12 @@ static PyMethodDef LeaseMgr_methods[] = {
      "Returns an IPv4 lease for specified IPv4 address."},
     {"getLeases4", (PyCFunction) LeaseMgr_getLeases4, METH_VARARGS | METH_KEYWORDS,
      "Returns all IPv4 leases for the particular subnet identifier."},
+    {"addLease", (PyCFunction) LeaseMgr_addLease, METH_VARARGS,
+     "Adds an IPv4 lease."},
     {"deleteLease", (PyCFunction) LeaseMgr_deleteLease, METH_VARARGS,
      "Deletes a lease."},
+    {"updateLease4", (PyCFunction) LeaseMgr_updateLease4, METH_VARARGS,
+     "Updates IPv4 lease."},
     {"wipeLeases4", (PyCFunction) LeaseMgr_wipeLeases4, METH_VARARGS,
      "Virtual method which removes specified leases."},
     {0}  // Sentinel

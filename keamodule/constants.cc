@@ -1,6 +1,6 @@
 #include "keamodule.h"
-#include <dhcp/dhcp4.h>
 
+using namespace isc::data;
 using namespace isc::dhcp;
 using namespace isc::hooks;
 
@@ -21,6 +21,10 @@ static KeaConstant constants[] = {
     {"NEXT_STEP_SKIP", CalloutHandle::NEXT_STEP_SKIP},
     {"NEXT_STEP_DROP", CalloutHandle::NEXT_STEP_DROP},
     {"NEXT_STEP_PARK", CalloutHandle::NEXT_STEP_PARK},
+
+    {"STATE_DEFAULT", 0x0},
+    {"STATE_DECLINED", 0x1},
+    {"STATE_EXPIRED_RECLAIMED", 0x2},
 
     constant(DHO_PAD),
     constant(DHO_SUBNET_MASK),

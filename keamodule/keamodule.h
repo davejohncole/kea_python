@@ -7,6 +7,7 @@
 #include <dhcp/pkt4.h>
 #include <dhcpsrv/cfgmgr.h>
 #include <dhcpsrv/lease_mgr.h>
+#include <dhcp/dhcp4.h>
 
 extern "C" {
 
@@ -36,6 +37,9 @@ extern int Capsule_define();
 extern int Constants_define();
 
 // utils.cc
+extern int assert_long_value(PyObject *value, const char *name);
+extern int assert_string_value(PyObject *value, const char *name, bool allow_none);
+extern int assert_bool_value(PyObject *value, const char *name);
 extern PyObject *element_to_object(isc::data::ConstElementPtr ptr);
 extern isc::data::ElementPtr object_to_element(PyObject *obj);
 

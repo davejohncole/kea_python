@@ -24,7 +24,7 @@ class Config:
 
 def load(handle):
     global config, type_to_label
-    config = Config(SrvConfig('staging').toElement())
+    config = Config(CfgMgr().getStagingCfg().toElement())
     type_to_label = dict([(v, k[4:].lower())
                           for k, v in globals().items()
                           if k.startswith('DHCP')])

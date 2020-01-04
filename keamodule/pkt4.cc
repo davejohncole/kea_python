@@ -210,7 +210,7 @@ Pkt4_getOption(Pkt4Object *self, PyObject *args) {
 
     try {
         OptionPtr ptr = self->ptr->getOption(type);
-        if (!ptr.get()) {
+        if (!ptr) {
             Py_RETURN_NONE;
         }
         return (Option_from_handle(ptr));

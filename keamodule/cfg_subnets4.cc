@@ -4,6 +4,7 @@ using namespace std;
 using namespace isc::hooks;
 using namespace isc::dhcp;
 using namespace isc::data;
+using namespace isc::asiolink;
 
 extern "C" {
 
@@ -32,6 +33,49 @@ CfgSubnets4_getAll(CfgSubnets4Object *self, PyObject *args) {
 }
 
 static PyObject *
+CfgSubnets4_getSubnet(CfgSubnets4Object *self, PyObject *args) {
+    unsigned long subnet_id;
+
+    if (!PyArg_ParseTuple(args, "k", &subnet_id)) {
+        return (0);
+    }
+
+    try {
+        Subnet4Ptr ptr = self->ptr->getSubnet(subnet_id);
+        if (!ptr) {
+            Py_RETURN_NONE;
+        }
+        return (Subnet4_from_ptr(ptr));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+CfgSubnets4_selectSubnet(CfgSubnets4Object *self, PyObject *args, PyObject *kwargs) {
+    static const char *kwlist[] = {"addr", NULL};
+    char *addr = 0;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|s", (char **)kwlist, &addr)) {
+        return (0);
+    }
+
+    try {
+        Subnet4Ptr ptr = self->ptr->selectSubnet(IOAddress(string(addr)));
+        if (!ptr) {
+            Py_RETURN_NONE;
+        }
+        return (Subnet4_from_ptr(ptr));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 CfgSubnets4_toElement(CfgSubnets4Object *self, PyObject *args) {
     try {
         ElementPtr ptr = self->ptr->toElement();
@@ -46,6 +90,10 @@ CfgSubnets4_toElement(CfgSubnets4Object *self, PyObject *args) {
 static PyMethodDef CfgSubnets4_methods[] = {
     {"getAll", (PyCFunction) CfgSubnets4_getAll, METH_NOARGS,
      "Returns collection of all IPv4 subnets."},
+    {"getSubnet", (PyCFunction) CfgSubnets4_getSubnet, METH_VARARGS,
+     "Returns subnet with specified subnet-id value."},
+    {"selectSubnet", (PyCFunction) CfgSubnets4_selectSubnet, METH_VARARGS | METH_KEYWORDS,
+     "Returns a pointer to the selected subnet."},
     {"toElement", (PyCFunction) CfgSubnets4_toElement, METH_NOARGS,
      "Unparse configuration object."},
     {0}  // Sentinel

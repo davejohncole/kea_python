@@ -5,6 +5,48 @@ using namespace isc::data;
 
 extern "C" {
 
+int
+assert_long_value(PyObject *value, const char *name) {
+    if (value == NULL) {
+        PyErr_Format(PyExc_TypeError, "Cannot delete the %s attribute", name);
+        return (-1);
+    }
+    if (!PyLong_Check(value)) {
+        PyErr_Format(PyExc_TypeError, "The %s attribute value must be an int", name);
+        return (-1);
+    }
+    return (0);
+}
+
+int
+assert_bool_value(PyObject *value, const char *name) {
+    if (value == NULL) {
+        PyErr_Format(PyExc_TypeError, "Cannot delete the %s attribute", name);
+        return (-1);
+    }
+    if (!PyBool_Check(value)) {
+        PyErr_Format(PyExc_TypeError, "The %s attribute value must be a bool", name);
+        return (-1);
+    }
+    return (0);
+}
+
+int
+assert_string_value(PyObject *value, const char *name, bool allow_none) {
+    if (value == NULL) {
+        PyErr_Format(PyExc_TypeError, "Cannot delete the %s attribute", name);
+        return (-1);
+    }
+    if (allow_none && value == Py_None) {
+        return (0);
+    }
+    if (!PyUnicode_Check(value)) {
+        PyErr_Format(PyExc_TypeError, "The %s attribute value must be a str", name);
+        return (-1);
+    }
+    return (0);
+}
+
 PyObject *
 element_to_object(ConstElementPtr ptr) {
     switch (ptr->getType()) {
