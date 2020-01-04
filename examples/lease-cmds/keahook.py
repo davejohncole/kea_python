@@ -1,7 +1,8 @@
 import kea
 
 
-class UNSPECIFIED: pass
+class UNSPECIFIED:
+    pass
 
 
 class CommandError(Exception):
@@ -71,17 +72,22 @@ def parse_lease4(args):
     cfg = kea.CfgMgr().getCurrentCfg()
     if subnet_id:
         subnet = cfg.getCfgSubnets4().getSubnet(subnet_id)
-        if not subnet
-            raise CommandError('Invalid subnet-id: No IPv4 subnet with subnet-id=%d currently configured.' % subnet_id)
+        if not subnet:
+            raise CommandError('Invalid subnet-id: No IPv4 subnet with subnet-id=%d'
+                               ' currently configured.' % subnet_id)
         if not subnet.inRange(lease.addr):
-            raise CommandError('The address %s does not belong to subnet %s, subnet-id=%s' % (lease.addr, subnet.toText(), subnet_id))
+            raise CommandError('The address %s does not belong to subnet %s, subnet-id=%s'
+                               % (lease.addr, subnet.toText(), subnet_id))
     else:
         subnet = cfg.getCfgSubnets4().selectSubnet(lease.addr)
         if not subnet:
-            raise CommandError('subnet-id not specified and failed to find a subnet for address %s' % lease.addr)
+            raise CommandError('subnet-id not specified and failed to find a subnet for address %s'
+                               % lease.addr)
         subnet_id = subnet.getID()
     lease.subnet_id = subnet_id
-    client_id = get_string_arg(args, 'client-id', None)     # TODO
+    client_id = get_string_arg(args, 'client-id', None)
+    if client_id is not None:
+        lease.client_id = client_id
     valid_lft = get_int_arg(args, 'valid-lft', None)
     if valid_lft is None:
         valid_lft = subnet.getValid()
@@ -89,9 +95,10 @@ def parse_lease4(args):
     expire = get_int_arg(args, 'expire', None)
     if expire is not None:
         if expire <= 0:
-            raise CommandError('expiration time must be positive for address %s' % addr)
+            raise CommandError('expiration time must be positive for address %s' % lease.addr)
         if expire < valid_lft:
-            raise CommandError('expiration time must be greater than valid lifetime for address %s' % addr)
+            raise CommandError('expiration time must be greater than valid lifetime for address %s'
+                               % lease.addr)
         cltt = expire - valid_lft
     else:
         cltt = 0
@@ -105,12 +112,14 @@ def parse_lease4(args):
     lease.state = get_int_arg(args, 'state', 0)
     if lease.state < 0 or lease.state > kea.STATE_EXPIRED_RECLAIMED:
         raise CommandError('Invalid state value: %s, supported '
-                           'values are: 0 (default), 1 (declined) and 2 (expired-reclaimed)' % lease.state)
+                           'values are: 0 (default), 1 (declined) and 2 (expired-reclaimed)'
+                           % lease.state)
     ctx = get_map_arg(args, 'user-context', {})
     comment = get_string_arg(args, 'comment', None)
     if comment is not None:
         if 'comment' in ctx:
-            raise CommandError("Duplicated comment entry '%s' in user context '%s'" % (comment, ctx))
+            raise CommandError("Duplicated comment entry '%s' in user context '%s'"
+                               % (comment, ctx))
         ctx['comment'] = comment
     if ctx:
         lease.setContext(ctx)
@@ -131,7 +140,7 @@ def make_lease_list_response(leases):
     return {'result': 0 if leases else 3,
             'text': '%d IPv4 lease(s) found.' % len(leases),
             'arguments': {'leases': [l.toElement() for l in leases],
-                            'count': len(leases)}}
+                          'count': len(leases)}}
 
 
 def get_lease4_kwargs(args):
@@ -187,7 +196,7 @@ def lease4_add(handle):
 
 def lease4_get(handle):
     def get_response(args):
-        kwargs = get_lease_kwargs(args)
+        kwargs = get_lease4_kwargs(args)
         lease = kea.LeaseMgr().getLease4(**kwargs)
         return make_lease_response(lease)
 
@@ -252,7 +261,7 @@ def lease4_get_by_hostname(handle):
 def lease4_del(handle):
     def get_response(args):
         lease_mgr = kea.LeaseMgr()
-        kwargs = get_lease_kwargs(args)
+        kwargs = get_lease4_kwargs(args)
         addr = kwargs.get('addr')
         if addr is None:
             lease = lease_mgr.getLease4(**kwargs)
@@ -274,13 +283,13 @@ def lease4_update(handle):
         lease = parse_lease4(args)
         force_create = get_bool_arg('force-create', False)
         lease_mgr = kea.LeaseMgr()
-        if force_create and lease_msg.getLease4(addr=lease.addr) is None:
+        if force_create and lease_mgr.getLease4(addr=lease.addr) is None:
             lease_mgr.addLease(lease)
             return {'result': 0,
-                     'text': 'IPv4 lease added.')
+                    'text': 'IPv4 lease added.'}
         lease_mgr.updateLease4(lease)
         return {'result': 0,
-                'text': 'IPv4 lease updated.')
+                'text': 'IPv4 lease updated.'}
 
     return wrap_handler(handle, get_response)
 

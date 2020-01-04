@@ -279,6 +279,40 @@ Lease4_set_hwaddr(Lease4Object *self, PyObject *value, void *closure) {
 }
 
 static PyObject *
+Lease4_get_client_id(Lease4Object *self, void *closure) {
+    try {
+        if (!self->ptr->client_id_) {
+            Py_RETURN_NONE;
+        }
+        return (PyUnicode_FromString(self->ptr->client_id_->toText().c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static int
+Lease4_set_client_id(Lease4Object *self, PyObject *value, void *closure) {
+    if (assert_string_value(value, "client_id", true)) {
+        return (1);
+    }
+    try {
+        if (value == Py_None) {
+            self->ptr->client_id_.reset();
+        }
+        else {
+            self->ptr->client_id_ = ClientId::fromText(PyUnicode_AsUTF8(value));
+        }
+        return (0);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+}
+
+static PyObject *
 Lease4_get_state(Lease4Object *self, void *closure) {
     try {
         return (PyLong_FromLong(self->ptr->state_));
@@ -314,6 +348,7 @@ static PyGetSetDef Lease4_getsetters[] = {
     {(char *)"fqdn_fwd", (getter) Lease4_get_fqdn_fwd, (setter) Lease4_set_fqdn_fwd, (char *)"Forward zone updated?", 0},
     {(char *)"fqdn_rev", (getter) Lease4_get_fqdn_rev, (setter) Lease4_set_fqdn_rev, (char *)"Reverse zone updated?", 0},
     {(char *)"hwaddr", (getter) Lease4_get_hwaddr, (setter) Lease4_set_hwaddr, (char *)"Client's MAC/hardware address", 0},
+    {(char *)"client_id", (getter) Lease4_get_client_id, (setter) Lease4_set_client_id, (char *)"Client identifier", 0},
     {(char *)"state", (getter) Lease4_get_state, (setter) Lease4_set_state, (char *)"Holds the lease state(s)", 0},
     {0}  // Sentinel
 };
