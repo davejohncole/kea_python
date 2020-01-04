@@ -32,7 +32,7 @@ def get_int_arg(args, name, default=UNSPECIFIED, error_msg=None):
     if not isinstance(value, int):
         if error_msg:
             raise CommandError(error_msg)
-        raise CommandError("'%s' is not integer." % name)
+        raise CommandError("'%s' is not an integer." % name)
     return value
 
 
@@ -41,27 +41,8 @@ def get_list_arg(args, name, default=UNSPECIFIED, error_msg=None):
     if not isinstance(value, list):
         if error_msg:
             raise CommandError(error_msg)
-        raise CommandError("'%s' is not list." % name)
+        raise CommandError("'%s' is not a list." % name)
     return value
-
-
-def wrap_handler(handle, get_response):
-    try:
-        cmd = handle.getArgument('command')
-        args = cmd.get('arguments')
-        if not isinstance(args, dict):
-            raise CommandError('Parameters missing or are not a map.')
-        handle.setArgument('response', get_response(args))
-    except CommandError as e:
-        handle.setArgument('response', {'result': 1,
-                                        'text': e.reason})
-        return 1
-    except Exception as e:
-        kea.logger.exception('')
-        handle.setArgument('response', {'result': 1,
-                                        'text': str(e)})
-        return 1
-    return 0
 
 
 def make_lease_response(lease):
@@ -103,8 +84,28 @@ def get_lease4_kwargs(args):
         return dict(client_id=ident, subnet_id=subnet_id)
 
 
+def wrap_handler(handle, get_response):
+    try:
+        cmd = handle.getArgument('command')
+        args = cmd.get('arguments')
+        if not isinstance(args, dict):
+            raise CommandError('Parameters missing or is not a map.')
+        handle.setArgument('response', get_response(args))
+    except CommandError as e:
+        handle.setArgument('response', {'result': 1,
+                                        'text': e.reason})
+        return 1
+    except Exception as e:
+        kea.logger.exception('')
+        handle.setArgument('response', {'result': 1,
+                                        'text': str(e)})
+        return 1
+    return 0
+
+
 def lease4_add(handle):
     def get_response(args):
+        # TODO
         return {'result': 0}
 
     return wrap_handler(handle, get_response)
@@ -176,8 +177,8 @@ def lease4_get_by_hostname(handle):
 
 def lease4_del(handle):
     def get_response(args):
-        kwargs = get_lease_kwargs(args)
         lease_mgr = kea.LeaseMgr()
+        kwargs = get_lease_kwargs(args)
         addr = kwargs.get('addr')
         if addr is None:
             lease = lease_mgr.getLease4(**kwargs)
@@ -195,9 +196,11 @@ def lease4_del(handle):
 
 
 def lease4_update(handle):
-    cmd = handle.getArgument('command')
-    handle.setArgument('response', {'result': 0})
-    return 0
+    def get_response(args):
+        # TODO
+        return {'result': 0}
+
+    return wrap_handler(handle, get_response)
 
 
 def lease4_wipe(handle):
