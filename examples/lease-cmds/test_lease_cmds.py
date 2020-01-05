@@ -185,7 +185,7 @@ class TestLeaseGet(ResponseTestCase):
         response = send_command('lease4-get',
                                 addr='172.28.5.12')
         self.assertResponse({
-                'arguments': {'cltt': 0,                # TODO int(time.time()),
+                'arguments': {'cltt': int(time.time()),
                               'fqdn-fwd': False,
                               'fqdn-rev': False,
                               'hostname': '',
@@ -204,7 +204,7 @@ class TestLeaseGet(ResponseTestCase):
                                 ident_type='hw-address',
                                 subnet_id=5)
         self.assertResponse({
-                'arguments': {'cltt': 0,                # TODO int(time.time()),
+                'arguments': {'cltt': int(time.time()),
                               'fqdn-fwd': False,
                               'fqdn-rev': False,
                               'hostname': '',
@@ -228,7 +228,7 @@ class TestLeaseGet(ResponseTestCase):
                                 subnet_id=6)
         self.assertResponse({
                 'arguments': {'client-id': '01:02:03:04:05:06',
-                              'cltt': 0,                # TODO int(time.time()),
+                              'cltt': int(time.time()),
                               'fqdn-fwd': False,
                               'fqdn-rev': False,
                               'hostname': '',
@@ -346,7 +346,7 @@ class TestLeaseGetAll(ResponseTestCase):
         self.assertResponse({
                 "text": "2 IPv4 lease(s) found.",
                 "arguments": {
-                    "leases": [{'cltt': 0,              # TODO int(time.time()),
+                    "leases": [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -355,7 +355,7 @@ class TestLeaseGetAll(ResponseTestCase):
                                 'state': 0,
                                 'subnet-id': 5,
                                 'valid-lft': 4000},
-                               {'cltt': 0,              # TODO int(time.time()),
+                               {'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -374,7 +374,7 @@ class TestLeaseGetAll(ResponseTestCase):
         self.assertResponse({
                 "text": "2 IPv4 lease(s) found.",
                 "arguments": {
-                    "leases": [{'cltt': 0,              # TODO int(time.time()),
+                    "leases": [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -383,7 +383,7 @@ class TestLeaseGetAll(ResponseTestCase):
                                 'state': 0,
                                 'subnet-id': 5,
                                 'valid-lft': 4000},
-                               {'cltt': 0,              # TODO int(time.time()),
+                               {'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -402,7 +402,7 @@ class TestLeaseGetAll(ResponseTestCase):
         self.assertResponse({
                 "text": "1 IPv4 lease(s) found.",
                 "arguments": {
-                    "leases": [{'cltt': 0,              # TODO int(time.time()),
+                    "leases": [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -444,7 +444,7 @@ class TestLease4GetPage(ResponseTestCase):
                 "text": "2 IPv4 lease(s) found.",
                 "arguments": {
                     "count": 2,
-                    "leases": [{'cltt': 0,              # TODO int(time.time()),
+                    "leases": [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -453,7 +453,7 @@ class TestLease4GetPage(ResponseTestCase):
                                 'state': 0,
                                 'subnet-id': 5,
                                 'valid-lft': 4000},
-                               {'cltt': 0,              # TODO int(time.time()),
+                               {'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -474,7 +474,7 @@ class TestLease4GetPage(ResponseTestCase):
                 "text": "1 IPv4 lease(s) found.",
                 "arguments": {
                     "count": 1,
-                    "leases": [{'cltt': 0,              # TODO int(time.time()),
+                    "leases": [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -495,7 +495,7 @@ class TestLease4GetPage(ResponseTestCase):
                 "text": "1 IPv4 lease(s) found.",
                 "arguments": {
                     "count": 1,
-                    "leases": [{'cltt': 0,              # TODO int(time.time()),
+                    "leases": [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -585,7 +585,7 @@ class TestGetLease4ByHwAddr(ResponseTestCase):
         self.assertResponse({
                 'arguments': {
                     'count': 1,
-                    'leases': [{'cltt': 0,      # TODO int(time.time()),
+                    'leases': [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',
@@ -620,7 +620,7 @@ class TestGetLease4ByClientId(ResponseTestCase):
         self.assertResponse({
                 'arguments': {
                     'count': 1,
-                    'leases': [{'cltt': 0,    # TODO int(time.time()),
+                    'leases': [{'cltt': int(time.time()),
                                 'fqdn-fwd': False,
                                 'fqdn-rev': False,
                                 'hostname': '',

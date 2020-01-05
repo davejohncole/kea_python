@@ -1,4 +1,5 @@
 import kea
+import time
 
 
 class UNSPECIFIED:
@@ -104,7 +105,7 @@ def parse_lease4(args):
                                % lease.addr)
         cltt = expire - valid_lft
     else:
-        cltt = 0
+        cltt = int(time.time())
     lease.cltt = cltt
     lease.fqdn_fwd = get_bool_arg(args, 'fqdn-fwd', False)
     lease.fqdn_rev = get_bool_arg(args, 'fqdn-rev', False)
