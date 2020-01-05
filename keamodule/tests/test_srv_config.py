@@ -31,6 +31,8 @@ class TestGetStagingConfig(utils.BaseTestCase):
         d = m.getStagingCfg()
         self.assertEqual(3, c.use_count)
         self.assertEqual(3, d.use_count)
+        d = None
+        self.assertEqual(2, c.use_count)
 
     def test_bad_args(self):
         m = kea.CfgMgr()
@@ -47,7 +49,6 @@ class TestSrvConfig_getCfgSubnets4(utils.BaseTestCase):
     def test_ok(self):
         c = kea.CfgMgr().getStagingCfg()
         n = c.getCfgSubnets4()
-        self.assertIsInstance(n, kea.CfgSubnets4)
         self.assertEqual(2, n.use_count)
 
     def test_bad_args(self):

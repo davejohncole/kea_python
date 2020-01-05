@@ -12,6 +12,9 @@ static PyObject *
 CfgSubnets4_getAll(CfgSubnets4Object *self, PyObject *args) {
     try {
         const Subnet4Collection *all = self->ptr->getAll();
+        if (!all) {
+            Py_RETURN_NONE;
+        }
         PyObject *list = PyList_New(0);
         if (!list) {
             return (0);
@@ -54,11 +57,10 @@ CfgSubnets4_getSubnet(CfgSubnets4Object *self, PyObject *args) {
 }
 
 static PyObject *
-CfgSubnets4_selectSubnet(CfgSubnets4Object *self, PyObject *args, PyObject *kwargs) {
-    static const char *kwlist[] = {"addr", NULL};
-    char *addr = 0;
+CfgSubnets4_selectSubnet(CfgSubnets4Object *self, PyObject *args) {
+    char *addr;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|s", (char **)kwlist, &addr)) {
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
         return (0);
     }
 
@@ -92,7 +94,7 @@ static PyMethodDef CfgSubnets4_methods[] = {
      "Returns collection of all IPv4 subnets."},
     {"getSubnet", (PyCFunction) CfgSubnets4_getSubnet, METH_VARARGS,
      "Returns subnet with specified subnet-id value."},
-    {"selectSubnet", (PyCFunction) CfgSubnets4_selectSubnet, METH_VARARGS | METH_KEYWORDS,
+    {"selectSubnet", (PyCFunction) CfgSubnets4_selectSubnet, METH_VARARGS,
      "Returns a pointer to the selected subnet."},
     {"toElement", (PyCFunction) CfgSubnets4_toElement, METH_NOARGS,
      "Unparse configuration object."},
@@ -127,10 +129,10 @@ CfgSubnets4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 
 PyTypeObject CfgSubnets4Type = {
     PyObject_HEAD_INIT(0)
-    "kea.CfgSubnets4",                            // tp_name
-    sizeof(CfgSubnets4Object),                    // tp_basicsize
+    "kea.CfgSubnets4",                          // tp_name
+    sizeof(CfgSubnets4Object),                  // tp_basicsize
     0,                                          // tp_itemsize
-    (destructor) CfgSubnets4_dealloc,             // tp_dealloc
+    (destructor) CfgSubnets4_dealloc,           // tp_dealloc
     0,                                          // tp_vectorcall_offset
     0,                                          // tp_getattr
     0,                                          // tp_setattr
@@ -146,16 +148,16 @@ PyTypeObject CfgSubnets4Type = {
     0,                                          // tp_setattro
     0,                                          // tp_as_buffer
     Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server CfgSubnets4",                     // tp_doc
+    "Kea server CfgSubnets4",                   // tp_doc
     0,                                          // tp_traverse
     0,                                          // tp_clear
     0,                                          // tp_richcompare
     0,                                          // tp_weaklistoffset
     0,                                          // tp_iter
     0,                                          // tp_iternext
-    CfgSubnets4_methods,                          // tp_methods
+    CfgSubnets4_methods,                        // tp_methods
     0,                                          // tp_members
-    CfgSubnets4_getsetters,                       // tp_getset
+    CfgSubnets4_getsetters,                     // tp_getset
     0,                                          // tp_base
     0,                                          // tp_dict
     0,                                          // tp_descr_get
@@ -163,7 +165,7 @@ PyTypeObject CfgSubnets4Type = {
     0,                                          // tp_dictoffset
     0,                                          // tp_init
     PyType_GenericAlloc,                        // tp_alloc
-    CfgSubnets4_new                               // tp_new
+    CfgSubnets4_new                             // tp_new
 };
 
 PyObject *
@@ -179,11 +181,6 @@ CfgSubnets4_from_ptr(CfgSubnets4Ptr &ptr) {
 int
 CfgSubnets4_define() {
     if (PyType_Ready(&CfgSubnets4Type) < 0) {
-        return (1);
-    }
-    Py_INCREF(&CfgSubnets4Type);
-    if (PyModule_AddObject(kea_module, "CfgSubnets4", (PyObject *) &CfgSubnets4Type) < 0) {
-        Py_DECREF(&CfgSubnets4Type);
         return (1);
     }
 
