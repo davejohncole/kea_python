@@ -25,7 +25,7 @@ class TestCalloutHandle_new(utils.BaseTestCase):
         m = kea.CalloutManager()
         h = kea.CalloutHandle(m)
         self.assertEqual(2, m.use_count)
-        h = None
+        del h
         self.assertEqual(1, m.use_count)
 
 
@@ -34,11 +34,11 @@ class TestCalloutHandle_setArgument(utils.BaseTestCase):
     def test_lease4(self):
         m = kea.CalloutManager()
         h = kea.CalloutHandle(m)
-        l = kea.Lease4()
-        l.addr = '1.2.3.4'
-        self.assertEqual(1, l.use_count)
-        self.assertIsNone(h.setArgument('lease4', l))
-        self.assertEqual(2, l.use_count)
+        x = kea.Lease4()
+        x.addr = '1.2.3.4'
+        self.assertEqual(1, x.use_count)
+        self.assertIsNone(h.setArgument('lease4', x))
+        self.assertEqual(2, x.use_count)
         self.assertEqual('1.2.3.4', h.getArgument('lease4').addr)
 
 
@@ -53,7 +53,7 @@ class TestCalloutHandle_setContext(utils.BaseTestCase):
 
 
 class TestCalloutHandle_getContext(utils.BaseTestCase):
-    
+
     def test_ok(self):
         m = kea.CalloutManager()
         h = kea.CalloutHandle(m)
@@ -67,11 +67,12 @@ class TestCalloutHandle_getContext(utils.BaseTestCase):
         h = kea.CalloutHandle(m)
         with self.assertRaises(TypeError) as cm:
             h.getContext('foo')
-        self.assertEqual(("unable to find callout context associated with the current library index (-1)",), cm.exception.args)
+        self.assertEqual(("unable to find callout context associated with the current"
+                          " library index (-1)",), cm.exception.args)
 
 
 class TestCalloutHandle_deleteContext(utils.BaseTestCase):
-    
+
     def test_ok(self):
         m = kea.CalloutManager()
         h = kea.CalloutHandle(m)
@@ -83,7 +84,7 @@ class TestCalloutHandle_deleteContext(utils.BaseTestCase):
 
 
 class TestCalloutHandle_getStatus(utils.BaseTestCase):
-    
+
     def test_ok(self):
         m = kea.CalloutManager()
         h = kea.CalloutHandle(m)
@@ -91,7 +92,7 @@ class TestCalloutHandle_getStatus(utils.BaseTestCase):
 
 
 class TestCalloutHandle_setStatus(utils.BaseTestCase):
-    
+
     def test_ok(self):
         m = kea.CalloutManager()
         h = kea.CalloutHandle(m)

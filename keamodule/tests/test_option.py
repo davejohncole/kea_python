@@ -1,4 +1,3 @@
-import unittest
 import codecs
 
 import kea
@@ -135,7 +134,9 @@ class TestOption_toText(utils.BaseTestCase):
         self.assertEqual('type=042, len=001: 05', o.toText())
 
     def test_nested(self):
-        o = kea.Option(42).addOption(kea.Option(4).setUint16(5)).addOption(kea.Option(6).setString('hello'))
+        o = kea.Option(42).addOption(kea.Option(4)
+                                     .setUint16(5)).addOption(kea.Option(6)
+                                                              .setString('hello'))
         self.assertEqual("""\
 type=042, len=011: ,
 options:

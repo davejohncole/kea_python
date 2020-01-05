@@ -1,4 +1,3 @@
-import unittest
 import textwrap
 from ipaddress import IPv4Network
 
@@ -139,18 +138,6 @@ class TestPkt4_addOption(utils.BaseTestCase):
         self.assertIs(p, p.addOption(o))
         self.assertEqual(2, o.use_count)
 
-
-class TestPkt4_getOption(utils.BaseTestCase):
-
-    def test_ok(self):
-        p = kea.Pkt4(kea.DHCPREQUEST, 42)
-        o = p.getOption(kea.DHO_DHCP_MESSAGE_TYPE)
-        self.assertIsInstance(o, kea.Option)
-        self.assertEqual(bytes([kea.DHCPREQUEST]), o.getBytes())
-
-
-class TestPkt4_addOption(utils.BaseTestCase):
-
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         o = kea.Option(kea.DHO_DHCP_AGENT_OPTIONS)
@@ -161,6 +148,15 @@ class TestPkt4_addOption(utils.BaseTestCase):
         self.assertEqual(kea.DHO_DHCP_AGENT_OPTIONS, n.getType())
 
 
+class TestPkt4_getOption(utils.BaseTestCase):
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        o = p.getOption(kea.DHO_DHCP_MESSAGE_TYPE)
+        self.assertIsInstance(o, kea.Option)
+        self.assertEqual(bytes([kea.DHCPREQUEST]), o.getBytes())
+
+
 class TestPkt4_toText(utils.BaseTestCase):
 
     def test_empty(self):
@@ -168,7 +164,7 @@ class TestPkt4_toText(utils.BaseTestCase):
         self.assertEqual(textwrap.dedent("""\
             local_address=0.0.0.0:67, remote_address=0.0.0.0:68, msg_type=DHCPREQUEST (3), transid=0x2a,
             options:
-              type=053, len=001: 3 (uint8)"""), p.toText())
+              type=053, len=001: 3 (uint8)"""), p.toText())  # noqa: E501
 
     def test_filled(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)                                               # 53
@@ -190,4 +186,4 @@ class TestPkt4_toText(utils.BaseTestCase):
               type=051, len=004: 00:00:1c:20
               type=053, len=001: 3 (uint8)
               type=058, len=004: 00:00:07:08
-              type=059, len=004: 00:00:0e:10"""), p.toText())
+              type=059, len=004: 00:00:0e:10"""), p.toText())  # noqa: E501
