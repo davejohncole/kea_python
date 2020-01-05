@@ -8,6 +8,14 @@ class TestLease4_new(utils.BaseTestCase):
         x = kea.Lease4()
         self.assertEqual(1, x.use_count)
 
+    def test_bad_args(self):
+        with self.assertRaises(TypeError) as cm:
+            kea.Lease4(1)
+        self.assertEqual(('function takes exactly 0 arguments (1 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            kea.Lease4(x=1)
+        self.assertEqual(('keyword arguments are not supported',), cm.exception.args)
+
 
 class TestLease4_addr(utils.BaseTestCase):
 
@@ -16,6 +24,16 @@ class TestLease4_addr(utils.BaseTestCase):
         self.assertEqual('0.0.0.0', x.addr)
         x.addr = '192.168.0.1'
         self.assertEqual('192.168.0.1', x.addr)
+
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.addr = 'bogus'
+        self.assertEqual(("Failed to convert string to address 'bogus': Invalid argument",),
+                         cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            x.addr = 0
+        self.assertEqual(('The addr attribute value must be a str',), cm.exception.args)
 
 
 class TestLease4_valid_lft(utils.BaseTestCase):
@@ -26,6 +44,12 @@ class TestLease4_valid_lft(utils.BaseTestCase):
         x.valid_lft = 3600
         self.assertEqual(3600, x.valid_lft)
 
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.valid_lft = 'bogus'
+        self.assertEqual(('The valid_lft attribute value must be an int',), cm.exception.args)
+
 
 class TestLease4_cltt(utils.BaseTestCase):
 
@@ -35,6 +59,12 @@ class TestLease4_cltt(utils.BaseTestCase):
         x.cltt = 3600
         self.assertEqual(3600, x.cltt)
 
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.cltt = 'bogus'
+        self.assertEqual(('The cltt attribute value must be an int',), cm.exception.args)
+
 
 class TestLease4_subnet_id(utils.BaseTestCase):
 
@@ -43,6 +73,12 @@ class TestLease4_subnet_id(utils.BaseTestCase):
         self.assertEqual(0, x.subnet_id)
         x.subnet_id = 5
         self.assertEqual(5, x.subnet_id)
+
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.subnet_id = 'bogus'
+        self.assertEqual(('The subnet_id attribute value must be an int',), cm.exception.args)
 
 
 class TestLease4_hostname(utils.BaseTestCase):
@@ -55,8 +91,13 @@ class TestLease4_hostname(utils.BaseTestCase):
         x.hostname = None
         self.assertIsNone(x.hostname)
 
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.hostname = 3
+        self.assertEqual(('The hostname attribute value must be a str',), cm.exception.args)
 
-# "state"
+
 class TestLease4_fqdn_fwd(utils.BaseTestCase):
 
     def test_getset(self):
@@ -66,6 +107,12 @@ class TestLease4_fqdn_fwd(utils.BaseTestCase):
         self.assertEqual(True, x.fqdn_fwd)
         x.fqdn_fwd = False
         self.assertEqual(False, x.fqdn_fwd)
+
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.fqdn_fwd = 'bogus'
+        self.assertEqual(('The fqdn_fwd attribute value must be a bool',), cm.exception.args)
 
 
 class TestLease4_fqdn_rev(utils.BaseTestCase):
@@ -78,6 +125,12 @@ class TestLease4_fqdn_rev(utils.BaseTestCase):
         x.fqdn_rev = False
         self.assertEqual(False, x.fqdn_rev)
 
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.fqdn_rev = 'bogus'
+        self.assertEqual(('The fqdn_rev attribute value must be a bool',), cm.exception.args)
+
 
 class TestLease4_hwaddr(utils.BaseTestCase):
 
@@ -86,6 +139,12 @@ class TestLease4_hwaddr(utils.BaseTestCase):
         self.assertIsNone(x.hwaddr)
         x.hwaddr = '01:02:03:04:05:06'
         self.assertEqual('01:02:03:04:05:06', x.hwaddr)
+
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.hwaddr = 'bogus'
+        self.assertEqual(("invalid format of the decoded string 'bogus'",), cm.exception.args)
 
 
 class TestLease4_client_id(utils.BaseTestCase):
@@ -96,6 +155,13 @@ class TestLease4_client_id(utils.BaseTestCase):
         x.client_id = '01:02:03:04:05:06'
         self.assertEqual('01:02:03:04:05:06', x.client_id)
 
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.client_id = 'bogus'
+        self.assertEqual(("'bogus' is not a valid string of hexadecimal digits",),
+                         cm.exception.args)
+
 
 class TestLease4_state(utils.BaseTestCase):
 
@@ -104,6 +170,12 @@ class TestLease4_state(utils.BaseTestCase):
         self.assertEqual(0, x.state)
         x.state = 5
         self.assertEqual(5, x.state)
+
+    def test_bad_type(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.state = 'bogus'
+        self.assertEqual(('The state attribute value must be an int',), cm.exception.args)
 
 
 class TestLease4_setContext(utils.BaseTestCase):
@@ -116,6 +188,15 @@ class TestLease4_setContext(utils.BaseTestCase):
         self.assertIs(x, x.setContext([1, 'foo']))
         self.assertIs(x, x.setContext({'foo': 'bar'}))
         self.assertIs(x, x.setContext(None))
+
+    def test_bad_args(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.setContext()
+        self.assertEqual(('function takes exactly 1 argument (0 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            x.setContext(x=1)
+        self.assertEqual(('setContext() takes no keyword arguments',), cm.exception.args)
 
 
 class TestLease4_getContext(utils.BaseTestCase):
@@ -135,6 +216,15 @@ class TestLease4_getContext(utils.BaseTestCase):
         self.assertEqual([1, 'foo'], x.getContext())
         x.setContext({'foo': 'bar'})
         self.assertEqual({'foo': 'bar'}, x.getContext())
+
+    def test_bad_args(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.getContext(1)
+        self.assertEqual(('getContext() takes no arguments (1 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            x.getContext(x=1)
+        self.assertEqual(('getContext() takes no keyword arguments',), cm.exception.args)
 
 
 class TestLease4_toElement(utils.BaseTestCase):
@@ -175,3 +265,12 @@ class TestLease4_toElement(utils.BaseTestCase):
                           'state': 3,
                           'subnet-id': 4,
                           'valid-lft': 1800}, x.toElement())
+
+    def test_bad_args(self):
+        x = kea.Lease4()
+        with self.assertRaises(TypeError) as cm:
+            x.toElement(1)
+        self.assertEqual(('toElement() takes no arguments (1 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            x.toElement(x=1)
+        self.assertEqual(('toElement() takes no keyword arguments',), cm.exception.args)

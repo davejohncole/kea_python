@@ -7,6 +7,11 @@ class TestCfgSubnets4_getAll(utils.BaseTestCase):
     def test_ok(self):
         n = kea.CfgMgr().getCurrentCfg().getCfgSubnets4()
         self.assertEqual([], n.getAll())
+        self.assertEqual(2, n.use_count)
+        o = kea.CfgMgr().getCurrentCfg().getCfgSubnets4()
+        self.assertEqual(3, o.use_count)
+        o = None
+        self.assertEqual(2, n.use_count)
 
     def test_bad_args(self):
         n = kea.CfgMgr().getCurrentCfg().getCfgSubnets4()

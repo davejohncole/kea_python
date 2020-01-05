@@ -57,7 +57,7 @@ Lease4_toElement(Lease4Object *self, PyObject *args) {
 static PyMethodDef Lease4_methods[] = {
     {"setContext", (PyCFunction) Lease4_setContext, METH_VARARGS,
      "Sets user context."},
-    {"getContext", (PyCFunction) Lease4_getContext, METH_VARARGS,
+    {"getContext", (PyCFunction) Lease4_getContext, METH_NOARGS,
      "Returns user context."},
     {"toElement", (PyCFunction) Lease4_toElement, METH_NOARGS,
      "Return the JSON representation of a lease."},
