@@ -52,7 +52,7 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
 
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
-        return (0);
+        return (-1);
     }
     if (!PyArg_ParseTuple(args, "O!", &CalloutManagerType, &manager)) {
         return (-1);

@@ -29,7 +29,7 @@ static int
 CalloutManager_init(CalloutManagerObject *self, PyObject *args, PyObject *kwds) {
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
-        return (0);
+        return (-1);
     }
     if (!PyArg_ParseTuple(args, "")) {
         return (-1);
