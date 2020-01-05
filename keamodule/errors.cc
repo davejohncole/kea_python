@@ -103,6 +103,7 @@ log_python_traceback() {
     string traceback;
 
     PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+    // steals reference to exc_* objects
     if (!format_python_traceback(exc_type, exc_value, exc_traceback, traceback)) {
         log_error(traceback);
         return (0);

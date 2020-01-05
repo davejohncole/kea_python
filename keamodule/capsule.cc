@@ -43,7 +43,13 @@ Logger_debug(LoggerObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return (0);
     }
-    LOG_DEBUG(*kea_logger, DBGLVL_TRACE_BASIC, *kea_message_id).arg(string(msg));
+    try {
+        LOG_DEBUG(*kea_logger, DBGLVL_TRACE_BASIC, *kea_message_id).arg(string(msg));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
 
     Py_RETURN_NONE;
 }
@@ -55,7 +61,13 @@ Logger_info(LoggerObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return (0);
     }
-    LOG_INFO(*kea_logger, *kea_message_id).arg(string(msg));
+    try {
+        LOG_INFO(*kea_logger, *kea_message_id).arg(string(msg));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
 
     Py_RETURN_NONE;
 }
@@ -67,7 +79,13 @@ Logger_warn(LoggerObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return (0);
     }
-    LOG_WARN(*kea_logger, *kea_message_id).arg(string(msg));
+    try {
+        LOG_WARN(*kea_logger, *kea_message_id).arg(string(msg));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
 
     Py_RETURN_NONE;
 }
@@ -80,7 +98,13 @@ Logger_error(LoggerObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return (0);
     }
-    LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
+    try {
+        LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
 
     Py_RETURN_NONE;
 }
@@ -92,7 +116,13 @@ Logger_fatal(LoggerObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "s", &msg)) {
         return (0);
     }
-    LOG_FATAL(*kea_logger, *kea_message_id).arg(string(msg));
+    try {
+        LOG_FATAL(*kea_logger, *kea_message_id).arg(string(msg));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
 
     Py_RETURN_NONE;
 }
@@ -105,22 +135,26 @@ Logger_exception(LoggerObject *self, PyObject *args) {
         return (0);
     }
     PyObject *exc_type, *exc_value, *exc_traceback;
-    string traceback;
     PyErr_GetExcInfo(&exc_type, &exc_value, &exc_traceback);
-    if (!format_python_traceback(exc_type, exc_value, exc_traceback, traceback)) {
-        if (strlen(msg) == 0) {
-            LOG_ERROR(*kea_logger, *kea_message_id).arg(traceback);
+    try {
+        string traceback;
+        // steals reference to exc_* objects
+        if (!format_python_traceback(exc_type, exc_value, exc_traceback, traceback)) {
+            if (strlen(msg) == 0) {
+                LOG_ERROR(*kea_logger, *kea_message_id).arg(traceback);
+            }
+            else {
+                LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg) + "\n" + traceback);
+            }
         }
         else {
-            LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg) + "\n" + traceback);
+            LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
         }
     }
-    else {
-        LOG_ERROR(*kea_logger, *kea_message_id).arg(string(msg));
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
     }
-    Py_XDECREF(exc_type);
-    Py_XDECREF(exc_value);
-    Py_XDECREF(exc_traceback);
 
     Py_RETURN_NONE;
 }

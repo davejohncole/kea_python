@@ -20,6 +20,7 @@ extern PyObject *kea_module;
 // errors.cc
 extern int Errors_initialize();
 extern int Errors_finalize();
+// steals reference to exc_* objects
 extern int format_python_traceback(PyObject *exc_type, PyObject *exc_value, PyObject *exc_traceback, std::string &traceback);
 extern int log_python_traceback();
 
