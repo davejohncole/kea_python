@@ -43,10 +43,12 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|sssk", (char **)kwlist, &addr, &hwaddr, &client_id, &subnet_id)) {
         return (0);
     }
-    PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
-    if (tmp) {
-        have_subnet_id = true;
-        Py_DECREF(tmp);
+    if (kwargs != 0) {
+        PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
+        if (tmp) {
+            have_subnet_id = true;
+            Py_DECREF(tmp);
+        }
     }
 
     try {
@@ -120,15 +122,17 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, KWFORMAT, (char **)kwlist, KWVARS)) {
         return (0);
     }
-    PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
-    if (tmp) {
-        have_subnet_id = true;
-        Py_DECREF(tmp);
-    }
-    tmp = PyDict_GetItemString(kwargs, "page_size");
-    if (tmp) {
-        have_page_size = true;
-        Py_DECREF(tmp);
+    if (kwargs != 0) {
+        PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
+        if (tmp) {
+            have_subnet_id = true;
+            Py_DECREF(tmp);
+        }
+        tmp = PyDict_GetItemString(kwargs, "page_size");
+        if (tmp) {
+            have_page_size = true;
+            Py_DECREF(tmp);
+        }
     }
 
     try {

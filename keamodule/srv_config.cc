@@ -121,11 +121,6 @@ SrvConfig_define() {
     if (PyType_Ready(&SrvConfigType) < 0) {
         return (1);
     }
-    Py_INCREF(&SrvConfigType);
-    if (PyModule_AddObject(kea_module, "SrvConfig", (PyObject *) &SrvConfigType) < 0) {
-        Py_DECREF(&SrvConfigType);
-        return (1);
-    }
 
     return (0);
 }

@@ -49,6 +49,9 @@ assert_string_value(PyObject *value, const char *name, bool allow_none) {
 
 PyObject *
 element_to_object(ConstElementPtr ptr) {
+    if (!ptr) {
+        Py_RETURN_NONE;
+    }
     switch (ptr->getType()) {
         case Element::integer:
             try {

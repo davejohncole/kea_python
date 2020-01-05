@@ -27,8 +27,24 @@ Lease4_setContext(Lease4Object *self, PyObject *args) {
 }
 
 static PyObject *
+Lease4_getContext(Lease4Object *self, PyObject *args) {
+    try {
+        return (element_to_object(self->ptr->getContext()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Lease4_toElement(Lease4Object *self, PyObject *args) {
     try {
+        if (!self->ptr->hwaddr_) {
+            // avoid assertion error in shared_ptr
+            PyErr_SetString(PyExc_RuntimeError, "hwaddr must not be empty");
+            return (0);
+        }
         ElementPtr ptr = self->ptr->toElement();
         return (element_to_object(ptr));
     }
@@ -41,6 +57,8 @@ Lease4_toElement(Lease4Object *self, PyObject *args) {
 static PyMethodDef Lease4_methods[] = {
     {"setContext", (PyCFunction) Lease4_setContext, METH_VARARGS,
      "Sets user context."},
+    {"getContext", (PyCFunction) Lease4_getContext, METH_VARARGS,
+     "Returns user context."},
     {"toElement", (PyCFunction) Lease4_toElement, METH_NOARGS,
      "Return the JSON representation of a lease."},
     {0}  // Sentinel
@@ -65,7 +83,7 @@ Lease4_get_addr(Lease4Object *self, void *closure) {
 
 static int
 Lease4_set_addr(Lease4Object *self, PyObject *value, void *closure) {
-    if (assert_long_value(value, "addr")) {
+    if (assert_string_value(value, "addr", false)) {
         return (1);
     }
     try {
@@ -253,6 +271,9 @@ Lease4_set_fqdn_rev(Lease4Object *self, PyObject *value, void *closure) {
 static PyObject *
 Lease4_get_hwaddr(Lease4Object *self, void *closure) {
     try {
+        if (!self->ptr->hwaddr_) {
+            Py_RETURN_NONE;
+        }
         string hwaddr = self->ptr->hwaddr_->toText(false);
         return (PyUnicode_FromString(hwaddr.c_str()));
     }
