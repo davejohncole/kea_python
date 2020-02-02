@@ -1,6 +1,16 @@
 # Kea Python
 Develop Kea hooks in Python.
 
+This hook embeds a Python3 interpreter in Kea and provides a thin wrapper oround a subset
+of the Kea classes to allow you to develop hooks in Python.  Where possible the classes in
+the kea Python module implement the same API as the Kea class so that there are no surprises
+when using the module.  You should be able to follow the Kea developer guide at
+https://jenkins.isc.org/job/Kea_doc/doxygen/.  After you have build the kea module you can
+get a list of the contents using:
+```
+pydoc3 kea
+```
+
 Kea documentation is found at https://gitlab.isc.org/isc-projects/kea/wikis/home and can be
 downloaded from https://www.isc.org/download/.
 

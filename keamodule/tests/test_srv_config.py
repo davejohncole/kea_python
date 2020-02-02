@@ -2,7 +2,19 @@ import kea
 import utils
 
 
+class TestSrvConfig_new(utils.BaseTestCase):
+
+    def test_cannot_construct(self):
+        with self.assertRaises(RuntimeError) as cm:
+            kea.SrvConfig()
+        self.assertEqual(("cannot directly construct",), cm.exception.args)
+
+
 class TestGetCurrentConfig(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        m = kea.CfgMgr()
+        self.assert_method_no_arguments(m.getCurrentCfg)
 
     def test_ok(self):
         m = kea.CfgMgr()
@@ -12,17 +24,12 @@ class TestGetCurrentConfig(utils.BaseTestCase):
         self.assertEqual(4, c.use_count)
         self.assertEqual(4, d.use_count)
 
-    def test_bad_args(self):
-        m = kea.CfgMgr()
-        with self.assertRaises(TypeError) as cm:
-            m.getCurrentCfg(1)
-        self.assertEqual(('getCurrentCfg() takes no arguments (1 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            m.getCurrentCfg(x=1)
-        self.assertEqual(('getCurrentCfg() takes no keyword arguments',), cm.exception.args)
-
 
 class TestGetStagingConfig(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        m = kea.CfgMgr()
+        self.assert_method_no_arguments(m.getStagingCfg)
 
     def test_ok(self):
         m = kea.CfgMgr()
@@ -34,45 +41,26 @@ class TestGetStagingConfig(utils.BaseTestCase):
         d = None
         self.assertEqual(2, c.use_count)
 
-    def test_bad_args(self):
-        m = kea.CfgMgr()
-        with self.assertRaises(TypeError) as cm:
-            m.getStagingCfg(1)
-        self.assertEqual(('getStagingCfg() takes no arguments (1 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            m.getStagingCfg(x=1)
-        self.assertEqual(('getStagingCfg() takes no keyword arguments',), cm.exception.args)
-
 
 class TestSrvConfig_getCfgSubnets4(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        c = kea.CfgMgr().getStagingCfg()
+        self.assert_method_no_arguments(c.getCfgSubnets4)
 
     def test_ok(self):
         c = kea.CfgMgr().getStagingCfg()
         n = c.getCfgSubnets4()
         self.assertEqual(2, n.use_count)
 
-    def test_bad_args(self):
-        c = kea.CfgMgr().getStagingCfg()
-        with self.assertRaises(TypeError) as cm:
-            c.getCfgSubnets4(1)
-        self.assertEqual(('getCfgSubnets4() takes no arguments (1 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            c.getCfgSubnets4(x=1)
-        self.assertEqual(('getCfgSubnets4() takes no keyword arguments',), cm.exception.args)
-
 
 class TestSrvConfig_toElement(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        c = kea.CfgMgr().getStagingCfg()
+        self.assert_method_no_arguments(c.toElement)
 
     def test_ok(self):
         c = kea.CfgMgr().getStagingCfg()
         e = c.toElement()
         self.assertIsInstance(e, dict)
-
-    def test_bad_args(self):
-        c = kea.CfgMgr().getStagingCfg()
-        with self.assertRaises(TypeError) as cm:
-            c.toElement(1)
-        self.assertEqual(('toElement() takes no arguments (1 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            c.toElement(x=1)
-        self.assertEqual(('toElement() takes no keyword arguments',), cm.exception.args)

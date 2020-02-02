@@ -55,6 +55,12 @@ SrvConfig_dealloc(SrvConfigObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+static int
+SrvConfig_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
+    PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
+    return (-1);
+}
+
 static PyObject *
 SrvConfig_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     SrvConfigObject *self;
@@ -101,7 +107,7 @@ PyTypeObject SrvConfigType = {
     0,                                          // tp_descr_get
     0,                                          // tp_descr_set
     0,                                          // tp_dictoffset
-    0,                                          // tp_init
+    (initproc) SrvConfig_init,                  // tp_init
     PyType_GenericAlloc,                        // tp_alloc
     SrvConfig_new                               // tp_new
 };
@@ -119,6 +125,10 @@ SrvConfig_from_ptr(SrvConfigPtr &ptr) {
 int
 SrvConfig_define() {
     if (PyType_Ready(&SrvConfigType) < 0) {
+        return (1);
+    }
+    if (PyModule_AddObject(kea_module, "SrvConfig", (PyObject *) &SrvConfigType) < 0) {
+        Py_DECREF(&SrvConfigType);
         return (1);
     }
 

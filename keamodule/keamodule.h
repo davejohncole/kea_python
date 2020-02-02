@@ -69,6 +69,7 @@ typedef struct {
     PyObject_HEAD
 
     isc::hooks::LibraryHandle *handle;
+    bool is_owner;
 } LibraryHandleObject;
 
 #define LibraryHandle_Check(op) (Py_TYPE(op) == &LibraryHandleType)

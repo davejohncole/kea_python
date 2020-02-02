@@ -117,6 +117,12 @@ CfgSubnets4_dealloc(CfgSubnets4Object *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+static int
+CfgSubnets4_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
+    PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
+    return (-1);
+}
+
 static PyObject *
 CfgSubnets4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CfgSubnets4Object *self;
@@ -163,7 +169,7 @@ PyTypeObject CfgSubnets4Type = {
     0,                                          // tp_descr_get
     0,                                          // tp_descr_set
     0,                                          // tp_dictoffset
-    0,                                          // tp_init
+    (initproc) CfgSubnets4_init,                // tp_init
     PyType_GenericAlloc,                        // tp_alloc
     CfgSubnets4_new                             // tp_new
 };
@@ -181,6 +187,10 @@ CfgSubnets4_from_ptr(CfgSubnets4Ptr &ptr) {
 int
 CfgSubnets4_define() {
     if (PyType_Ready(&CfgSubnets4Type) < 0) {
+        return (1);
+    }
+    if (PyModule_AddObject(kea_module, "CfgSubnets4", (PyObject *) &CfgSubnets4Type) < 0) {
+        Py_DECREF(&CfgSubnets4Type);
         return (1);
     }
 

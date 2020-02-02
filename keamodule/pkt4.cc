@@ -237,8 +237,7 @@ static PyObject *
 Pkt4_pack(Pkt4Object *self, PyObject *args) {
     try {
         self->ptr->pack();
-        Py_INCREF(self);
-        return ((PyObject *)self);
+        return (PyBytes_FromStringAndSize((char *)self->ptr->getBuffer().getData(), self->ptr->getBuffer().getLength()));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());

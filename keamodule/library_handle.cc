@@ -18,6 +18,10 @@ LibraryHandle_registerCommandCallout(LibraryHandleObject *self, PyObject *args) 
         PyErr_SetString(PyExc_TypeError, "callout must be callable");
         return (0);
     }
+    if (self->is_owner) {
+        PyErr_SetString(PyExc_RuntimeError, "only supported in embedded mode");
+        return (0);
+    }
 
     CalloutClosureObject *obj = (CalloutClosureObject *) CalloutClosure_from_object(name, callout);
     if (!obj) {
@@ -46,6 +50,14 @@ static PyMethodDef LibraryHandle_methods[] = {
     {0}  // Sentinel
 };
 
+static void
+LibraryHandle_dealloc(LibraryHandleObject *self) {
+    if (self->is_owner) {
+        delete self->handle;
+    }
+    Py_TYPE(self)->tp_free((PyObject *) self);
+}
+
 static int
 LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
     CalloutManagerObject *manager = 0;
@@ -60,6 +72,7 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
 
     try {
         self->handle = new LibraryHandle(manager->manager.get());
+        self->is_owner = true;
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -75,6 +88,7 @@ LibraryHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self = (LibraryHandleObject *) type->tp_alloc(type, 0);
     if (self) {
         self->handle = 0;
+        self->is_owner = false;
     }
     return ((PyObject *) self);
 }
@@ -84,7 +98,7 @@ PyTypeObject LibraryHandleType = {
     "kea.LibraryHandle",                        // tp_name
     sizeof(LibraryHandleObject),                // tp_basicsize
     0,                                          // tp_itemsize
-    0,                                          // tp_dealloc
+    (destructor) LibraryHandle_dealloc,         // tp_dealloc
     0,                                          // tp_vectorcall_offset
     0,                                          // tp_getattr
     0,                                          // tp_setattr
@@ -125,6 +139,7 @@ LibraryHandle_from_handle(LibraryHandle *handle) {
     LibraryHandleObject *obj = PyObject_New(LibraryHandleObject, &LibraryHandleType);
     if (obj) {
         obj->handle = handle;
+        obj->is_owner = false;
     }
     return (PyObject *)obj;
 }

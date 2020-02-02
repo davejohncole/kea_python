@@ -4,10 +4,8 @@ import utils
 
 class TestCalloutManager_new(utils.BaseTestCase):
 
-    def test_toomanyargs(self):
-        with self.assertRaises(TypeError) as cm:
-            kea.CalloutManager(1)
-        self.assertEqual(('function takes exactly 0 arguments (1 given)',), cm.exception.args)
+    def test_badarg_count(self):
+        self.assert_constructor_no_arguments(kea.CalloutManager)
 
     def test_ok(self):
         m = kea.CalloutManager()

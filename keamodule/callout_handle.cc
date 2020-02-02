@@ -39,7 +39,7 @@ CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
         }
     }
 
-    if (strcmp(name, "command") == 0) {
+    if (strcmp(name, "command") == 0 || strcmp(name, "response") == 0) {
         try {
             ConstElementPtr ptr;
             self->handle->getArgument(name, ptr);
@@ -51,7 +51,7 @@ CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
         }
     }
 
-    PyErr_SetString(PyExc_ValueError, "Unknown argument");
+    PyErr_SetString(PyExc_ValueError, "unknown argument");
     return (0);
 }
 
@@ -66,7 +66,7 @@ CalloutHandle_setArgument(CalloutHandleObject *self, PyObject *args) {
 
     if (strcmp(name, "lease4") == 0) {
         if (!Lease4_Check(value)) {
-            PyErr_SetString(PyExc_TypeError, "Expected Lease4 object");
+            PyErr_SetString(PyExc_TypeError, "expected Lease4 object");
             return (0);
         }
         try {
@@ -79,7 +79,22 @@ CalloutHandle_setArgument(CalloutHandleObject *self, PyObject *args) {
         }
     }
 
-    if (strcmp(name, "response") == 0) {
+    if (strcmp(name, "query4") == 0 || strcmp(name, "response4") == 0) {
+        if (!Pkt4_Check(value)) {
+            PyErr_SetString(PyExc_TypeError, "expected Pkt4 object");
+            return (0);
+        }
+        try {
+            self->handle->setArgument(name, ((Pkt4Object *)value)->ptr);
+            Py_RETURN_NONE;
+        }
+        catch (const exception &e) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+            return (0);
+        }
+    }
+
+    if (strcmp(name, "command") == 0 || strcmp(name, "response") == 0) {
         try {
             ConstElementPtr ptr = object_to_element(value);
             if (!ptr) {
@@ -94,7 +109,7 @@ CalloutHandle_setArgument(CalloutHandleObject *self, PyObject *args) {
         }
     }
 
-    PyErr_SetString(PyExc_ValueError, "Unknown argument");
+    PyErr_SetString(PyExc_ValueError, "unknown argument");
     return (0);
 }
 

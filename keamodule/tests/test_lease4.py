@@ -4,17 +4,12 @@ import utils
 
 class TestLease4_new(utils.BaseTestCase):
 
+    def test_badarg_count(self):
+        self.assert_constructor_no_arguments(kea.Lease4)
+
     def test_ok(self):
         x = kea.Lease4()
         self.assertEqual(1, x.use_count)
-
-    def test_bad_args(self):
-        with self.assertRaises(TypeError) as cm:
-            kea.Lease4(1)
-        self.assertEqual(('function takes exactly 0 arguments (1 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            kea.Lease4(x=1)
-        self.assertEqual(('keyword arguments are not supported',), cm.exception.args)
 
 
 class TestLease4_addr(utils.BaseTestCase):
@@ -180,6 +175,10 @@ class TestLease4_state(utils.BaseTestCase):
 
 class TestLease4_setContext(utils.BaseTestCase):
 
+    def test_badarg_count(self):
+        x = kea.Lease4()
+        self.assert_method_one_arg_no_keywords(x.setContext)
+
     def test_ok(self):
         x = kea.Lease4()
         self.assertIs(x, x.setContext('foo'))
@@ -189,17 +188,12 @@ class TestLease4_setContext(utils.BaseTestCase):
         self.assertIs(x, x.setContext({'foo': 'bar'}))
         self.assertIs(x, x.setContext(None))
 
-    def test_bad_args(self):
-        x = kea.Lease4()
-        with self.assertRaises(TypeError) as cm:
-            x.setContext()
-        self.assertEqual(('function takes exactly 1 argument (0 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            x.setContext(x=1)
-        self.assertEqual(('setContext() takes no keyword arguments',), cm.exception.args)
-
 
 class TestLease4_getContext(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        x = kea.Lease4()
+        self.assert_method_no_arguments(x.getContext)
 
     def test_ok(self):
         x = kea.Lease4()
@@ -217,23 +211,19 @@ class TestLease4_getContext(utils.BaseTestCase):
         x.setContext({'foo': 'bar'})
         self.assertEqual({'foo': 'bar'}, x.getContext())
 
-    def test_bad_args(self):
-        x = kea.Lease4()
-        with self.assertRaises(TypeError) as cm:
-            x.getContext(1)
-        self.assertEqual(('getContext() takes no arguments (1 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            x.getContext(x=1)
-        self.assertEqual(('getContext() takes no keyword arguments',), cm.exception.args)
-
 
 class TestLease4_toElement(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        x = kea.Lease4()
+        self.assert_method_no_arguments(x.toElement)
 
     def test_empty(self):
         x = kea.Lease4()
         with self.assertRaises(RuntimeError) as cm:
             self.assertEqual({}, x.toElement())
         self.assertIsInstance(cm.exception, RuntimeError)
+        self.assertEqual(("hwaddr must not be empty",), cm.exception.args)
 
     def test_ok(self):
         x = kea.Lease4()
@@ -265,12 +255,3 @@ class TestLease4_toElement(utils.BaseTestCase):
                           'state': 3,
                           'subnet-id': 4,
                           'valid-lft': 1800}, x.toElement())
-
-    def test_bad_args(self):
-        x = kea.Lease4()
-        with self.assertRaises(TypeError) as cm:
-            x.toElement(1)
-        self.assertEqual(('toElement() takes no arguments (1 given)',), cm.exception.args)
-        with self.assertRaises(TypeError) as cm:
-            x.toElement(x=1)
-        self.assertEqual(('toElement() takes no keyword arguments',), cm.exception.args)
