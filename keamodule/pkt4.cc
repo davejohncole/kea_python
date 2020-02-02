@@ -39,6 +39,37 @@ Pkt4_setType(Pkt4Object *self, PyObject *args) {
 }
 
 static PyObject *
+Pkt4_getFlags(Pkt4Object *self, PyObject *args) {
+    try {
+        uint16_t flags = self->ptr->getFlags();
+        return (PyLong_FromLong(flags));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setFlags(Pkt4Object *self, PyObject *args) {
+    uint16_t flags;
+
+    if (!PyArg_ParseTuple(args, "H", &flags)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setFlags(flags);
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Pkt4_getLocalAddr(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->getLocalAddr().toText();
@@ -91,6 +122,99 @@ Pkt4_setRemoteAddr(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setRemoteAddr(IOAddress(string(addr)));
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_getCiaddr(Pkt4Object *self, PyObject *args) {
+    try {
+        string addr = self->ptr->getCiaddr().toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setCiaddr(Pkt4Object *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setCiaddr(IOAddress(string(addr)));
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_getGiaddr(Pkt4Object *self, PyObject *args) {
+    try {
+        string addr = self->ptr->getGiaddr().toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setGiaddr(Pkt4Object *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setGiaddr(IOAddress(string(addr)));
+        Py_INCREF(self);
+        return ((PyObject *)self);
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_getSiaddr(Pkt4Object *self, PyObject *args) {
+    try {
+        string addr = self->ptr->getSiaddr().toText();
+        return (PyUnicode_FromString(addr.c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Pkt4_setSiaddr(Pkt4Object *self, PyObject *args) {
+    char *addr;
+
+    if (!PyArg_ParseTuple(args, "s", &addr)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setSiaddr(IOAddress(string(addr)));
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -245,11 +369,27 @@ Pkt4_pack(Pkt4Object *self, PyObject *args) {
     }
 }
 
+static PyObject *
+Pkt4_unpack(Pkt4Object *self, PyObject *args) {
+    try {
+        self->ptr->unpack();
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
 static PyMethodDef Pkt4_methods[] = {
     {"getType", (PyCFunction) Pkt4_getType, METH_NOARGS,
      "For packets without DHCP Message Type option, it returns DHCP_NOTYPE (0)."},
     {"setType", (PyCFunction) Pkt4_setType, METH_VARARGS,
      "Sets DHCP message type."},
+    {"getFlags", (PyCFunction) Pkt4_getFlags, METH_NOARGS,
+     "Returns flags field."},
+    {"setFlags", (PyCFunction) Pkt4_setFlags, METH_VARARGS,
+     "Sets flags field."},
     {"getLocalAddr", (PyCFunction) Pkt4_getLocalAddr, METH_NOARGS,
      "Returns local IP address."},
     {"setLocalAddr", (PyCFunction) Pkt4_setLocalAddr, METH_VARARGS,
@@ -258,6 +398,18 @@ static PyMethodDef Pkt4_methods[] = {
      "Returns remote IP address."},
     {"setRemoteAddr", (PyCFunction) Pkt4_setRemoteAddr, METH_VARARGS,
      "Sets remote IP address."},
+    {"getCiaddr", (PyCFunction) Pkt4_getCiaddr, METH_NOARGS,
+     "Returns ciaddr field."},
+    {"setCiaddr", (PyCFunction) Pkt4_setCiaddr, METH_VARARGS,
+     "Sets ciaddr field."},
+    {"getGiaddr", (PyCFunction) Pkt4_getGiaddr, METH_NOARGS,
+     "Returns giaddr field."},
+    {"setGiaddr", (PyCFunction) Pkt4_setGiaddr, METH_VARARGS,
+     "Sets giaddr field."},
+    {"getSiaddr", (PyCFunction) Pkt4_getSiaddr, METH_NOARGS,
+     "Returns siaddr field."},
+    {"setSiaddr", (PyCFunction) Pkt4_setSiaddr, METH_VARARGS,
+     "Sets siaddr field."},
     {"getYiaddr", (PyCFunction) Pkt4_getYiaddr, METH_NOARGS,
      "Returns yiaddr field."},
     {"setYiaddr", (PyCFunction) Pkt4_setYiaddr, METH_VARARGS,
@@ -276,6 +428,8 @@ static PyMethodDef Pkt4_methods[] = {
      "Returns text representation of the packet."},
     {"pack", (PyCFunction) Pkt4_pack, METH_NOARGS,
      "Prepares on-wire format of DHCPv4 packet."},
+    {"unpack", (PyCFunction) Pkt4_unpack, METH_NOARGS,
+     "Parses on-wire form of DHCPv4 packet."},
     {0}  // Sentinel
 };
 
@@ -299,16 +453,30 @@ static int
 Pkt4_init(Pkt4Object *self, PyObject *args, PyObject *kwds) {
     unsigned char msg_type;
     unsigned long transid;
+    PyObject *data;
 
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (-1);
     }
-    if (!PyArg_ParseTuple(args, "bk", &msg_type, &transid)) {
-        return (-1);
-    }
 
-    self->ptr.reset(new Pkt4(msg_type, transid));
+    if (PyTuple_Size(args) == 1) {
+        if (!PyArg_ParseTuple(args, "S", &data)) {
+            return (-1);
+        }
+        uint8_t *buff;
+        Py_ssize_t len;
+        PyBytes_AsStringAndSize(data, (char**)&buff, &len);
+
+        self->ptr.reset(new Pkt4(buff, len));
+    }
+    else {
+        if (!PyArg_ParseTuple(args, "bk", &msg_type, &transid)) {
+            return (-1);
+        }
+
+        self->ptr.reset(new Pkt4(msg_type, transid));
+    }
 
     return (0);
 }

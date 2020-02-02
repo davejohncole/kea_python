@@ -8,9 +8,23 @@ import utils
 class TestPkt4_new(utils.BaseTestCase):
 
     def test_badarg_count(self):
-        self.assert_constructor_two_args_no_keywords(kea.Pkt4)
+        # 1 or 2 args
+        with self.assertRaises(TypeError) as cm:
+            kea.Pkt4()
+        self.assertEqual(('function takes exactly 2 arguments (0 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            kea.Pkt4(1, 2, 3)
+        self.assertEqual(('function takes exactly 2 arguments (3 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            kea.Pkt4(x=1)
+        self.assertEqual(('keyword arguments are not supported',), cm.exception.args)
 
     def test_badarg_type(self):
+        # 1 arg - bytes
+        with self.assertRaises(TypeError) as cm:
+            kea.Pkt4(42)
+        self.assertEqual(("argument 1 must be bytes, not int",), cm.exception.args)
+        # 2 args - type, trans_id
         with self.assertRaises(TypeError) as cm:
             kea.Pkt4('1', 42)
         self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
@@ -50,6 +64,35 @@ class TestPkt4_setType(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         p.setType(kea.DHCPNAK)
         self.assertEqual(kea.DHCPNAK, p.getType())
+
+
+class TestPkt4_getFlags(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_no_arguments(p.getFlags)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual(0, p.getFlags())
+
+
+class TestPkt4_setFlags(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_one_arg_no_keywords(p.setFlags)
+
+    def test_badarg_type(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        with self.assertRaises(TypeError) as cm:
+            p.setFlags('foo')
+        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        p.setFlags(0xbeef)
+        self.assertEqual(0xbeef, p.getFlags())
 
 
 class TestPkt4_getLocalAddr(utils.BaseTestCase):
@@ -116,6 +159,105 @@ class TestPkt4_setRemoteAddr(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         self.assertIs(p, p.setRemoteAddr('1.2.3.4'))
         self.assertEqual('1.2.3.4', p.getRemoteAddr())
+
+
+class TestPkt4_getCiaddr(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_no_arguments(p.getCiaddr)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual('0.0.0.0', p.getCiaddr())
+
+
+class TestPkt4_setCiaddr(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_one_arg_no_keywords(p.setCiaddr)
+
+    def test_badarg_type(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        with self.assertRaises(TypeError) as cm:
+            p.setCiaddr(1)
+        self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.setCiaddr('foo')
+        self.assertEqual(("Failed to convert string to address 'foo': Invalid argument",),
+                         cm.exception.args)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertIs(p, p.setCiaddr('1.2.3.4'))
+        self.assertEqual('1.2.3.4', p.getCiaddr())
+
+
+class TestPkt4_getGiaddr(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_no_arguments(p.getGiaddr)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual('0.0.0.0', p.getGiaddr())
+
+
+class TestPkt4_setGiaddr(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_one_arg_no_keywords(p.setGiaddr)
+
+    def test_badarg_type(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        with self.assertRaises(TypeError) as cm:
+            p.setGiaddr(1)
+        self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.setGiaddr('foo')
+        self.assertEqual(("Failed to convert string to address 'foo': Invalid argument",),
+                         cm.exception.args)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertIs(p, p.setGiaddr('1.2.3.4'))
+        self.assertEqual('1.2.3.4', p.getGiaddr())
+
+
+class TestPkt4_getSiaddr(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_no_arguments(p.getSiaddr)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertEqual('0.0.0.0', p.getSiaddr())
+
+
+class TestPkt4_setSiaddr(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_one_arg_no_keywords(p.setSiaddr)
+
+    def test_badarg_type(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        with self.assertRaises(TypeError) as cm:
+            p.setSiaddr(1)
+        self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.setSiaddr('foo')
+        self.assertEqual(("Failed to convert string to address 'foo': Invalid argument",),
+                         cm.exception.args)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assertIs(p, p.setSiaddr('1.2.3.4'))
+        self.assertEqual('1.2.3.4', p.getSiaddr())
 
 
 class TestPkt4_getYiaddr(utils.BaseTestCase):
@@ -264,6 +406,19 @@ class TestPkt4_pack(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         wire = p.pack()
         self.assertIsInstance(wire, bytes)
+
+
+class TestPkt4_unpack(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        self.assert_method_no_arguments(p.unpack)
+
+    def test_ok(self):
+        p = kea.Pkt4(kea.DHCPREQUEST, 42)
+        wire = p.pack()
+        p = kea.Pkt4(wire)
+        self.assertIsNone(p.unpack())
 
 
 class TestPkt4_toText(utils.BaseTestCase):
