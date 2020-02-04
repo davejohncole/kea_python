@@ -1,5 +1,6 @@
 # lease-cmds
-This exmaple is a re-implementation of the `lease-cmds` hook that comes with Kea.
+This example is a re-implementation IPv4 functionality of the `lease-cmds` hook that
+comes with Kea.
 
 Start the kea image and run the Python implementation of the `lease-cmds` hook.:
 ```
@@ -9,7 +10,7 @@ root@ae43fd3e78da:/workdir# /usr/local/sbin/kea-dhcp4 -c examples/lease-cmds/kea
 ```
 
 Then in another shell start a command shell in the kea container in order to run the test
-harness that exercises all of the implemeneted commands:
+harness that exercises all of the implemented commands:
 ```
 djc@laptop:~/play/kea_python$ docker exec -it kea bash
 root@ae43fd3e78da:/source# cd /workdir/examples/lease-cmds/
