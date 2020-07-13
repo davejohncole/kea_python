@@ -7,7 +7,9 @@
 #include <dhcp/pkt4.h>
 #include <dhcpsrv/cfgmgr.h>
 #include <dhcpsrv/lease_mgr.h>
+#include <dhcpsrv/host_mgr.h>
 #include <dhcp/dhcp4.h>
+#include <dhcpsrv/parsers/host_reservation_parser.h>
 
 extern "C" {
 
@@ -200,5 +202,42 @@ typedef struct {
 extern PyTypeObject Subnet4Type;
 extern PyObject *Subnet4_from_ptr(isc::dhcp::Subnet4Ptr &ptr);
 extern int Subnet4_define();
+
+// host.cc
+typedef struct {
+    PyObject_HEAD
+
+    bool is_const;
+    isc::dhcp::HostPtr ptr;
+    isc::dhcp::ConstHostPtr const_ptr;
+} HostObject;
+
+#define Host_Check(op) (Py_TYPE(op) == &HostType)
+extern PyTypeObject HostType;
+extern PyObject *Host_from_ptr(isc::dhcp::HostPtr host);
+extern PyObject *Host_from_constptr(isc::dhcp::ConstHostPtr host);
+extern int Host_define();
+
+// host_mgr.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::HostMgr *mgr;
+} HostMgrObject;
+
+#define HostMgr_Check(op) (Py_TYPE(op) == &HostMgrType)
+extern PyTypeObject HostMgrType;
+extern int HostMgr_define();
+
+// host_reservation_parser.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::HostReservationParser4 *parser;
+} HostReservationParserObject;
+
+#define HostReservationParser_Check(op) (Py_TYPE(op) == &HostReservationParserType)
+extern PyTypeObject HostReservationParserType;
+extern int HostReservationParser_define();
 
 }

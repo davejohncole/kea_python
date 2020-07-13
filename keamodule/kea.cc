@@ -39,7 +39,10 @@ PyInit_kea(void) {
         || SrvConfig_define()
         || CfgSubnets4_define()
         || Subnet4_define()
-        || LeaseMgr_define()) {
+        || LeaseMgr_define()
+        || Host_define()
+        || HostMgr_define()
+        || HostReservationParser_define()) {
         Py_DECREF(kea_module);
         return (0);
     }

@@ -9,6 +9,7 @@ help:
 	@echo "  build-dhtest    - build dhtest image"
 	@echo "  run-kea-dev     - run kea-dev:$(VER) shell"
 	@echo "  run-kea         - run kea:$(VER) shell"
+	@echo "  run-mysql       - run mariadb for kea"
 	@echo "  run-dhtest      - run dhtest shell"
 	@echo "run inside kea-dev shell"
 	@echo "  build-hook      - build and install libkea_python"
@@ -30,6 +31,9 @@ run-kea-dev: kea-network
 run-kea: kea-network
 	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea kea:$(VER) bash
 
+run-mysql: kea-network
+	docker run --rm --network kea -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=kea -e MYSQL_USER=kea -eMYSQL_PASSWORD=kea --name mysql mariadb
+
 run-dhtest: kea-network
 	docker run --rm -it --network kea --privileged -v`pwd`:/workdir --name dhtest dhtest bash
 
@@ -46,5 +50,5 @@ test-module:
 	cd keamodule && nosetests3
 
 .PHONY: help \
-	build-kea-dev build-kea build-dhtest run-kea-dev run-kea run-dhtest kea-network \
+	build-kea-dev build-kea build-dhtest run-kea-dev run-kea run-mysql run-dhtest kea-network \
 	build-hook build-module test-module

@@ -184,7 +184,13 @@ static KeaConstant constants[] = {
     constant(RAI_OPTION_OPERATOR_REALM),
     constant(RAI_OPTION_RELAY_PORT),
     constant(RAI_OPTION_VIRTUAL_SUBNET_SELECT),
-    constant(RAI_OPTION_VIRTUAL_SUBNET_SELECT_CTRL)
+    constant(RAI_OPTION_VIRTUAL_SUBNET_SELECT_CTRL),
+
+    {"IDENT_HWADDR", Host::IdentifierType::IDENT_HWADDR},
+    {"IDENT_DUID", Host::IdentifierType::IDENT_DUID},
+    {"IDENT_CIRCUIT_ID", Host::IdentifierType::IDENT_CIRCUIT_ID},
+    {"IDENT_CLIENT_ID", Host::IdentifierType::IDENT_CLIENT_ID},
+    {"IDENT_FLEX", Host::IdentifierType::IDENT_FLEX},
 };
 #define num_constants (sizeof(constants) / sizeof(constants[0]))
 
