@@ -39,24 +39,6 @@ def get_int_arg(args, name, default=UNSPECIFIED, error_msg=None):
     return value
 
 
-def get_bool_arg(args, name, default=UNSPECIFIED, error_msg=None):
-    value = get_arg(args, name, default)
-    if value != default and not isinstance(value, bool):
-        if error_msg:
-            raise CommandError(error_msg)
-        raise CommandError("'%s' is not a bool" % name)
-    return value
-
-
-def get_list_arg(args, name, default=UNSPECIFIED, error_msg=None):
-    value = get_arg(args, name, default)
-    if value != default and not isinstance(value, list):
-        if error_msg:
-            raise CommandError(error_msg)
-        raise CommandError("'%s' is not a list" % name)
-    return value
-
-
 def get_map_arg(args, name, default=UNSPECIFIED, error_msg=None):
     value = get_arg(args, name, default)
     if value != default and not isinstance(value, dict):
