@@ -42,7 +42,7 @@ PyInit_kea(void) {
         || LeaseMgr_define()
         || Host_define()
         || HostMgr_define()
-        || HostReservationParser_define()) {
+        || HostReservationParser4_define()) {
         Py_DECREF(kea_module);
         return (0);
     }

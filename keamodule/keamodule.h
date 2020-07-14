@@ -229,15 +229,15 @@ typedef struct {
 extern PyTypeObject HostMgrType;
 extern int HostMgr_define();
 
-// host_reservation_parser.cc
+// host_reservation_parser4.cc
 typedef struct {
     PyObject_HEAD
 
     isc::dhcp::HostReservationParser4 *parser;
-} HostReservationParserObject;
+} HostReservationParser4Object;
 
-#define HostReservationParser_Check(op) (Py_TYPE(op) == &HostReservationParserType)
-extern PyTypeObject HostReservationParserType;
-extern int HostReservationParser_define();
+#define HostReservationParser4_Check(op) (Py_TYPE(op) == &HostReservationParser4Type)
+extern PyTypeObject HostReservationParser4Type;
+extern int HostReservationParser4_define();
 
 }

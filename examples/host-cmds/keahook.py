@@ -75,7 +75,7 @@ def reservation_add(handle):
         resv = get_map_arg(args, 'reservation')
         subnet_id = get_int_arg(resv, 'subnet-id')
         del resv['subnet-id']
-        host = kea.HostReservationParser().parse(subnet_id, resv)
+        host = kea.HostReservationParser4().parse(subnet_id, resv)
         kea.HostMgr.instance().add(host)
         return {'result': 0,
                 'text': 'Host added.'}
