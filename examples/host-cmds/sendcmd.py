@@ -38,6 +38,8 @@ if __name__ == '__main__':
     #                  'client-classes': ['special_snowflake', 'office']
     #              })
 
+    # send_command('reservation-get', **{'subnet-id': 5, 'ip-address': '172.28.5.190'})
+
     # send_command('reservation-get', **{'subnet-id': 5, 'ip-address': '172.28.5.191'})
 
     # send_command('reservation-get', **{'subnet-id': 5,
@@ -50,4 +52,30 @@ if __name__ == '__main__':
     #                                    'identifier-type': 'hw-address',
     #                                    'identifier': '1a:1b:1c:1d:1e:1f'})
 
-    send_command('reservation-get-all', **{'subnet-id': 5})
+    # send_command('reservation-get-all', **{'subnet-id': 5})
+
+    # for i in range(10):
+    #     send_command('reservation-add',
+    #                  reservation={
+    #                      'subnet-id': 5,
+    #                      'hw-address': '1a:1b:1c:1d:1e:%02x' % i,
+    #                      'ip-address': '172.28.5.%d' % (i + 1)})
+
+    # for i in range(10):
+    #     send_command('reservation-get', **{'subnet-id': 5, 'ip-address': '172.28.5.%d' % (i + 1)})
+
+    # for i in range(20):
+    #     send_command('reservation-del',
+    #                  **{'subnet-id': 5,
+    #                     'ip-address': '172.28.5.%d' % (i + 1)})
+
+    res = send_command('reservation-get-page', **{'subnet-id': 5,
+                                                  'limit': 5})
+    while res['result'] == 0:
+        next = res['arguments']['next']
+        lower_host_id = next['from']
+        source_index = next['source-index']
+        res = send_command('reservation-get-page', **{'subnet-id': 5,
+                                                      'limit': 5,
+                                                      'from': lower_host_id,
+                                                      'source-index': source_index})

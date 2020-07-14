@@ -8,6 +8,18 @@ using namespace isc::data;
 extern "C" {
 
 static PyObject *
+Host_getHostId(HostObject *self, PyObject *args) {
+    try {
+        HostID host_id = (self->is_const ? self->const_ptr : self->ptr)->getHostId();
+        return (PyLong_FromUnsignedLongLong(host_id));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Host_toElement(HostObject *self, PyObject *args) {
     try {
         ElementPtr ptr = (self->is_const ? self->const_ptr : self->ptr)->toElement4();
@@ -20,6 +32,8 @@ Host_toElement(HostObject *self, PyObject *args) {
 }
 
 static PyMethodDef Host_methods[] = {
+    {"getHostId", (PyCFunction) Host_getHostId, METH_NOARGS,
+     "Returns Host ID (primary key in MySQL, PostgreSQL and Cassandra backends)."},
     {"toElement", (PyCFunction) Host_toElement, METH_NOARGS,
      "Element representation of the host."},
     {0}  // Sentinel

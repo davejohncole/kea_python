@@ -111,15 +111,15 @@ def reservation_get(handle):
     return wrap_handler(handle, get_response)
 
 
-# {"command": "reservation-get",
+# {"command": "reservation-get-all",
 #  "arguments": {"subnet-id": 1}}
 def reservation_get_all(handle):
     def get_response(args):
         subnet_id = get_int_arg(args, 'subnet-id')
         hosts = kea.HostMgr.instance().getAll4(subnet_id)
         return {'result': 0,
-                'hosts': [h.toElement() for h in hosts],
-                'text': '%s IPv4 host(s) found.' % len(hosts)}
+                'text': '%s IPv4 host(s) found.' % len(hosts),
+                'arguments': {'hosts': [h.toElement() for h in hosts]}}
 
     return wrap_handler(handle, get_response)
 
@@ -134,15 +134,31 @@ def reservation_get_all(handle):
 #                 "limit": 10}}
 def reservation_get_page(handle):
     def get_response(args):
-        return {'result': 0}
+        host_mgr = kea.HostMgr.instance()
+        subnet_id = get_int_arg(args, 'subnet-id')
+        source_index = get_int_arg(args, 'source-index', 0)
+        lower_host_id = get_int_arg(args, 'from', 0)
+        page_size = get_int_arg(args, 'limit')
+        hosts, source_index = host_mgr.getPage4(subnet_id, source_index, lower_host_id, page_size)
+        if hosts:
+            return {'result': 0,
+                    'text': '%s IPv4 host(s) found.' % len(hosts),
+                    'arguments': {'count': len(hosts),
+                                  'hosts': [h.toElement() for h in hosts],
+                                  'next': {'from': hosts[-1].getHostId(),
+                                           'source-index': source_index}}}
+        return {'result': 3,
+                'text': '0 IPv4 host(s) found.',
+                'arguments': {'count': 0,
+                              'hosts': []}}
 
     return wrap_handler(handle, get_response)
 
 
-# {"command": "reservation-get",
+# {"command": "reservation-del",
 #  "arguments": {"subnet-id": 1,
 #                "ip-address": "192.0.2.202"}}
-# {"command": "reservation-get",
+# {"command": "reservation-del",
 #  "arguments": {"subnet-id": 4,
 #                "identifier-type": "hw-address",
 #                "identifier": "01:02:03:04:05:06"}}

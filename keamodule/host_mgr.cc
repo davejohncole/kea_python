@@ -123,7 +123,7 @@ HostMgr_getPage4(HostMgrObject *self, PyObject *args) {
         if (host_list == 0) {
             return (0);
         }
-        PyObject *result = Py_BuildValue("OkK", host_list, source_index, lower_host_id);
+        PyObject *result = Py_BuildValue("Ok", host_list, source_index);
         Py_DECREF(host_list);
         return (result);
     }
