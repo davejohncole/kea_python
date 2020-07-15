@@ -17,10 +17,12 @@ def calc_macros():
         raise RuntimeError('could not determine kea version')
     version = tuple(int(v) for v in m.group(1).split('.'))
     macros = []
-    if version >= (1, 7, 1):
-        macros.append(('HAVE_GETLEASES4_HOSTNAME', None))
-    if version >= (1, 7, 4):
-        macros.append(('HAVE_DELETELEASE_LEASE', None))
+    if version < (1, 7, 1):
+        macros.append(('MISSING_GETLEASES4_HOSTNAME', None))
+    if version < (1, 7, 4):
+        macros.append(('HAVE_DELETELEASE_ADDR', None))
+    if version < (1, 7, 5):
+        macros.append(('HAVE_LIBRARYHANDLE_MANAGER_PTR', None))
     return macros
 
 

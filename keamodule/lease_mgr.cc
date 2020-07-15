@@ -102,14 +102,14 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
 
 static PyObject *
 LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
-#if HAVE_GETLEASES4_HOSTNAME
-    #define KWLIST {"subnet_id", "hostname", "lower_bound_address", "page_size", NULL}
-    #define KWFORMAT "|kssk"
-    #define KWVARS &subnet_id, &hostname, &lower_bound_address, &page_size
-#else
+#if MISSING_GETLEASES4_HOSTNAME
     #define KWLIST {"subnet_id", "lower_bound_address", "page_size", NULL}
     #define KWFORMAT "|ksk"
     #define KWVARS &subnet_id, &lower_bound_address, &page_size
+#else
+    #define KWLIST {"subnet_id", "hostname", "lower_bound_address", "page_size", NULL}
+    #define KWFORMAT "|kssk"
+    #define KWVARS &subnet_id, &hostname, &lower_bound_address, &page_size
 #endif
     static const char *kwlist[] = KWLIST;
     unsigned long subnet_id = 0;
@@ -141,7 +141,7 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
             // Lease4Collection getLeases4(SubnetID subnet_id)
             leases = self->mgr->getLeases4((SubnetID) subnet_id);
         }
-#if HAVE_GETLEASES4_HOSTNAME
+#ifndef MISSING_GETLEASES4_HOSTNAME
         else if (!have_subnet_id && hostname != 0 && !lower_bound_address && !have_page_size) {
             // Lease4Collection getLeases4(const std::string &hostname)
             leases = self->mgr->getLeases4(string(hostname));
@@ -188,25 +188,25 @@ LeaseMgr_addLease(LeaseMgrObject *self, PyObject *args) {
 
 static PyObject *
 LeaseMgr_deleteLease(LeaseMgrObject *self, PyObject *args) {
-#if HAVE_DELETELEASE_LEASE
-    Lease4Object *lease;
-
-    if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
-        return (0);
-    }
-#else
+#if HAVE_DELETELEASE_ADDR
     char *addr;
 
     if (!PyArg_ParseTuple(args, "s", &addr)) {
         return (0);
     }
+#else
+    Lease4Object *lease;
+
+    if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
+        return (0);
+    }
 #endif
 
     try {
-#if HAVE_DELETELEASE_LEASE
-        bool result = self->mgr->deleteLease(lease->ptr);
-#else
+#if HAVE_DELETELEASE_ADDR
         bool result = self->mgr->deleteLease(IOAddress(string(addr)));
+#else
+        bool result = self->mgr->deleteLease(lease->ptr);
 #endif
         if (result) {
             Py_RETURN_TRUE;

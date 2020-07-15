@@ -71,7 +71,11 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
     }
 
     try {
+#if HAVE_LIBRARYHANDLE_MANAGER_PTR
         self->handle = new LibraryHandle(manager->manager.get());
+#else
+        self->handle = new LibraryHandle(*manager->manager);
+#endif
         self->is_owner = true;
     }
     catch (const exception &e) {
