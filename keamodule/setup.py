@@ -3,28 +3,15 @@ import re
 from distutils.core import setup, Extension
 
 
-def find_kea_include():
-    for path in ['/usr/local/include/kea',
-                 '/usr/include/kea']:
-        if os.path.isdir(path):
-            return path
-    raise RuntimeError('cannot locate kea include directory')
-
-
-def find_kea_libs():
-    for path in ['/usr/local/lib',
-                 '/usr/lib64']:
-        if os.path.exists(os.path.join(path, 'libkea-hooks.so')):
-            return path
-    raise RuntimeError('cannot locate kea library directory')
-
-
-kea_include = find_kea_include()
-kea_libs = find_kea_libs()
+settings = {}
+for line in open('../settings.mk'):
+    if '=' in line:
+        name, value = line.split('=')
+        settings[name.strip()] = value.strip()
 
 
 def calc_macros():
-    config_h = open(os.path.join(kea_include, 'config.h')).read()
+    config_h = open(os.path.join(settings['KEA_INC'], 'config.h')).read()
     m = re.search(r'^#define VERSION "([^"]*)"\n', config_h, re.M)
     if not m:
         raise RuntimeError('could not determine kea version')
@@ -60,13 +47,13 @@ kea = Extension('kea',
                          'subnet4.cc',
                          'option.cc',
                          'srv_config.cc'],
-                include_dirs=[kea_include],
+                include_dirs=[settings['KEA_INC']],
                 libraries=['kea-exceptions',
                            'kea-log',
                            'kea-hooks',
                            'kea-dhcpsrv',
                            'ffi'],
-                library_dirs=[kea_libs],
+                library_dirs=[settings['KEA_LIBS']],
                 extra_compile_args=['-std=c++11'])
 
 setup(name='kea',

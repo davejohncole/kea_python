@@ -25,21 +25,16 @@ def find_keahooks():
     raise RuntimeError('cannot find kea hooks')
 
 
-if os.path.exists('config.txt'):
-    config = {}
-    for line in open('config.txt'):
-        if '=' in line:
-            name, value = line.split('=')
-            config[name.strip()] = value.strip()
-else:
-    config = dict(pyinc=find_pyinc(),
-                  keainc=find_keainc(),
-                  keahooks=find_keahooks())
-    open('config.txt', 'w').write('''\
-pyinc = {pyinc}
-keainc = {keainc}
-keahooks = {keahooks}
-'''.format(**config))
+def find_kealibs():
+    for path in ['/usr/local/lib',
+                 '/usr/lib64']:
+        if os.path.exists(os.path.join(path, 'libkea-hooks.so')):
+            return path
+    raise RuntimeError('cannot locate kea library directory')
 
 
-print(config[sys.argv[1]])
+with open('settings.mk', 'w') as fp:
+    fp.write('PYTHON_INC = %s\n' % find_pyinc())
+    fp.write('KEA_INC = %s\n' % find_keainc())
+    fp.write('KEA_HOOKS = %s\n' % find_keahooks())
+    fp.write('KEA_LIBS = %s\n' % find_kealibs())

@@ -40,11 +40,14 @@ run-dhtest: kea-network
 kea-network:
 	docker network ls | grep -q kea || docker network create --subnet=172.28.5.0/24 --ip-range=172.28.5.0/24 kea
 
-build-hook:
+build-hook: settings.mk
 	cd keahook && rm -f libkea_python.so && make install
 
-build-module:
+build-module: settings.mk
 	cd keamodule && rm -rf build && python3 setup.py install
+
+settings.mk:
+	python3 settings.py
 
 test-module:
 	cd keamodule && nosetests3
