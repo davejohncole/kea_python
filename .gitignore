@@ -6,3 +6,4 @@ build
 *.log.lock
 .vscode
 settings.mk
+dhcpdb_create.mysql.sql

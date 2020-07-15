@@ -31,8 +31,12 @@ run-kea-dev: kea-network
 run-kea: kea-network
 	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea kea:$(VER) bash
 
-run-mysql: kea-network
-	docker run --rm --network kea -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=kea -e MYSQL_USER=kea -eMYSQL_PASSWORD=kea --name mysql mariadb
+run-mysql: kea-network dhcpdb_create.mysql.sql
+	docker run --rm --network kea \
+		-e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=kea -e MYSQL_USER=kea -eMYSQL_PASSWORD=kea \
+		--name mysql \
+		-v `pwd`/dhcpdb_create.mysql.sql:/docker-entrypoint-initdb.d/dhcpdb_create.mysql.sql \
+		mariadb
 
 run-dhtest: kea-network
 	docker run --rm -it --network kea --privileged -v`pwd`:/workdir --name dhtest dhtest bash
@@ -48,6 +52,10 @@ build-module: settings.mk
 
 settings.mk:
 	python3 settings.py
+
+dhcpdb_create.mysql.sql:
+	tar xz --strip-components 6 -f kea-$(VER).tar.gz kea-$(VER)/src/share/database/scripts/mysql/dhcpdb_create.mysql
+	mv dhcpdb_create.mysql dhcpdb_create.mysql.sql
 
 test-module:
 	cd keamodule && nosetests3
