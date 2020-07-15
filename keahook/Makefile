@@ -2,7 +2,7 @@ include ../settings.mk
 
 libkea_python.so: load_unload.cc messages.cc version.cc
 	g++ -std=c++11 -I $(KEA_INC) -I $(PYTHON_INC) -L /usr/local/lib -fpic -shared -o libkea_python.so \
-		load_unload.cc messages.cc version.cc \settings
+		load_unload.cc messages.cc version.cc \
 		-lkea-dhcpsrv -lkea-dhcp++ -lkea-hooks -lkea-log -lkea-util -lkea-exceptions
 
 messages.cc: messages.mes
