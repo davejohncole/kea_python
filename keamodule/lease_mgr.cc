@@ -188,14 +188,26 @@ LeaseMgr_addLease(LeaseMgrObject *self, PyObject *args) {
 
 static PyObject *
 LeaseMgr_deleteLease(LeaseMgrObject *self, PyObject *args) {
+#if HAVE_DELETELEASE_LEASE
+    Lease4Object *lease;
+
+    if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
+        return (0);
+    }
+#else
     char *addr;
 
     if (!PyArg_ParseTuple(args, "s", &addr)) {
         return (0);
     }
+#endif
 
     try {
+#if HAVE_DELETELEASE_LEASE
+        bool result = self->mgr->deleteLease(lease->ptr);
+#else
         bool result = self->mgr->deleteLease(IOAddress(string(addr)));
+#endif
         if (result) {
             Py_RETURN_TRUE;
         }

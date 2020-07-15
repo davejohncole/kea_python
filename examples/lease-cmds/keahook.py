@@ -271,13 +271,14 @@ def lease4_del(handle):
     def get_response(args):
         lease_mgr = kea.LeaseMgr()
         kwargs = get_lease4_kwargs(args)
-        addr = kwargs.get('addr')
-        if addr is None:
-            lease = lease_mgr.getLease4(**kwargs)
-            if not lease:
-                raise CommandError("IPv4 lease not found")
-            addr = lease.addr
-        if lease_mgr.deleteLease(addr):
+        lease = lease_mgr.getLease4(**kwargs)
+        if not lease:
+            raise CommandError("IPv4 lease not found")
+        if kea.__version__ >= '1.7.3':
+            arg = lease
+        else:
+            arg = lease.addr
+        if lease_mgr.deleteLease(arg):
             return {'result': 0,
                     'text': 'IPv4 lease deleted'}
         else:
