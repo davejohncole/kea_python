@@ -52,6 +52,50 @@ KEA_LIBS = /usr/lib64
 If those settings are not correct then you can manually edit the file.  It will only be re-created
 if you remove it manually or by running `make clean`.
 
+## Loading the kea_python hook
+To load this hook into kea you will need a `hook-libraries` section in `kea.conf` that looks something
+like the following:
+```
+        "hooks-libraries": [{
+            "library": "/usr/lib64/kea/hooks/libkea_python.so",
+            "parameters": {
+                "libpython": "libpython3.6m.so",
+                "module": "/usr/local/lib/kea/keahook.py"
+            }
+        }],
+```
+Three things need to be specified:
+1. The full path to the kea_python hook in `"library"`.  The `KEA_HOOKS` directory defined in `settings.mk`
+   is where the hook will be installed.
+1. The name of the python3 shared library in `"libpython"`.  On CentOS 7 you cn determine this by running:
+   ```
+   $ rpm -ql python3-devel | grep libpython
+   /usr/lib64/libpython3.6m.so
+   ```
+   You only need the filename, not the full path.
+1. The full path to the Python module that implements your hook logic in `"module"`.  You can install your
+   Python hook anywhere you like.  The directory containing the hook will be added to PYTHONPATH so you
+   can install other modules and packages into the same directory.
+
+The reason you specify libpython in kea.conf is because kea_python is not linked with libpython.  This is
+due to the way Kea dynamically loads hook libraries.  Kea uses dlopen(3) with the RTLD_LOCAL flag which
+prevents any symbols defined in the hook library from being used for subsequent dynamic linking.  Python
+would not be able to load any extension modules, including those that are part of Python.
+
+To work around this problem the kea_python hook is not linked with libpython, it instead uses dlopen(3)
+with the RTLD_GLOBAL flag to load libpython after it is loaded so that Python symbols are available Python
+extension modules.
+
+## Examples
+There are a number of examples showing how to use the module.  The notable ones are
+* [lease-cmds](examples/lease-cmds) is a re-implementation of the IPv4 functionality in the lease-cmds hook
+  bundled with Kea.
+* [facebook-trick](examples/facebook-trick) demonstrates how to completely replace the lease allocation
+  process.  It was inspired by a Facebook presentation to usenix.  The PDF slides are currenlt available
+  at https://www.usenix.org/sites/default/files/conference/protected-files/srecon15europe_slides_failla.pdf
+* [host-cmds](examples/host-cmds) is an implementation (without reference to source code) of the REST API
+  described at https://kea.readthedocs.io/en/kea-1.6.2/arm/hooks.html#host-cmds-host-commands
+
 ## Using docker to experiment
 Download a Kea .tar.gz from https://downloads.isc.org/isc/kea/ and place it in your working
 directory.
