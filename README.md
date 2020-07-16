@@ -167,29 +167,3 @@ like this:
 ```
 root@a742a1b8b485:/workdir# make clean-module build-module test-module
 ```
-
-## Building the hook and module outside of Docker
-All of the commands in needed to build the hook library and kea module are in either `DockerfileDev`
-or `Dockerfile`.
-
-Assuming you have already built and installed Kea on a machine, something very similar to the
-following commands should work:
-```
-djc@laptop:~/play/kea_python$ apt-get -y install libffi-dev libpython3-dev python3
-djc@laptop:~/play/kea_python$ cd keahook
-djc@laptop:~/play/kea_python/keahook$ make libkea_python.so
-djc@laptop:~/play/kea_python/keahook$ cp libkea_python.so /where/you/install/kea/hooks
-djc@laptop:~/play/kea_python/keahook$ cd ../keamodule
-djc@laptop:~/play/kea_python/keamodule$ python3 setup.py install
-```
-The `setup.py` script will install the kea module into the standard directory for site packages.
-On Debian this will be `/usr/local/lib/python3.5/dist-packages`.
-
-You can confirm a correct installation by importing the kea module in an interactive Python shell.
-```
-djc@laptop:~/play/kea_python$ python3
-Python 3.5.3 (default, Sep 27 2018, 17:25:39) 
-[GCC 6.3.0 20170516] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> import kea
-```
