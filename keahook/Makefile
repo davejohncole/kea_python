@@ -8,5 +8,8 @@ libkea_python.so: load_unload.cc messages.cc version.cc
 messages.cc: messages.mes
 	kea-msg-compiler messages.mes
 
+clean:
+	rm -f libkea_python.so
+
 install: libkea_python.so
 	install libkea_python.so $(KEA_HOOKS)

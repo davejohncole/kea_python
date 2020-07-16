@@ -19,8 +19,41 @@ This project uses docker images so that the DHCP server and clients can be run o
 development workstation in a virtual network.  Installation of Docker Engine - Community as
 is described at https://docs.docker.com/install/linux/docker-ce/ubuntu/ (for Ubuntu).
 
-## Getting started
-Download a Kea .tar.gz from https://www.isc.org/download/ and place it in your working
+## Installation on CentOS 7
+To build and install this kea_python on CentOS you will need to perform the following (if you
+have not already done so):
+```
+$ sudo yum -y update
+$ sudo yum -y install epel-release
+$ sudo yum -y install make gcc-c++
+$ sudo yum -y install kea kea-hooks kea-devel python3-devel libffi-devel
+```
+This will install all of the software required to build this project.
+
+If you have manually compiled and installed Kea from source then the following process should
+still work, although you will need to install the python3-devel and libffi-devel packages.
+
+Clone the kea_python project, compile it, and install it:
+```
+$ git clone https://github.com/davejohncole/kea_python.git
+$ cd kea_python
+$ make build
+$ sudo make install
+```
+The build target creates a `settings.mk` in the parent directory that is used in the build process
+for the keahook and keamodule subdirectories.  `settings.mk` contains the location of
+dependencies required to build.  It will look something like this:
+```
+PYTHON_INC = /usr/include/python3.5m
+KEA_INC = /usr/local/include/kea
+KEA_HOOKS = /usr/local/lib/kea/hooks
+KEA_LIBS = /usr/local/lib
+```
+If those settings are not correct then you can manually edit the file.  It will only be re-created
+if you remove it manually or by running `make clean`.
+
+## Using docker to experiment
+Download a Kea .tar.gz from https://downloads.isc.org/isc/kea/ and place it in your working
 directory.
 
 Most of the commands you will need to run are in a `Makefile`.  You can view the targets
@@ -28,32 +61,46 @@ by simply running `make`:
 ```
 djc@laptop:~/play/kea_python$ make
 run on host
-  build-kea-dev   - build kea-dev:1.6.1 image
-  build-kea       - build kea:1.6.1 image
+  build-kea-dev   - build kea-dev:1.6.2 image
+  build-kea       - build kea:1.6.2 image
   build-dhtest    - build dhtest image
-  run-kea-dev     - run kea-dev:1.6.1 shell
-  run-kea         - run kea:1.6.1 shell
+  run-kea-dev     - run kea-dev:1.6.2 shell
+  run-kea         - run kea:1.6.2 shell
+  run-mysql       - run mariadb for kea with schema for 1.6.2
   run-dhtest      - run dhtest shell
-run inside kea-dev shell
-  build-hook      - build and install libkea_python
-  build-module    - build and install kea extension module
+run on host or inside kea-dev shell
+  build           - build-hook and build-module
+  install         - install-hook and install-module
+  clean           - remove all generated files
+  build-hook      - build libkea_python
+  build-module    - build kea extension module
+  clean-module    - delete kea extension module build files
+  install-hook    - install libkea_python
+  install-module  - install kea extension module
   test-module     - run unit tests for kea extension module
 ```
 
-By default the project works with kea 1.6.1.  You can override that by specifying the version
+By default the project works with kea 1.6.2.  You can override that by specifying the version
 in the environment:
 ```
-djc@laptop:~/play/kea_python$ VER=1.7.3 make
+djc@laptop:~/play/kea_python$ VER=1.7.5 make
 run on host
-  build-kea-dev   - build kea-dev:1.7.3 image
-  build-kea       - build kea:1.7.3 image
+  build-kea-dev   - build kea-dev:1.7.5 image
+  build-kea       - build kea:1.7.5 image
   build-dhtest    - build dhtest image
-  run-kea-dev     - run kea-dev:1.7.3 shell
-  run-kea         - run kea:1.7.3 shell
+  run-kea-dev     - run kea-dev:1.7.5 shell
+  run-kea         - run kea:1.7.5 shell
+  run-mysql       - run mariadb for kea with schema for 1.7.5
   run-dhtest      - run dhtest shell
-run inside kea-dev shell
-  build-hook      - build and install libkea_python
-  build-module    - build and install kea extension module
+run on host or inside kea-dev shell
+  build           - build-hook and build-module
+  install         - install-hook and install-module
+  clean           - remove all generated files
+  build-hook      - build libkea_python
+  build-module    - build kea extension module
+  clean-module    - delete kea extension module build files
+  install-hook    - install libkea_python
+  install-module  - install kea extension module
   test-module     - run unit tests for kea extension module
 ```
 
@@ -76,8 +123,8 @@ development related files.  The saving is huge:
 ```
 djc@laptop:~/play/kea_python$ docker images
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-kea                 1.6.1               292b89ff6bc8        5 minutes ago       346MB
-kea-dev             1.6.1               bdd11aaa16eb        8 minutes ago       3.55GB
+kea                 1.6.2               f09ca68bf21a        5 minutes ago       363MB
+kea-dev             1.6.2               465d0a9fc510        2 hours ago         3.85GB
 debian              stretch-slim        2b343cb3b772        5 weeks ago         55.3MB
 ```
 
@@ -110,7 +157,7 @@ to do is the following:
 ```
 djc@laptop:~/play/kea_python$ make run-kea-dev 
 root@a742a1b8b485:/source# cd /workdir
-root@a742a1b8b485:/workdir# make build-hook build-module
+root@a742a1b8b485:/workdir# make install
 ```
 Once the build finishes your container is able to run python hooks in the same was as the `kea`
 image.  Your working directory is mounted as `/workdir` in the container.
@@ -118,7 +165,7 @@ image.  Your working directory is mounted as `/workdir` in the container.
 Any time you make a change to the `keamodule` code you should rebuild it and run the unit tests
 like this:
 ```
-root@a742a1b8b485:/workdir# make build-module test-module
+root@a742a1b8b485:/workdir# make clean-module build-module test-module
 ```
 
 ## Building the hook and module outside of Docker

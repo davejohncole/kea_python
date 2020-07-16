@@ -1,5 +1,5 @@
 ifeq "$(VER)" ""
-	VER=1.6.1
+	VER=1.6.2
 endif
 
 help:
@@ -9,11 +9,17 @@ help:
 	@echo "  build-dhtest    - build dhtest image"
 	@echo "  run-kea-dev     - run kea-dev:$(VER) shell"
 	@echo "  run-kea         - run kea:$(VER) shell"
-	@echo "  run-mysql       - run mariadb for kea"
+	@echo "  run-mysql       - run mariadb for kea with schema for $(VER)"
 	@echo "  run-dhtest      - run dhtest shell"
-	@echo "run inside kea-dev shell"
-	@echo "  build-hook      - build and install libkea_python"
-	@echo "  build-module    - build and install kea extension module"
+	@echo "run on host or inside kea-dev shell"
+	@echo "  build           - build-hook and build-module"
+	@echo "  install         - install-hook and install-module"
+	@echo "  clean           - remove all generated files"
+	@echo "  build-hook      - build libkea_python"
+	@echo "  build-module    - build kea extension module"
+	@echo "  clean-module    - delete kea extension module build files"
+	@echo "  install-hook    - install libkea_python"
+	@echo "  install-module  - install kea extension module"
 	@echo "  test-module     - run unit tests for kea extension module"
 
 build-kea-dev:
@@ -44,11 +50,30 @@ run-dhtest: kea-network
 kea-network:
 	docker network ls | grep -q kea || docker network create --subnet=172.28.5.0/24 --ip-range=172.28.5.0/24 kea
 
+build: build-hook build-module
+
 build-hook: settings.mk
-	cd keahook && rm -f libkea_python.so && make install
+	cd keahook && make libkea_python.so
 
 build-module: settings.mk
-	cd keamodule && rm -rf build && python3 setup.py install
+	cd keamodule && python3 setup.py build
+
+clean-module:
+	cd keamodule && rm -rf build
+
+install: install-hook install-module
+
+install-hook: build-hook
+	cd keahook && make install
+
+install-module: build-module
+	cd keamodule && python3 setup.py install
+
+clean:
+	touch settings.mk
+	cd keahook && make clean
+	cd keamodule && rm -rf build
+	rm -f settings.mk dhcpdb_create.mysql.sql
 
 settings.mk:
 	python3 settings.py
@@ -58,7 +83,7 @@ dhcpdb_create.mysql.sql:
 	mv dhcpdb_create.mysql dhcpdb_create.mysql.sql
 
 test-module:
-	cd keamodule && nosetests3
+	PYTHONPATH=$(wildcard keamodule/build/lib.*) nosetests3 -w keamodule/tests
 
 .PHONY: help \
 	build-kea-dev build-kea build-dhtest run-kea-dev run-kea run-mysql run-dhtest kea-network \

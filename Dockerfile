@@ -4,7 +4,7 @@ FROM kea-dev:$VER AS build
 WORKDIR /source
 COPY . .
 
-RUN make build-hook build-module \
+RUN make clean install \
     && mkdir /dist \
     && cd /usr/local \
     && find lib -name \*.so\* | tar cf - -T - | (cd /dist; tar xf -) \
@@ -21,7 +21,9 @@ RUN apt-get update -y \
         libpython3.5 \
         liblog4cplus-1.1-9 \
         libboost-system1.62.0 \
-        libffi6
+        libffi6 \
+        libpq5 \
+        libmariadb2
 
 COPY --from=build /dist /usr/local
 
