@@ -44,10 +44,10 @@ The build target creates a `settings.mk` in the parent directory that is used in
 for the keahook and keamodule subdirectories.  `settings.mk` contains the location of
 dependencies required to build.  It will look something like this:
 ```
-PYTHON_INC = /usr/include/python3.5m
-KEA_INC = /usr/local/include/kea
-KEA_HOOKS = /usr/local/lib/kea/hooks
-KEA_LIBS = /usr/local/lib
+PYTHON_INC = /usr/include/python3.6m
+KEA_INC = /usr/include/kea
+KEA_HOOKS = /usr/lib64/kea/hooks
+KEA_LIBS = /usr/lib64
 ```
 If those settings are not correct then you can manually edit the file.  It will only be re-created
 if you remove it manually or by running `make clean`.
