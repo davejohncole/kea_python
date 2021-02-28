@@ -5,9 +5,7 @@ import utils
 class TestCfgSubnets4_new(utils.BaseTestCase):
 
     def test_cannot_construct(self):
-        with self.assertRaises(RuntimeError) as cm:
-            kea.CfgSubnets4()
-        self.assertEqual(("cannot directly construct",), cm.exception.args)
+        self.assert_cannot_construct(kea.CfgSubnets4)
 
 
 class TestCfgSubnets4_getAll(utils.BaseTestCase):

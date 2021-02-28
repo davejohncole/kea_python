@@ -16,6 +16,11 @@ class BaseTestCase(unittest.TestCase):
         self.maxDiff = None
         kea.logger = Logger()
 
+    def assert_cannot_construct(self, cls):
+        with self.assertRaises(RuntimeError) as cm:
+            cls()
+        self.assertEqual(("cannot directly construct",), cm.exception.args)
+
     def assert_constructor_no_arguments(self, cls):
         with self.assertRaises(TypeError) as cm:
             cls(1)

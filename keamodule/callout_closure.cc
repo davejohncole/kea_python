@@ -52,11 +52,6 @@ CalloutClosure_dealloc(CalloutClosureObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
-static PyObject *
-CalloutClosure_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    return (type->tp_alloc(type, 0));
-}
-
 PyTypeObject CalloutClosureType = {
     PyObject_HEAD_INIT(0)
     "kea.CalloutClosure",                       // tp_name
@@ -95,7 +90,7 @@ PyTypeObject CalloutClosureType = {
     0,                                          // tp_dictoffset
     0,                                          // tp_init
     PyType_GenericAlloc,                        // tp_alloc
-    CalloutClosure_new                          // tp_new
+    PyType_GenericNew                           // tp_new
 };
 
 PyObject *

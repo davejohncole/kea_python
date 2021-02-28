@@ -56,11 +56,6 @@ CfgMgr_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
-static PyObject *
-CfgMgr_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    return (type->tp_alloc(type, 0));
-}
-
 PyTypeObject CfgMgrType = {
     PyObject_HEAD_INIT(0)
     "kea.CfgMgr",                               // tp_name
@@ -99,7 +94,7 @@ PyTypeObject CfgMgrType = {
     0,                                          // tp_dictoffset
     (initproc) CfgMgr_init,                     // tp_init
     PyType_GenericAlloc,                        // tp_alloc
-    CfgMgr_new                                  // tp_new
+    PyType_GenericNew                           // tp_new
 };
 
 int
