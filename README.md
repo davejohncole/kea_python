@@ -94,7 +94,7 @@ There are a number of examples showing how to use the module.  The notable ones 
   process.  It was inspired by a Facebook presentation to usenix.  The PDF slides are currenlty available
   at https://www.usenix.org/sites/default/files/conference/protected-files/srecon15europe_slides_failla.pdf
 * [host-cmds](examples/host-cmds) is an implementation (without reference to source code) of the REST API
-  described at https://kea.readthedocs.io/en/kea-1.6.2/arm/hooks.html#host-cmds-host-commands
+  described at https://kea.readthedocs.io/en/kea-1.8.2/arm/hooks.html#host-cmds-host-commands
 
 ## Using docker to experiment
 Download a Kea .tar.gz from https://downloads.isc.org/isc/kea/ and place it in your working
@@ -105,12 +105,12 @@ by simply running `make`:
 ```
 djc@laptop:~/play/kea_python$ make
 run on host
-  build-kea-dev   - build kea-dev:1.6.2 image
-  build-kea       - build kea:1.6.2 image
+  build-kea-dev   - build kea-dev:1.8.2 image
+  build-kea       - build kea:1.8.2 image
   build-dhtest    - build dhtest image
-  run-kea-dev     - run kea-dev:1.6.2 shell
-  run-kea         - run kea:1.6.2 shell
-  run-mysql       - run mariadb for kea with schema for 1.6.2
+  run-kea-dev     - run kea-dev:1.8.2 shell
+  run-kea         - run kea:1.8.2 shell
+  run-mysql       - run mariadb for kea with schema for 1.8.2
   run-dhtest      - run dhtest shell
 run on host or inside kea-dev shell
   build           - build-hook and build-module
@@ -124,7 +124,7 @@ run on host or inside kea-dev shell
   test-module     - run unit tests for kea extension module
 ```
 
-By default the project works with kea 1.6.2.  You can override that by specifying the version
+By default the project works with kea 1.8.2.  You can override that by specifying the version
 in the environment:
 ```
 djc@laptop:~/play/kea_python$ VER=1.7.5 make
@@ -166,10 +166,10 @@ The `kea` image uses `kea-dev` to compile the `kea_python` hook and then discard
 development related files.  The saving is huge:
 ```
 djc@laptop:~/play/kea_python$ docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-kea                 1.6.2               f09ca68bf21a        5 minutes ago       363MB
-kea-dev             1.6.2               465d0a9fc510        2 hours ago         3.85GB
-debian              stretch-slim        2b343cb3b772        5 weeks ago         55.3MB
+REPOSITORY                    TAG           IMAGE ID       CREATED             SIZE
+kea                           1.8.2         0df9286a45a2   About an hour ago   543MB
+kea-dev                       1.8.2         75fa98de7b1f   About an hour ago   6.24GB
+ubuntu                        21.04         58fb7079c94b   3 weeks ago         80.9MB
 ```
 
 ## Running examples

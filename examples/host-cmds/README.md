@@ -1,6 +1,6 @@
 # host-cmds
 This example was implemented by following the REST interface described in the Kea
-documentation at https://kea.readthedocs.io/en/kea-1.6.2/arm/hooks.html#host-cmds-host-commands.
+documentation at https://kea.readthedocs.io/en/kea-1.8.2/arm/hooks.html#host-cmds-host-commands.
 
 Run a MySQL instance with the host reservations schema.  Kea will not start if it cannot connect
 to the database.
