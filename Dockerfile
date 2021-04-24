@@ -10,7 +10,7 @@ RUN make clean install \
     && find lib -name \*.so\* | tar cf - -T - | (cd /dist; tar xf -) \
     && tar cf - etc share/man bin sbin var | (cd /dist; tar xf -)
 
-FROM debian:stretch-slim
+FROM ubuntu:21.04
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update -y \
@@ -18,12 +18,12 @@ RUN apt-get update -y \
         procps \
         socat \
         python3 \
-        libpython3.5 \
-        liblog4cplus-1.1-9 \
-        libboost-system1.62.0 \
-        libffi6 \
+        libpython3.9 \
+        liblog4cplus-2.0.5 \
+        libboost-system1.74.0 \
+        libffi8ubuntu1 \
         libpq5 \
-        libmariadb2
+        libmariadb3
 
 COPY --from=build /dist /usr/local
 

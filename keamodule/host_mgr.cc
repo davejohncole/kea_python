@@ -228,13 +228,6 @@ HostMgr_init(HostMgrObject *self, PyObject *args, PyObject *kwds) {
     return (-1);
 }
 
-static PyObject *
-HostMgr_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
-    HostMgrObject *self;
-    self = (HostMgrObject *) type->tp_alloc(type, 0);
-    return ((PyObject *) self);
-}
-
 PyTypeObject HostMgrType = {
     PyObject_HEAD_INIT(0)
     "kea.HostMgr",                              // tp_name
@@ -273,7 +266,7 @@ PyTypeObject HostMgrType = {
     0,                                          // tp_dictoffset
     (initproc) HostMgr_init,                    // tp_init
     PyType_GenericAlloc,                        // tp_alloc
-    HostMgr_new                                 // tp_new
+    PyType_GenericNew                           // tp_new
 };
 
 int

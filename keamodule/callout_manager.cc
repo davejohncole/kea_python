@@ -21,12 +21,14 @@ static PyGetSetDef CalloutManager_getsetters[] = {
 
 static void
 CalloutManager_dealloc(CalloutManagerObject *self) {
-    self->manager.reset();
+    self->manager.~CalloutManagerPtr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static int
 CalloutManager_init(CalloutManagerObject *self, PyObject *args, PyObject *kwds) {
+    new(&self->manager) CalloutManagerPtr;
+
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (-1);
@@ -51,7 +53,7 @@ CalloutManager_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CalloutManagerObject *self;
     self = (CalloutManagerObject *) type->tp_alloc(type, 0);
     if (self) {
-        self->manager.reset();
+        new(&self->manager) CalloutManagerPtr;
     }
     return ((PyObject *) self);
 }

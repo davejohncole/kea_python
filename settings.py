@@ -3,7 +3,7 @@ import sys
 
 
 def find_pyinc():
-    path = os.path.join(sys.prefix, 'include/python%d.%dm' % sys.version_info[:2])
+    path = os.path.join(sys.prefix, 'include/python%d.%d' % sys.version_info[:2])
     if os.path.isdir(path):
         return path
     raise RuntimeError('cannot find python include')

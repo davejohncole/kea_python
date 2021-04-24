@@ -29,9 +29,3 @@ class TestHostMgr_add(utils.BaseTestCase):
         with self.assertRaises(TypeError) as cm:
             m.add('foo')
         self.assertEqual(("argument 1 must be kea.Host, not str",), cm.exception.args)
-
-    def test_ok(self):
-        h = kea.HostReservationParser4().parse(1, {'hw-address': '01:02:03:04:05:06',
-                                                   'ip-address': '192.168.1.1'})
-        m = kea.HostMgr.instance()
-        m.add(h)

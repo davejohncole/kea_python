@@ -51,8 +51,8 @@ static PyGetSetDef Host_getsetters[] = {
 
 static void
 Host_dealloc(HostObject *self) {
-    self->ptr.reset();
-    self->const_ptr.reset();
+    self->ptr.~HostPtr();
+    self->const_ptr.~ConstHostPtr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
@@ -63,6 +63,9 @@ Host_init(HostObject *self, PyObject *args, PyObject *kwds) {
     const char *identifier_type;
     unsigned long subnet_id;
     const char *ipv4_reservation;
+
+    new(&self->ptr) HostPtr;
+    new(&self->const_ptr) ConstHostPtr;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "ssks", (char **)kwlist,
          &identifier, &identifier_type, &subnet_id, &ipv4_reservation)) {
@@ -87,8 +90,8 @@ Host_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     HostObject *self;
     self = (HostObject *) type->tp_alloc(type, 0);
     if (self) {
-        self->ptr.reset();
-        self->const_ptr.reset();
+        new(&self->ptr) HostPtr;
+        new(&self->const_ptr) ConstHostPtr;
     }
     return ((PyObject *) self);
 }
@@ -138,8 +141,8 @@ PyObject *
 Host_from_ptr(HostPtr host) {
     HostObject *self = PyObject_New(HostObject, &HostType);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
-        memset(&self->const_ptr, 0 , sizeof(self->const_ptr));
+        new(&self->ptr) HostPtr;
+        new(&self->const_ptr) ConstHostPtr;
         self->is_const = false;
         self->ptr = host;
     }
@@ -150,8 +153,8 @@ PyObject *
 Host_from_constptr(ConstHostPtr host) {
     HostObject *self = PyObject_New(HostObject, &HostType);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
-        memset(&self->const_ptr, 0 , sizeof(self->const_ptr));
+        new(&self->ptr) HostPtr;
+        new(&self->const_ptr) ConstHostPtr;
         self->is_const = true;
         self->const_ptr = host;
     }

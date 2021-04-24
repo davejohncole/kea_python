@@ -445,7 +445,7 @@ static PyGetSetDef Pkt4_getsetters[] = {
 
 static void
 Pkt4_dealloc(Pkt4Object *self) {
-    self->ptr.reset();
+    self->ptr.~Pkt4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
@@ -454,6 +454,8 @@ Pkt4_init(Pkt4Object *self, PyObject *args, PyObject *kwds) {
     unsigned char msg_type;
     unsigned long transid;
     PyObject *data;
+
+    new(&self->ptr) Pkt4Ptr;
 
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
@@ -486,7 +488,7 @@ Pkt4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Pkt4Object *self;
     self = (Pkt4Object *) type->tp_alloc(type, 0);
     if (self) {
-        self->ptr.reset();
+        new(&self->ptr) Pkt4Ptr;
     }
     return ((PyObject *) self);
 }
@@ -536,7 +538,7 @@ PyObject *
 Pkt4_from_handle(Pkt4Ptr &ptr) {
     Pkt4Object *self = PyObject_New(Pkt4Object, &Pkt4Type);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
+        new(&self->ptr) Pkt4Ptr;
         self->ptr = ptr;
     }
     return (PyObject *)self;

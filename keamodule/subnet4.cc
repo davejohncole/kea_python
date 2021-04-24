@@ -102,7 +102,7 @@ static PyGetSetDef Subnet4_getsetters[] = {
 
 static void
 Subnet4_dealloc(Subnet4Object *self) {
-    self->ptr.reset();
+    self->ptr.~Subnet4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
@@ -111,7 +111,7 @@ Subnet4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Subnet4Object *self;
     self = (Subnet4Object *) type->tp_alloc(type, 0);
     if (self) {
-        self->ptr.reset();
+        new(&self->ptr) Subnet4Ptr;
     }
     return ((PyObject *) self);
 }
@@ -161,7 +161,7 @@ PyObject *
 Subnet4_from_ptr(Subnet4Ptr &ptr) {
     Subnet4Object *self = PyObject_New(Subnet4Object, &Subnet4Type);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
+        new(&self->ptr) Subnet4Ptr;
         self->ptr = ptr;
     }
     return (PyObject *)self;

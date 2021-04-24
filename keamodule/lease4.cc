@@ -376,12 +376,14 @@ static PyGetSetDef Lease4_getsetters[] = {
 
 static void
 Lease4_dealloc(Lease4Object *self) {
-    self->ptr.reset();
+    self->ptr.~Lease4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static int
 Lease4_init(Lease4Object *self, PyObject *args, PyObject *kwds) {
+    new(&self->ptr) Lease4Ptr;
+
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (-1);
@@ -389,7 +391,7 @@ Lease4_init(Lease4Object *self, PyObject *args, PyObject *kwds) {
     if (!PyArg_ParseTuple(args, "")) {
         return (-1);
     }
-    self->ptr.reset(new Lease4());
+    self->ptr = Lease4Ptr(new Lease4());
 
     return (0);
 }
@@ -399,7 +401,7 @@ Lease4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Lease4Object *self;
     self = (Lease4Object *) type->tp_alloc(type, 0);
     if (self) {
-        self->ptr.reset();
+        new(&self->ptr) Lease4Ptr;
     }
     return ((PyObject *) self);
 }
@@ -449,7 +451,7 @@ PyObject *
 Lease4_from_handle(Lease4Ptr &ptr) {
     Lease4Object *self = PyObject_New(Lease4Object, &Lease4Type);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
+        new(&self->ptr) Lease4Ptr;
         self->ptr = ptr;
     }
     return (PyObject *)self;

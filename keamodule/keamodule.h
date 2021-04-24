@@ -80,10 +80,11 @@ extern PyObject *LibraryHandle_from_handle(isc::hooks::LibraryHandle *handle);
 extern int LibraryHandle_define();
 
 // callout_manager.cc
+typedef boost::shared_ptr<isc::hooks::CalloutManager> CalloutManagerPtr;
 typedef struct {
     PyObject_HEAD
 
-    boost::shared_ptr<isc::hooks::CalloutManager> manager;
+    CalloutManagerPtr manager;
 } CalloutManagerObject;
 
 #define CalloutManager_Check(op) (Py_TYPE(op) == &CalloutManagerType)

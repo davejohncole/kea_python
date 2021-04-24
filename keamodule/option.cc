@@ -273,13 +273,15 @@ static PyGetSetDef Option_getsetters[] = {
 
 static void
 Option_dealloc(OptionObject *self) {
-    self->ptr.reset();
+    self->ptr.~OptionPtr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static int
 Option_init(OptionObject *self, PyObject *args, PyObject *kwds) {
     unsigned short type;
+
+    new(&self->ptr) OptionPtr;
 
     if (kwds != 0) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
@@ -298,7 +300,7 @@ Option_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     OptionObject *self;
     self = (OptionObject *) type->tp_alloc(type, 0);
     if (self) {
-        self->ptr.reset();
+        new(&self->ptr) OptionPtr;
     }
     return ((PyObject *) self);
 }
@@ -348,7 +350,7 @@ PyObject *
 Option_from_handle(OptionPtr &ptr) {
     OptionObject *self = PyObject_New(OptionObject, &OptionType);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
+        new(&self->ptr) OptionPtr;
         self->ptr = ptr;
     }
     return (PyObject *)self;

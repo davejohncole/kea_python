@@ -95,6 +95,7 @@ unload_kea_capsule() {
     if (kea_capsule) {
         Kea_Unload();
     }
+    return (0);
 }
 
 int

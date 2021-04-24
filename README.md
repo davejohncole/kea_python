@@ -91,7 +91,7 @@ There are a number of examples showing how to use the module.  The notable ones 
 * [lease-cmds](examples/lease-cmds) is a re-implementation of the IPv4 functionality in the lease-cmds hook
   bundled with Kea.
 * [facebook-trick](examples/facebook-trick) demonstrates how to completely replace the lease allocation
-  process.  It was inspired by a Facebook presentation to usenix.  The PDF slides are currenlt available
+  process.  It was inspired by a Facebook presentation to usenix.  The PDF slides are currenlty available
   at https://www.usenix.org/sites/default/files/conference/protected-files/srecon15europe_slides_failla.pdf
 * [host-cmds](examples/host-cmds) is an implementation (without reference to source code) of the REST API
   described at https://kea.readthedocs.io/en/kea-1.6.2/arm/hooks.html#host-cmds-host-commands

@@ -51,12 +51,14 @@ static PyGetSetDef SrvConfig_getsetters[] = {
 
 static void
 SrvConfig_dealloc(SrvConfigObject *self) {
-    self->ptr.reset();
+    self->ptr.~SrvConfigPtr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static int
-SrvConfig_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
+SrvConfig_init(SrvConfigObject *self, PyObject *args, PyObject *kwds) {
+    new(&self->ptr) SrvConfigPtr;
+
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
     return (-1);
 }
@@ -66,7 +68,7 @@ SrvConfig_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     SrvConfigObject *self;
     self = (SrvConfigObject *) type->tp_alloc(type, 0);
     if (self) {
-        self->ptr.reset();
+        new(&self->ptr) SrvConfigPtr;
     }
     return ((PyObject *) self);
 }
@@ -116,7 +118,7 @@ PyObject *
 SrvConfig_from_ptr(SrvConfigPtr &ptr) {
     SrvConfigObject *self = PyObject_New(SrvConfigObject, &SrvConfigType);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
+        new(&self->ptr) SrvConfigPtr;
         self->ptr = ptr;
     }
     return (PyObject *)self;

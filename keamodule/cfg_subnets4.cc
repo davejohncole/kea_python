@@ -113,12 +113,14 @@ static PyGetSetDef CfgSubnets4_getsetters[] = {
 
 static void
 CfgSubnets4_dealloc(CfgSubnets4Object *self) {
-    self->ptr.reset();
+    self->ptr.~CfgSubnets4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static int
-CfgSubnets4_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
+CfgSubnets4_init(CfgSubnets4Object *self, PyObject *args, PyObject *kwds) {
+    new(&self->ptr) CfgSubnets4Ptr;
+
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
     return (-1);
 }
@@ -128,7 +130,7 @@ CfgSubnets4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CfgSubnets4Object *self;
     self = (CfgSubnets4Object *) type->tp_alloc(type, 0);
     if (self) {
-        self->ptr.reset();
+        new(&self->ptr) CfgSubnets4Ptr;
     }
     return ((PyObject *) self);
 }
@@ -178,7 +180,7 @@ PyObject *
 CfgSubnets4_from_ptr(CfgSubnets4Ptr &ptr) {
     CfgSubnets4Object *self = PyObject_New(CfgSubnets4Object, &CfgSubnets4Type);
     if (self) {
-        memset(&self->ptr, 0 , sizeof(self->ptr));
+        new(&self->ptr) CfgSubnets4Ptr;
         self->ptr = ptr;
     }
     return (PyObject *)self;

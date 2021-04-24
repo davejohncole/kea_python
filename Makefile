@@ -1,5 +1,5 @@
 ifeq "$(VER)" ""
-	VER=1.6.2
+	VER=1.8.2
 endif
 
 help:

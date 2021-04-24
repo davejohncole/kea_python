@@ -1,4 +1,4 @@
-FROM debian:stretch-slim
+FROM ubuntu:21.04
 ARG VER
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -19,9 +19,12 @@ RUN apt-get update -y \
         liblog4cplus-dev \
         libpython3-dev \
         python3 \
+        python3-distutils \
         python3-nose \
-        libpq-dev postgresql-server-dev-all \
-        libmariadb-dev libmariadb-dev-compat \
+        libpq-dev \
+        postgresql-server-dev-all \
+        libmariadb-dev \
+        libmariadb-dev-compat \
     && tar xzf kea-$VER.tar.gz \
     && cd kea-$VER \
     && ./configure \
