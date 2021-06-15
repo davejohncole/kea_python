@@ -1,6 +1,6 @@
 import os
 import re
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 
 settings = {}
