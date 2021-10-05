@@ -15,7 +15,8 @@ def calc_macros():
     m = re.search(r'^#define VERSION "([^"]*)"\n', config_h, re.M)
     if not m:
         raise RuntimeError('could not determine kea version')
-    version = tuple(int(v) for v in m.group(1).split('.'))
+    ver = re.sub('-git', '', m.group(1))
+    version = tuple(int(v) for v in ver.split('.'))
     macros = []
     if version < (1, 7, 1):
         macros.append(('MISSING_GETLEASES4_HOSTNAME', None))
@@ -23,6 +24,8 @@ def calc_macros():
         macros.append(('HAVE_DELETELEASE_ADDR', None))
     if version < (1, 7, 5):
         macros.append(('HAVE_LIBRARYHANDLE_MANAGER_PTR', None))
+    if version < (1, 9, 4):
+        macros.append(('HAVE_GETLEASE4_METHOD', None))
     return macros
 
 
