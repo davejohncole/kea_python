@@ -21,6 +21,7 @@ RUN apt-get update -y \
         python3 \
         python3-distutils \
         python3-nose \
+        python3-setuptools \
         libpq-dev \
         postgresql-server-dev-all \
         libmariadb-dev \
