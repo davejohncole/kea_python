@@ -257,37 +257,23 @@ LeaseMgr_wipeLeases4(LeaseMgrObject *self, PyObject *args) {
     }
 }
 
-#if HAVE_GETLEASE4_METHOD
 static PyMethodDef LeaseMgr_methods[] = {
+#if HAVE_GETLEASE4_METHOD
     {"getLease4", (PyCFunction) LeaseMgr_getLease4, METH_VARARGS | METH_KEYWORDS,
      "Returns an IPv4 lease for specified IPv4 address."},
-    {"getLeases4", (PyCFunction) LeaseMgr_getLeases4, METH_VARARGS | METH_KEYWORDS,
-     "Returns all IPv4 leases for the particular subnet identifier."},
-    {"addLease", (PyCFunction) LeaseMgr_addLease, METH_VARARGS,
-     "Adds an IPv4 lease."},
-    {"deleteLease", (PyCFunction) LeaseMgr_deleteLease, METH_VARARGS,
-     "Deletes a lease."},
-    {"updateLease4", (PyCFunction) LeaseMgr_updateLease4, METH_VARARGS,
-     "Updates IPv4 lease."},
-    {"wipeLeases4", (PyCFunction) LeaseMgr_wipeLeases4, METH_VARARGS,
-     "Virtual method which removes specified leases."},
-    {0}  // Sentinel
-};
-#else
-static PyMethodDef LeaseMgr_methods[] = {
-    {"getLeases4", (PyCFunction) LeaseMgr_getLeases4, METH_VARARGS | METH_KEYWORDS,
-     "Returns all IPv4 leases for the particular subnet identifier."},
-    {"addLease", (PyCFunction) LeaseMgr_addLease, METH_VARARGS,
-     "Adds an IPv4 lease."},
-    {"deleteLease", (PyCFunction) LeaseMgr_deleteLease, METH_VARARGS,
-     "Deletes a lease."},
-    {"updateLease4", (PyCFunction) LeaseMgr_updateLease4, METH_VARARGS,
-     "Updates IPv4 lease."},
-    {"wipeLeases4", (PyCFunction) LeaseMgr_wipeLeases4, METH_VARARGS,
-     "Virtual method which removes specified leases."},
-    {0}  // Sentinel
-};
 #endif
+    {"getLeases4", (PyCFunction) LeaseMgr_getLeases4, METH_VARARGS | METH_KEYWORDS,
+     "Returns all IPv4 leases for the particular subnet identifier."},
+    {"addLease", (PyCFunction) LeaseMgr_addLease, METH_VARARGS,
+     "Adds an IPv4 lease."},
+    {"deleteLease", (PyCFunction) LeaseMgr_deleteLease, METH_VARARGS,
+     "Deletes a lease."},
+    {"updateLease4", (PyCFunction) LeaseMgr_updateLease4, METH_VARARGS,
+     "Updates IPv4 lease."},
+    {"wipeLeases4", (PyCFunction) LeaseMgr_wipeLeases4, METH_VARARGS,
+     "Virtual method which removes specified leases."},
+    {0}  // Sentinel
+};
 
 static void
 LeaseMgr_dealloc(LeaseMgrObject *self) {
