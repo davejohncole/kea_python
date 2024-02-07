@@ -100,7 +100,7 @@ element_to_object(ConstElementPtr ptr) {
             }
             try {
                 for (std::vector<ElementPtr>::const_iterator it = list_ptr.begin(); it != list_ptr.cend(); ++it) {
-                    auto pos = it - list_ptr.begin() ;
+                    auto pos = it - list_ptr.begin();
                     PyObject *elem = element_to_object(*it);
                     if (!elem || PyList_SetItem(list, pos, elem) < 0) {
                         Py_DECREF(list);
