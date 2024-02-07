@@ -39,10 +39,13 @@ PyInit_kea(void) {
         || SrvConfig_define()
         || CfgSubnets4_define()
         || Subnet4_define()
+        || Subnet4ConfigParser_define()
         || LeaseMgr_define()
         || Host_define()
         || HostMgr_define()
-        || HostReservationParser4_define()) {
+        || HostReservationParser4_define()
+        || ConfigBackendDHCPv4Mgr_define()
+        || ConfigBackendPoolDHCPv4_define()) {
         Py_DECREF(kea_module);
         return (0);
     }

@@ -4,12 +4,16 @@
 #include <hooks/callout_manager.h>
 #include <log/macros.h>
 #include <dhcpsrv/lease.h>
+#include <dhcpsrv/subnet.h>
 #include <dhcp/pkt4.h>
 #include <dhcpsrv/cfgmgr.h>
 #include <dhcpsrv/lease_mgr.h>
 #include <dhcpsrv/host_mgr.h>
 #include <dhcp/dhcp4.h>
+#include <dhcpsrv/parsers/dhcp_parsers.h>
 #include <dhcpsrv/parsers/host_reservation_parser.h>
+#include <dhcpsrv/config_backend_dhcp4_mgr.h>
+#include <database/backend_selector.h>
 
 extern "C" {
 
@@ -204,6 +208,17 @@ extern PyTypeObject Subnet4Type;
 extern PyObject *Subnet4_from_ptr(isc::dhcp::Subnet4Ptr &ptr);
 extern int Subnet4_define();
 
+// subnet4_config_parser.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::Subnet4ConfigParser *parser;
+} Subnet4ConfigParserObject;
+
+#define Subnet4ConfigParser_Check(op) (Py_TYPE(op) == &Subnet4ConfigParserType)
+extern PyTypeObject Subnet4ConfigParserType;
+extern int Subnet4ConfigParser_define();
+
 // host.cc
 typedef struct {
     PyObject_HEAD
@@ -240,5 +255,29 @@ typedef struct {
 #define HostReservationParser4_Check(op) (Py_TYPE(op) == &HostReservationParser4Type)
 extern PyTypeObject HostReservationParser4Type;
 extern int HostReservationParser4_define();
+
+// config_backend_dhcp4_mgr.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::ConfigBackendDHCPv4Mgr *mgr;
+} ConfigBackendDHCPv4MgrObject;
+
+#define ConfigBackendDHCPv4Mgr_Check(op) (Py_TYPE(op) == &ConfigBackendDHCPv4MgrType)
+extern PyTypeObject ConfigBackendDHCPv4MgrType;
+extern int ConfigBackendDHCPv4Mgr_define();
+
+// config_backend_pool_dhcp4.cc
+typedef boost::shared_ptr<isc::dhcp::ConfigBackendPoolDHCPv4> ConfigBackendPoolDHCPv4Ptr;
+typedef struct {
+    PyObject_HEAD
+
+    ConfigBackendPoolDHCPv4Ptr ptr;
+} ConfigBackendPoolDHCPv4Object;
+
+#define ConfigBackendPoolDHCPv4Object_Check(op) (Py_TYPE(op) == &ConfigBackendPoolDHCPv4Type)
+extern PyTypeObject ConfigBackendPoolDHCPv4Type;
+extern PyObject *ConfigBackendPoolDHCPv4_from_ptr(ConfigBackendPoolDHCPv4Ptr &ptr);
+extern int ConfigBackendPoolDHCPv4_define();
 
 }

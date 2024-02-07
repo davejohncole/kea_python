@@ -106,6 +106,34 @@ Subnet4_dealloc(Subnet4Object *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+static int
+Subnet4_init(Subnet4Object *self, PyObject *args, PyObject *kwds) {
+    static const char *kwlist[] = {"prefix", "length", "t1", "t2", "valid_lifetime", "id", NULL};
+    const char *prefix;
+    uint8_t length;
+    uint32_t t1;
+    uint32_t t2;
+    uint32_t valid_lifetime;
+    uint32_t subnet_id;
+
+    new(&self->ptr) Subnet4Ptr;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "sbIIII", (char **)kwlist,
+         &prefix, &length, &t1, &t2, &valid_lifetime, &subnet_id)) {
+        return (-1);
+    }
+
+    try {
+        self->ptr.reset(new Subnet4(IOAddress(string(prefix)), length, t1, t2, valid_lifetime, SubnetID(subnet_id)));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (-1);
+    }
+
+    return (0);
+}
+
 static PyObject *
 Subnet4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Subnet4Object *self;
@@ -152,7 +180,7 @@ PyTypeObject Subnet4Type = {
     0,                                          // tp_descr_get
     0,                                          // tp_descr_set
     0,                                          // tp_dictoffset
-    0,                                          // tp_init
+    (initproc) Subnet4_init,                    // tp_init
     PyType_GenericAlloc,                        // tp_alloc
     Subnet4_new                                 // tp_new
 };

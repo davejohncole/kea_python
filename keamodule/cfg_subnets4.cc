@@ -9,6 +9,60 @@ using namespace isc::asiolink;
 extern "C" {
 
 static PyObject *
+CfgSubnets4_add(CfgSubnets4Object *self, PyObject *args) {
+    Subnet4Object *subnet;
+
+    if (!PyArg_ParseTuple(args, "O!", &Subnet4Type, &subnet)) {
+        return (0);
+    }
+    try {
+        self->ptr->add(subnet->ptr);
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+CfgSubnets4_delSubnetID(CfgSubnets4Object *self, PyObject *args) {
+    uint32_t subnet_id;
+
+    if (!PyArg_ParseTuple(args, "I", &subnet_id)) {
+        return (0);
+    }
+    try {
+        self->ptr->del(subnet_id);
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+CfgSubnets4_replace(CfgSubnets4Object *self, PyObject *args) {
+    Subnet4Object *subnet;
+
+    if (!PyArg_ParseTuple(args, "O!", &Subnet4Type, &subnet)) {
+        return (0);
+    }
+    try {
+        Subnet4Ptr ptr = self->ptr->replace(subnet->ptr);
+        if (!ptr) {
+            Py_RETURN_NONE;
+        }
+        return (Subnet4_from_ptr(ptr));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 CfgSubnets4_getAll(CfgSubnets4Object *self, PyObject *args) {
     try {
         const Subnet4Collection *all = self->ptr->getAll();
@@ -90,6 +144,13 @@ CfgSubnets4_toElement(CfgSubnets4Object *self, PyObject *args) {
 }
 
 static PyMethodDef CfgSubnets4_methods[] = {
+    {"add", (PyCFunction) CfgSubnets4_add, METH_VARARGS,
+     "Adds new subnet to the configuration."},
+    {"delSubnetID", (PyCFunction) CfgSubnets4_delSubnetID, METH_VARARGS,
+     "Removes subnet from the configuration."},
+    {"replace", (PyCFunction) CfgSubnets4_replace, METH_VARARGS,
+     "Replaces subnet in the configuration. This method replaces a subnet by another subnet with the same ID."
+     " The prefix should be the same too."},
     {"getAll", (PyCFunction) CfgSubnets4_getAll, METH_NOARGS,
      "Returns collection of all IPv4 subnets."},
     {"getSubnet", (PyCFunction) CfgSubnets4_getSubnet, METH_VARARGS,
@@ -183,7 +244,7 @@ CfgSubnets4_from_ptr(CfgSubnets4Ptr &ptr) {
         new(&self->ptr) CfgSubnets4Ptr;
         self->ptr = ptr;
     }
-    return (PyObject *)self;
+    return ((PyObject *)self);
 }
 
 int
