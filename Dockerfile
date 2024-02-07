@@ -10,7 +10,7 @@ RUN make clean install \
     && find lib -name \*.so\* | tar cf - -T - | (cd /dist; tar xf -) \
     && tar cf - etc share/man bin sbin var | (cd /dist; tar xf -)
 
-FROM ubuntu:21.04
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update -y \
@@ -18,7 +18,7 @@ RUN apt-get update -y \
         procps \
         socat \
         python3 \
-        libpython3.9 \
+        libpython3.10 \
         liblog4cplus-2.0.5 \
         libboost-system1.74.0 \
         libffi8ubuntu1 \

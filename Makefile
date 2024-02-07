@@ -1,5 +1,5 @@
 ifeq "$(VER)" ""
-	VER=1.8.2
+	VER=2.0.3
 endif
 
 help:
@@ -32,17 +32,17 @@ build-dhtest:
 	cd dhtest && docker build --tag dhtest .
 
 run-kea-dev: kea-network
-	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea-dev kea-dev:$(VER) bash
+	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea-dev --hostname kea kea-dev:$(VER) bash
 
 run-kea: kea-network
-	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea kea:$(VER) bash
+	docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged -v`pwd`:/workdir --name kea --hostname kea kea:$(VER) bash
 
 run-mysql: kea-network dhcpdb_create.mysql.sql
 	docker run --rm --network kea \
 		-e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=kea -e MYSQL_USER=kea -eMYSQL_PASSWORD=kea \
-		--name mysql \
+		--name mysql --hostname mysql \
 		-v `pwd`/dhcpdb_create.mysql.sql:/docker-entrypoint-initdb.d/dhcpdb_create.mysql.sql \
-		mariadb
+		mariadb --general_log
 
 run-dhtest: kea-network
 	docker run --rm -it --network kea --privileged -v`pwd`:/workdir --name dhtest dhtest bash
@@ -67,7 +67,7 @@ install-hook: build-hook
 	cd keahook && make install
 
 install-module: build-module
-	cd keamodule && python3 setup.py install
+	cd keamodule && python3 setup.py install --single-version-externally-managed --root=/
 
 clean:
 	touch settings.mk
