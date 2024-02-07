@@ -2,6 +2,7 @@ kea-*.tar.gz
 libkea_python.so
 __pycache__
 build
+kea.egg-info
 *.log
 *.log.lock
 .vscode
