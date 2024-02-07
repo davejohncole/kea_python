@@ -1,3 +1,4 @@
+import argparse
 import json
 import socket
 
@@ -22,7 +23,69 @@ def send_command(name, **args):
     return json.loads(response)
 
 
+num_resv = 10
+
+
+def add_reservations():
+    for i in range(num_resv):
+        send_command('reservation-add',
+                     reservation={
+                         'subnet-id': 5,
+                         'hw-address': '1a:1b:1c:1d:1e:%02x' % i,
+                         'ip-address': '172.28.5.%d' % (i + 1)})
+
+
+def get_reservations():
+    for i in range(num_resv):
+        send_command('reservation-get', **{'subnet-id': 5, 'ip-address': '172.28.5.%d' % (i + 1)})
+
+
+def list_reservations():
+    res = send_command('reservation-get-page', **{'subnet-id': 5,
+                                                  'limit': 5})
+    while res['result'] == 0:
+        next = res['arguments']['next']
+        lower_host_id = next['from']
+        source_index = next['source-index']
+        res = send_command('reservation-get-page', **{'subnet-id': 5,
+                                                      'limit': 5,
+                                                      'from': lower_host_id,
+                                                      'source-index': source_index})
+
+
+def delete_reservations():
+    for i in range(num_resv):
+        send_command('reservation-del',
+                     **{'subnet-id': 5,
+                        'ip-address': '172.28.5.%d' % (i + 1)})
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--add', action='store_true')
+    parser.add_argument('--get', action='store_true')
+    parser.add_argument('--list', action='store_true')
+    parser.add_argument('--delete', action='store_true')
+
+    args = parser.parse_args()
+    if args.add:
+        add_reservations()
+    if args.get:
+        get_reservations()
+    if args.list:
+        list_reservations()
+    if args.delete:
+        delete_reservations()
+    if not args.add and not args.get and not args.list and not args.delete:
+        add_reservations()
+        get_reservations()
+        list_reservations()
+        delete_reservations()
+
+
+
 if __name__ == '__main__':
+    main()
     # send_command('reservation-add',
     #              reservation={
     #                  'subnet-id': 5,
@@ -53,31 +116,3 @@ if __name__ == '__main__':
     #                                    'identifier': '1a:1b:1c:1d:1e:1f'})
 
     # send_command('reservation-get-all', **{'subnet-id': 5})
-
-    num_resv = 10
-
-    for i in range(num_resv):
-        send_command('reservation-add',
-                     reservation={
-                         'subnet-id': 5,
-                         'hw-address': '1a:1b:1c:1d:1e:%02x' % i,
-                         'ip-address': '172.28.5.%d' % (i + 1)})
-
-    for i in range(num_resv):
-        send_command('reservation-get', **{'subnet-id': 5, 'ip-address': '172.28.5.%d' % (i + 1)})
-
-    res = send_command('reservation-get-page', **{'subnet-id': 5,
-                                                  'limit': 5})
-    while res['result'] == 0:
-        next = res['arguments']['next']
-        lower_host_id = next['from']
-        source_index = next['source-index']
-        res = send_command('reservation-get-page', **{'subnet-id': 5,
-                                                      'limit': 5,
-                                                      'from': lower_host_id,
-                                                      'source-index': source_index})
-
-    for i in range(num_resv):
-        send_command('reservation-del',
-                     **{'subnet-id': 5,
-                        'ip-address': '172.28.5.%d' % (i + 1)})
