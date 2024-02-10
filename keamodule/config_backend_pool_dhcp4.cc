@@ -13,14 +13,17 @@ parse_backend_selector(const char *backend, BackendSelector& selector) {
         selector = BackendSelector(BackendSelector::Type::MYSQL);
         return (0);
     }
+#ifdef HAVE_BACKEND_PGSQL
     if (strcmp(backend, "pgsql") == 0) {
         selector = BackendSelector(BackendSelector::Type::PGSQL);
         return (0);
     }
-    if (strcmp(backend, "cql") == 0) {
-        selector = BackendSelector(BackendSelector::Type::CQL);
+#else
+    if (strcmp(backend, "postgresql") == 0) {
+        selector = BackendSelector(BackendSelector::Type::POSTGRESQL);
         return (0);
     }
+#endif
     if (strcmp(backend, "unspec") == 0) {
         selector = BackendSelector::UNSPEC();
         return (0);

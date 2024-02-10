@@ -58,7 +58,6 @@ ConfigBackendDHCPv4Mgr_instance(ConfigBackendDHCPv4MgrObject *self, PyObject *ar
     }
 }
 
-
 static PyMethodDef ConfigBackendDHCPv4Mgr_methods[] = {
     {"instance", (PyCFunction) ConfigBackendDHCPv4Mgr_instance, METH_NOARGS|METH_STATIC,
      "Returns a sole instance of the ConfigBackendDHCPv4Mgr."},

@@ -26,26 +26,27 @@ PyInit_kea(void) {
     }
 
     if (PyModule_AddStringConstant(kea_module, "__version__", VERSION) < 0
-        || Capsule_define()
-        || Constants_define()
         || CalloutClosure_define()
-        || LibraryHandle_define()
-        || CalloutManager_define()
         || CalloutHandle_define()
-        || Lease4_define()
-        || Pkt4_define()
-        || Option_define()
+        || CalloutManager_define()
+        || Capsule_define()
         || CfgMgr_define()
-        || SrvConfig_define()
         || CfgSubnets4_define()
-        || Subnet4_define()
-        || Subnet4ConfigParser_define()
-        || LeaseMgr_define()
+        || ConfigBackendDHCPv4Mgr_define()
+        || ConfigBackendPoolDHCPv4_define()
+        || Constants_define()
         || Host_define()
         || HostMgr_define()
         || HostReservationParser4_define()
-        || ConfigBackendDHCPv4Mgr_define()
-        || ConfigBackendPoolDHCPv4_define()) {
+        || Lease4_define()
+        || LeaseMgr_define()
+        || LibraryHandle_define()
+        || LoggerManager_define()
+        || Option_define()
+        || Pkt4_define()
+        || SrvConfig_define()
+        || Subnet4_define()
+        || Subnet4ConfigParser_define()) {
         Py_DECREF(kea_module);
         return (0);
     }

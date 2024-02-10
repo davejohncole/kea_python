@@ -12,7 +12,7 @@ class TestOption_new(utils.BaseTestCase):
     def test_badarg_type(self):
         with self.assertRaises(TypeError) as cm:
             kea.Option('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         o = kea.Option(42)
@@ -111,7 +111,7 @@ class TestOption_setUint8(utils.BaseTestCase):
         o = kea.Option(42)
         with self.assertRaises(TypeError) as cm:
             o.setUint8('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         o = kea.Option(42)
@@ -141,7 +141,7 @@ class TestOption_setUint16(utils.BaseTestCase):
         o = kea.Option(42)
         with self.assertRaises(TypeError) as cm:
             o.setUint16('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         o = kea.Option(42)
@@ -206,7 +206,7 @@ class TestOption_getOption(utils.BaseTestCase):
         o = kea.Option(42)
         with self.assertRaises(TypeError) as cm:
             o.getOption('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         o = kea.Option(42).addOption(kea.Option(2).setUint8(0xef))

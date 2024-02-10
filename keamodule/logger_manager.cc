@@ -1,15 +1,21 @@
 #include "keamodule.h"
 
 using namespace std;
-using namespace isc::dhcp;
+using namespace isc::log;
 
 extern "C" {
 
 static PyObject *
-CfgMgr_getCurrentCfg(CfgMgrObject *self, PyObject *args) {
+LoggerManager_static_init(LoggerManagerObject *self, PyObject *args) {
+    const char *root;
+
+    if (!PyArg_ParseTuple(args, "s", &root)) {
+        return (0);
+    }
+
     try {
-        SrvConfigPtr ptr = CfgMgr::instance().getCurrentCfg();
-        return (SrvConfig_from_ptr(ptr));
+        LoggerManager::init(root);
+        Py_RETURN_NONE;
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -17,67 +23,29 @@ CfgMgr_getCurrentCfg(CfgMgrObject *self, PyObject *args) {
     }
 }
 
-static PyObject *
-CfgMgr_getStagingCfg(CfgMgrObject *self, PyObject *args) {
-    try {
-        SrvConfigPtr ptr = CfgMgr::instance().getStagingCfg();
-        return (SrvConfig_from_ptr(ptr));
-    }
-    catch (const exception &e) {
-        PyErr_SetString(PyExc_TypeError, e.what());
-        return (0);
-    }
-}
-
-PyObject *
-CfgMgr_from_ptr(CfgMgr *mgr) {
-    CfgMgrObject *self = PyObject_New(CfgMgrObject, &CfgMgrType);
-    if (self) {
-        self->mgr = mgr;
-    }
-    return ((PyObject *)self);
-}
-
-static PyObject *
-CfgMgr_instance(CfgMgrObject *self, PyObject *args) {
-    try {
-        CfgMgr& mgr = CfgMgr::instance();
-        return (CfgMgr_from_ptr(&mgr));
-    }
-    catch (const exception &e) {
-        PyErr_SetString(PyExc_TypeError, e.what());
-        return (0);
-    }
-}
-
-static PyMethodDef CfgMgr_methods[] = {
-    {"instance", (PyCFunction) CfgMgr_instance, METH_NOARGS|METH_STATIC,
-     "Returns a single instance of Configuration Manager."
-     " CfgMgr is a singleton and this method is the only way of accessing it."},
-    {"getCurrentCfg", (PyCFunction) CfgMgr_getCurrentCfg, METH_NOARGS,
-     "Returns the current configuration."},
-    {"getStagingCfg", (PyCFunction) CfgMgr_getStagingCfg, METH_NOARGS,
-     "Returns the staging configuration."},
+static PyMethodDef LoggerManager_methods[] = {
+    {"init", (PyCFunction) LoggerManager_static_init, METH_VARARGS|METH_STATIC,
+     "Run-Time Initialization Performs run-time initialization of the logger system."},
     {0}  // Sentinel
 };
 
 static void
-CfgMgr_dealloc(CfgMgrObject *self) {
+LoggerManager_dealloc(LoggerManagerObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
 static int
-CfgMgr_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
+LoggerManager_init(LoggerManagerObject *self, PyObject *args, PyObject *kwds) {
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
     return (-1);
 }
 
-PyTypeObject CfgMgrType = {
+PyTypeObject LoggerManagerType = {
     PyObject_HEAD_INIT(0)
-    "kea.CfgMgr",                               // tp_name
-    sizeof(CfgMgrObject),                       // tp_basicsize
+    "kea.LoggerManager",                        // tp_name
+    sizeof(LoggerManagerObject),                // tp_basicsize
     0,                                          // tp_itemsize
-    (destructor) CfgMgr_dealloc,                // tp_dealloc
+    (destructor) LoggerManager_dealloc,         // tp_dealloc
     0,                                          // tp_vectorcall_offset
     0,                                          // tp_getattr
     0,                                          // tp_setattr
@@ -93,14 +61,14 @@ PyTypeObject CfgMgrType = {
     0,                                          // tp_setattro
     0,                                          // tp_as_buffer
     Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server CfgMgr",                        // tp_doc
+    "Kea server LoggerManager",                 // tp_doc
     0,                                          // tp_traverse
     0,                                          // tp_clear
     0,                                          // tp_richcompare
     0,                                          // tp_weaklistoffset
     0,                                          // tp_iter
     0,                                          // tp_iternext
-    CfgMgr_methods,                             // tp_methods
+    LoggerManager_methods,                      // tp_methods
     0,                                          // tp_members
     0,                                          // tp_getset
     0,                                          // tp_base
@@ -108,19 +76,19 @@ PyTypeObject CfgMgrType = {
     0,                                          // tp_descr_get
     0,                                          // tp_descr_set
     0,                                          // tp_dictoffset
-    (initproc) CfgMgr_init,                     // tp_init
+    (initproc) LoggerManager_init,              // tp_init
     PyType_GenericAlloc,                        // tp_alloc
     PyType_GenericNew                           // tp_new
 };
 
 int
-CfgMgr_define() {
-    if (PyType_Ready(&CfgMgrType) < 0) {
+LoggerManager_define() {
+    if (PyType_Ready(&LoggerManagerType) < 0) {
         return (1);
     }
-    Py_INCREF(&CfgMgrType);
-    if (PyModule_AddObject(kea_module, "CfgMgr", (PyObject *) &CfgMgrType) < 0) {
-        Py_DECREF(&CfgMgrType);
+    Py_INCREF(&LoggerManagerType);
+    if (PyModule_AddObject(kea_module, "LoggerManager", (PyObject *) &LoggerManagerType) < 0) {
+        Py_DECREF(&LoggerManagerType);
         return (1);
     }
 

@@ -1,7 +1,9 @@
 from kea import *
 from ipaddress import IPv4Address, IPv4Network
 
+
 class Config:
+
     def __init__(self, conf):
         dhcp4 = conf['Dhcp4']
         self.options = [Option(DHO_DHCP_LEASE_TIME).setUint32(dhcp4.get('valid-lifetime', 7200)),
@@ -18,20 +20,24 @@ class Config:
         self.options.append(Option(DHO_ROUTERS).setBytes(self.subnet[1].packed))
         self.options.append(Option(DHO_DOMAIN_NAME).setString('facebook.com'))
 
+
 class HostInfo:
     def __init__(self, hwaddr):
         self.hwaddr = hwaddr
         self.addr = config.subnet[42]
 
+
 def load(handle):
     global config
-    config = Config(CfgMgr().getStagingCfg().toElement())
+    config = Config(CfgMgr.instance().getStagingCfg().toElement())
     return 0
+
 
 def pkt4_receive(handle):
     query = handle.getArgument('query4')
     handle.setContext('hostinfo', HostInfo(query.getHWAddr()))
     return 0
+
 
 def lease4_select(handle):
     hostinfo = handle.getContext('hostinfo')
@@ -41,6 +47,7 @@ def lease4_select(handle):
     if query.getType() == DHCPREQUEST:
         handle.setStatus(NEXT_STEP_SKIP)
     return 0
+
 
 def pkt4_send(handle):
     response = handle.getArgument('response4')

@@ -4,6 +4,12 @@ import unittest
 import kea
 
 
+if sys.version_info < (3, 10):
+    EXPECT_INT_GOT_STR = "an integer is required (got type str)"
+else:
+    EXPECT_INT_GOT_STR = "'str' object cannot be interpreted as an integer"
+
+
 class Logger:
 
     def error(self, msg):
@@ -14,6 +20,8 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
+        # initialise logger in kea to prevent errors when calling kea code outside of kea
+        kea.LoggerManager.init('python')
         kea.logger = Logger()
 
     def assert_cannot_construct(self, cls):

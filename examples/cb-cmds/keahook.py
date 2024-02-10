@@ -78,9 +78,9 @@ def wrap_handler(handle, get_response):
 
 
 def debug_subnets():
-    subnets = kea.CfgMgr().getCurrentCfg().getCfgSubnets4().getAll()
+    subnets = kea.CfgMgr.instance().getCurrentCfg().getCfgSubnets4().getAll()
     if subnets:
-        for s in kea.CfgMgr().getCurrentCfg().getCfgSubnets4().getAll():
+        for s in subnets:
             kea.logger.debug(json.dumps(s.toElement()))
     else:
         kea.logger.debug('no subnets')
@@ -129,11 +129,9 @@ def remote_subnet4_del_by_id(handle):
         backend = get_string_arg(args, 'remote')
         subnets = get_list_arg(args, 'subnets')
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
-        cfg_subnets = kea.CfgMgr().getCurrentCfg().getCfgSubnets4()
         for subnet in subnets:
             subnet_id = subnet['id']
             pool.deleteSubnet4(backend, 'all', subnet_id)
-            cfg_subnets.delSubnetID(subnet_id)
         return {'result': 0,
                 'text': '%s IPv4 subnet(s) deleted.' % len(subnets)}
 
@@ -171,27 +169,10 @@ def remote_subnet4_set(handle):
         subnet4 = kea.Subnet4ConfigParser().parse(subnet)
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
         pool.createUpdateSubnet4(subnet4, backend, server)
-        cfg_subnets = kea.CfgMgr().getCurrentCfg().getCfgSubnets4()
-        if cfg_subnets.getSubnet(subnet4.getID()):
-            cfg_subnets.replace(subnet4)
-        else:
-            cfg_subnets.add(subnet4)
         return {'result': 0,
                 'text': 'Subnet added.'}
 
     return wrap_handler(handle, get_response)
-
-
-def dhcp4_srv_configured(handle):
-    debug_subnets()
-    mgr = kea.ConfigBackendDHCPv4Mgr.instance()
-    mgr.addBackend('type=mysql host=mysql name=kea user=kea password=kea')
-    pool = mgr.getPool()
-    config = kea.CfgMgr().getCurrentCfg().getCfgSubnets4()
-    for subnet in pool.getAllSubnets4('mysql', 'kea'):
-        config.add(subnet)
-    debug_subnets()
-    return 0
 
 
 def load(handle):

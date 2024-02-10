@@ -28,7 +28,7 @@ class TestPkt4_new(utils.BaseTestCase):
         # 2 args - type, trans_id
         with self.assertRaises(TypeError) as cm:
             kea.Pkt4('1', 42)
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             kea.Pkt4(1, '42')
         self.assertEqual(("argument 2 must be int, not str",), cm.exception.args)
@@ -59,7 +59,7 @@ class TestPkt4_setType(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         with self.assertRaises(TypeError) as cm:
             p.setType('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -88,7 +88,7 @@ class TestPkt4_setFlags(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         with self.assertRaises(TypeError) as cm:
             p.setFlags('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -337,7 +337,7 @@ class TestPkt4_delOption(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         with self.assertRaises(TypeError) as cm:
             p.delOption('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
@@ -388,7 +388,7 @@ class TestPkt4_getOption(utils.BaseTestCase):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)
         with self.assertRaises(TypeError) as cm:
             p.getOption('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)

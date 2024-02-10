@@ -74,7 +74,7 @@ def parse_lease4(args):
     lease.addr = get_string_arg(args, 'ip-address')
     lease.hwaddr = get_string_arg(args, 'hw-address')
     subnet_id = get_int_arg(args, 'subnet-id', 0)
-    cfg = kea.CfgMgr().getCurrentCfg()
+    cfg = kea.CfgMgr.instance().getCurrentCfg()
     if subnet_id:
         subnet = cfg.getCfgSubnets4().getSubnet(subnet_id)
         if not subnet:
@@ -308,7 +308,7 @@ def lease4_wipe(handle):
     def get_response(args):
         subnet_id = get_arg(args, 'subnet-id', None)
         if subnet_id is None:
-            config = kea.CfgMgr().getCurrentCfg()
+            config = kea.CfgMgr.instance().getCurrentCfg()
             subnet_ids = [s.getID() for s in config.getCfgSubnets4().getAll()]
         elif not isinstance(subnet_id, int):
             raise CommandError("'subnet-id' is not integer")

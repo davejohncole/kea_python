@@ -3,7 +3,7 @@ import json
 import socket
 
 
-def send_command(name, args):
+def send_command(name, args=None):
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     s.connect('/var/run/kea4.sock')
     cmd = {'command': name}
@@ -56,15 +56,20 @@ def remote_subnet4_set():
                  {'subnet': {
                      'subnet': '172.28.5.0/24',
                      'id': 5,
-                     'pools': [{'pool': '172.28.5.10 - 172.28.5.200'}]
+                     'pools': [{'pool': '172.28.5.100 - 172.28.5.200'}]
                   },
                   'remote': 'mysql',
                   'server-tags': 'kea'
                  })
 
 
+def server_tag_get():
+    send_command('server-tag-get')
+
+
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--server-tag-get', action='store_true')
     parser.add_argument('--server-set', action='store_true')
     parser.add_argument('--server-get-all', action='store_true')
     parser.add_argument('--subnet-set', action='store_true')
@@ -73,6 +78,9 @@ def main():
 
     args = parser.parse_args()
     do_all = True
+    if args.server_tag_get:
+        server_tag_get()
+        do_all = False
     if args.subnet_set:
         remote_subnet4_set()
         do_all = False

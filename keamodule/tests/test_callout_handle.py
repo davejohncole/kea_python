@@ -223,7 +223,7 @@ class TestCalloutHandle_setStatus(utils.BaseTestCase):
         h = kea.CalloutHandle(kea.CalloutManager())
         with self.assertRaises(TypeError) as cm:
             h.setStatus('foo')
-        self.assertEqual(("an integer is required (got type str)",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         h = kea.CalloutHandle(kea.CalloutManager())
