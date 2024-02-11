@@ -337,7 +337,7 @@ Pkt4_getOption(Pkt4Object *self, PyObject *args) {
         if (!ptr) {
             Py_RETURN_NONE;
         }
-        return (Option_from_handle(ptr));
+        return (Option_from_ptr(ptr));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -535,7 +535,7 @@ PyTypeObject Pkt4Type = {
 };
 
 PyObject *
-Pkt4_from_handle(Pkt4Ptr &ptr) {
+Pkt4_from_ptr(Pkt4Ptr &ptr) {
     Pkt4Object *self = PyObject_New(Pkt4Object, &Pkt4Type);
     if (self) {
         new(&self->ptr) Pkt4Ptr;

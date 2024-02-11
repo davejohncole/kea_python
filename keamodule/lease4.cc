@@ -448,7 +448,7 @@ PyTypeObject Lease4Type = {
 };
 
 PyObject *
-Lease4_from_handle(Lease4Ptr &ptr) {
+Lease4_from_ptr(Lease4Ptr &ptr) {
     Lease4Object *self = PyObject_New(Lease4Object, &Lease4Type);
     if (self) {
         new(&self->ptr) Lease4Ptr;

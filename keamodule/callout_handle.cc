@@ -19,7 +19,7 @@ CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
         try {
             Lease4Ptr ptr;
             self->handle->getArgument(name, ptr);
-            return (Lease4_from_handle(ptr));
+            return (Lease4_from_ptr(ptr));
         }
         catch (const exception &e) {
             PyErr_SetString(PyExc_TypeError, e.what());
@@ -31,7 +31,7 @@ CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
         try {
             Pkt4Ptr ptr;
             self->handle->getArgument(name, ptr);
-            return (Pkt4_from_handle(ptr));
+            return (Pkt4_from_ptr(ptr));
         }
         catch (const exception &e) {
             PyErr_SetString(PyExc_TypeError, e.what());

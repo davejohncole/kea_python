@@ -197,7 +197,7 @@ typedef struct {
 
 #define Lease4_Check(op) (Py_TYPE(op) == &Lease4Type)
 extern PyTypeObject Lease4Type;
-extern PyObject *Lease4_from_handle(isc::dhcp::Lease4Ptr &ptr);
+extern PyObject *Lease4_from_ptr(isc::dhcp::Lease4Ptr &ptr);
 extern int Lease4_define();
 
 // lease_mgr.cc
@@ -240,7 +240,7 @@ typedef struct {
 
 #define Option_Check(op) (Py_TYPE(op) == &OptionType)
 extern PyTypeObject OptionType;
-extern PyObject *Option_from_handle(isc::dhcp::OptionPtr &ptr);
+extern PyObject *Option_from_ptr(isc::dhcp::OptionPtr &ptr);
 extern int Option_define();
 
 // pkt4.cc
@@ -252,8 +252,20 @@ typedef struct {
 
 #define Pkt4_Check(op) (Py_TYPE(op) == &Pkt4Type)
 extern PyTypeObject Pkt4Type;
-extern PyObject *Pkt4_from_handle(isc::dhcp::Pkt4Ptr &ptr);
+extern PyObject *Pkt4_from_ptr(isc::dhcp::Pkt4Ptr &ptr);
 extern int Pkt4_define();
+
+// server.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::db::ServerPtr ptr;
+} ServerObject;
+
+#define Server_Check(op) (Py_TYPE(op) == &ServerType)
+extern PyTypeObject ServerType;
+extern PyObject *Server_from_ptr(isc::db::ServerPtr &ptr);
+extern int Server_define();
 
 // srv_config.cc
 typedef struct {

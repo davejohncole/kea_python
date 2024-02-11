@@ -15,7 +15,7 @@ lease_list_from_collection(Lease4Collection &leases) {
     }
     try {
         for (auto lease : leases) {
-            PyObject *obj = Lease4_from_handle(lease);
+            PyObject *obj = Lease4_from_ptr(lease);
             if (!obj || PyList_Append(list, obj) < 0) {
                 Py_DECREF(list);
                 return (0);
@@ -93,7 +93,7 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
         if (!ptr) {
             Py_RETURN_NONE;
         }
-        return (Lease4_from_handle(ptr));
+        return (Lease4_from_ptr(ptr));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());

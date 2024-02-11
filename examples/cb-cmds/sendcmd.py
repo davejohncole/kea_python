@@ -25,20 +25,20 @@ def send_command(name, args=None):
 
 def remote_server4_get_all():
     send_command('remote-server4-get-all',
-                 {'remote': 'mysql'})
+                 {'remote': {'type': 'mysql'}})
 
 
 def remote_server4_set():
     send_command('remote-server4-set',
                  {'servers': [{'server-tag': 'kea',
                                'description': 'Default server.'}],
-                  'remote': 'mysql'})
+                  'remote': {'type': 'mysql'}})
 
 
 def remote_subnet4_list():
     send_command('remote-subnet4-list',
-                 {'remote': 'mysql',
-                  'server-tags': 'kea'
+                 {'remote': {'type': 'mysql'},
+                  'server-tags': ['kea']
                  })
 
 
@@ -47,19 +47,20 @@ def remote_subnet4_del_by_id():
                  {'subnets': [{
                      'id': 5,
                   }],
-                  'remote': 'mysql',
+                  'remote': {'type': 'mysql'},
+                  'server-tags': ['kea']
                  })
 
 
 def remote_subnet4_set():
     send_command('remote-subnet4-set',
-                 {'subnet': {
+                 {'subnet': [{
                      'subnet': '172.28.5.0/24',
                      'id': 5,
                      'pools': [{'pool': '172.28.5.100 - 172.28.5.200'}]
-                  },
-                  'remote': 'mysql',
-                  'server-tags': 'kea'
+                  }],
+                  'remote': {'type': 'mysql'},
+                  'server-tags': ['kea']
                  })
 
 

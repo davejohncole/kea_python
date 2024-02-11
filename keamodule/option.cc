@@ -193,7 +193,7 @@ Option_getOption(OptionObject *self, PyObject *args) {
     try {
         OptionPtr ptr = self->ptr->getOption(type);
         if (ptr) {
-            return Option_from_handle(ptr);
+            return Option_from_ptr(ptr);
         }
         Py_RETURN_NONE;
     } catch (const exception &e) {
@@ -347,7 +347,7 @@ PyTypeObject OptionType = {
 };
 
 PyObject *
-Option_from_handle(OptionPtr &ptr) {
+Option_from_ptr(OptionPtr &ptr) {
     OptionObject *self = PyObject_New(OptionObject, &OptionType);
     if (self) {
         new(&self->ptr) OptionPtr;

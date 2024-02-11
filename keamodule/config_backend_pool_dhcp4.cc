@@ -33,30 +33,74 @@ parse_backend_selector(const char *backend, BackendSelector& selector) {
 }
 
 static int
-parse_server_selector(const char *server, ServerSelector& selector) {
-    if (strcmp(server, "unassigned") == 0) {
-        selector = ServerSelector::UNASSIGNED();
+parse_server_selector(PyObject *selector, ServerSelector& server_selector) {
+    if (PyUnicode_Check(selector)) {
+        PyObject *selector_utf8 = PyUnicode_AsUTF8String(selector);
+        if (!selector_utf8) {
+            return (-1);
+        }
+        const char *type = PyBytes_AsString(selector_utf8);
+        try {
+            if (strcmp(type, "unassigned") == 0) {
+                server_selector = ServerSelector::UNASSIGNED();
+            }
+            else if (strcmp(type, "all") == 0) {
+                server_selector = ServerSelector::ALL();
+            }
+            else if (strcmp(type, "any") == 0) {
+                server_selector = ServerSelector::ANY();
+            }
+            else {
+                server_selector = ServerSelector::ONE(string(type));
+            }
+        }
+        catch (const exception &e) {
+            Py_DECREF(selector_utf8);
+            PyErr_SetString(PyExc_TypeError, e.what());
+            return (-1);
+        }
+        Py_DECREF(selector_utf8);
         return (0);
     }
-    if (strcmp(server, "all") == 0) {
-        selector = ServerSelector::ALL();
+    if (PyList_Check(selector)) {
+        std::set<string> tags;
+        for (int i = 0; i < PyList_GET_SIZE(selector); i++) {
+            PyObject *elem = PyList_GetItem(selector, i);
+            if (!elem) {
+                return (-1);
+            }
+            if (!PyUnicode_Check(elem)) {
+                PyErr_Format(PyExc_TypeError, "Expected string for element %d", i);
+                return (-1);
+            }
+            PyObject *selector_utf8 = PyUnicode_AsUTF8String(selector);
+            if (!selector_utf8) {
+                return (-1);
+            }
+            try {
+                const char *selector = PyBytes_AsString(selector_utf8);
+                tags.insert(selector);
+                Py_DECREF(selector_utf8);
+            }
+            catch (const exception &e) {
+                Py_DECREF(selector_utf8);
+                PyErr_SetString(PyExc_TypeError, e.what());
+                return (-1);
+            }
+        }
+        server_selector = ServerSelector::MULTIPLE(tags);
         return (0);
     }
-    if (strcmp(server, "any") == 0) {
-        selector = ServerSelector::ANY();
-        return (0);
-    }
-    selector = ServerSelector::ONE(string(server));
-    return (0);
+    PyErr_SetString(PyExc_TypeError, "Expected string or list of strings.");
+    return (-1);
 }
 
 static PyObject *
 ConfigBackendPoolDHCPv4_createUpdateServer4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
     const char *backend;
-    const char *server_tag;
-    const char *description;
+    ServerObject *server;
 
-    if (!PyArg_ParseTuple(args, "sss", &backend, &server_tag, &description)) {
+    if (!PyArg_ParseTuple(args, "sO!", &backend, &ServerType, &server)) {
         return (0);
     }
     BackendSelector backend_selector;
@@ -65,8 +109,7 @@ ConfigBackendPoolDHCPv4_createUpdateServer4(ConfigBackendPoolDHCPv4Object *self,
     }
 
     try {
-        ServerPtr server = Server::create(ServerTag(server_tag), description);
-        self->ptr->createUpdateServer4(backend_selector, server);
+        self->ptr->createUpdateServer4(backend_selector, server->ptr);
         Py_RETURN_NONE;
     }
     catch (const exception &e) {
@@ -77,11 +120,11 @@ ConfigBackendPoolDHCPv4_createUpdateServer4(ConfigBackendPoolDHCPv4Object *self,
 
 static PyObject *
 ConfigBackendPoolDHCPv4_createUpdateSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
-    Subnet4Object *subnet;
     const char *backend;
-    const char *server;
+    PyObject *selector;
+    Subnet4Object *subnet;
 
-    if (!PyArg_ParseTuple(args, "O!ss", &Subnet4Type, &subnet, &backend, &server)) {
+    if (!PyArg_ParseTuple(args, "sOO!", &backend, &selector, &Subnet4Type, &subnet)) {
         return (0);
     }
     BackendSelector backend_selector;
@@ -91,7 +134,9 @@ ConfigBackendPoolDHCPv4_createUpdateSubnet4(ConfigBackendPoolDHCPv4Object *self,
 
     try {
         ServerSelector server_selector(ServerSelector::UNASSIGNED());
-        parse_server_selector(server, server_selector);
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
         self->ptr->createUpdateSubnet4(backend_selector, server_selector, subnet->ptr);
         Py_RETURN_NONE;
     }
@@ -104,10 +149,10 @@ ConfigBackendPoolDHCPv4_createUpdateSubnet4(ConfigBackendPoolDHCPv4Object *self,
 static PyObject *
 ConfigBackendPoolDHCPv4_deleteSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
     const char *backend;
-    const char *server;
+    PyObject *selector;
     uint32_t subnet_id;
 
-    if (!PyArg_ParseTuple(args, "ssI", &backend, &server, &subnet_id)) {
+    if (!PyArg_ParseTuple(args, "sOI", &backend, &selector, &subnet_id)) {
         return (0);
     }
     BackendSelector backend_selector;
@@ -117,8 +162,33 @@ ConfigBackendPoolDHCPv4_deleteSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObj
 
     try {
         ServerSelector server_selector(ServerSelector::UNASSIGNED());
-        parse_server_selector(server, server_selector);
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
         uint64_t count = self->ptr->deleteSubnet4(backend_selector, server_selector, subnet_id);
+        return (PyLong_FromLong(count));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+ConfigBackendPoolDHCPv4_deleteServer4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
+    const char *backend;
+    const char *server_tag;
+
+    if (!PyArg_ParseTuple(args, "ss", &backend, &server_tag)) {
+        return (0);
+    }
+    BackendSelector backend_selector;
+    if (parse_backend_selector(backend, backend_selector) < 0) {
+        return (0);
+    }
+
+    try {
+        uint64_t count = self->ptr->deleteServer4(backend_selector, ServerTag(server_tag));
         return (PyLong_FromLong(count));
     }
     catch (const exception &e) {
@@ -149,7 +219,7 @@ ConfigBackendPoolDHCPv4_getAllServers4(ConfigBackendPoolDHCPv4Object *self, PyOb
             int pos = 0;
             for (auto it = servers.begin(); it != servers.cend(); ++it, ++pos) {
                 ServerPtr server = *it;
-                PyObject *elem = element_to_object(server->toElement());
+                PyObject *elem = Server_from_ptr(server);
                 if (!elem || PyList_SetItem(list, pos, elem) < 0) {
                     Py_DECREF(list);
                     return (0);
@@ -172,9 +242,9 @@ ConfigBackendPoolDHCPv4_getAllServers4(ConfigBackendPoolDHCPv4Object *self, PyOb
 static PyObject *
 ConfigBackendPoolDHCPv4_getAllSubnets4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
     const char *backend;
-    const char *server;
+    PyObject *selector;
 
-    if (!PyArg_ParseTuple(args, "ss", &backend, &server)) {
+    if (!PyArg_ParseTuple(args, "sO", &backend, &selector)) {
         return (0);
     }
     BackendSelector backend_selector;
@@ -184,7 +254,9 @@ ConfigBackendPoolDHCPv4_getAllSubnets4(ConfigBackendPoolDHCPv4Object *self, PyOb
 
     try {
         ServerSelector server_selector(ServerSelector::UNASSIGNED());
-        parse_server_selector(server, server_selector);
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
         Subnet4Collection subnets = self->ptr->getAllSubnets4(backend_selector, server_selector);
         PyObject *list = PyList_New(subnets.size());
         if (!list) {
@@ -229,6 +301,8 @@ static PyMethodDef ConfigBackendPoolDHCPv4_methods[] = {
      "Creates or updates a server."},
     {"createUpdateSubnet4", (PyCFunction) ConfigBackendPoolDHCPv4_createUpdateSubnet4, METH_VARARGS,
      "Creates or updates a subnet."},
+    {"deleteServer4", (PyCFunction) ConfigBackendPoolDHCPv4_deleteServer4, METH_VARARGS,
+     "Deletes a server from the backend."},
     {"deleteSubnet4", (PyCFunction) ConfigBackendPoolDHCPv4_deleteSubnet4, METH_VARARGS,
      "Deletes subnet by identifier."},
     {"getAllServers4", (PyCFunction) ConfigBackendPoolDHCPv4_getAllServers4, METH_VARARGS,

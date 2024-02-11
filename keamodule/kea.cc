@@ -44,6 +44,7 @@ PyInit_kea(void) {
         || LoggerManager_define()
         || Option_define()
         || Pkt4_define()
+        || Server_define()
         || SrvConfig_define()
         || Subnet4_define()
         || Subnet4ConfigParser_define()) {

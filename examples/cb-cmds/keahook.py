@@ -1,3 +1,9 @@
+"""
+Implementation of https://kea.readthedocs.io/en/kea-2.2.0/arm/hooks.html#cb-cmds-configuration-backend-commands
+
+The behaviour is not likely to be identical to the official hook since it has been developed
+by reading the hook documentation, and guessing how the hook would implement the function.
+"""
 import json
 import kea
 
@@ -77,76 +83,145 @@ def wrap_handler(handle, get_response):
     return 0
 
 
-def debug_subnets():
-    subnets = kea.CfgMgr.instance().getCurrentCfg().getCfgSubnets4().getAll()
-    if subnets:
-        for s in subnets:
-            kea.logger.debug(json.dumps(s.toElement()))
-    else:
-        kea.logger.debug('no subnets')
+def make_selector(server_tags):
+    if isinstance(server_tags, list) and len(server_tags) == 1:
+        return server_tags[0]
+    return server_tags
 
 
-# {"command": "remote-server4-get-all",
-#  "arguments": {"remote": "mysql"}}
+# {
+#     "command": "remote-server4-del",
+#     "arguments": {
+#         "servers": [{
+#             "server-tag": "server1"
+#         }],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     } 
+# }
+def remote_server4_del(handle):
+    def get_response(args):
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        count = 0
+        for server in get_list_arg(args, 'servers'):
+            server_tag = server['server_tag']
+            count += pool.deleteServer4(backend, server_tag)
+        return {'result': 0,
+                'text': '%s DHCPv4 server(s) deleted.' % count,
+                'arguments': {
+                    'count': count
+                }}
+
+    return wrap_handler(handle, get_response)
+
+
+# {
+#     "command": "remote-server4-get-all",
+#     "arguments": {
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
 def remote_server4_get_all(handle):
     def get_response(args):
-        backend = get_string_arg(args, 'remote')
-        servers = kea.ConfigBackendDHCPv4Mgr.instance().getPool().getAllServers4(backend)
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        servers = pool.getAllServers4(backend)
         return {'result': 0,
                 'text': 'DHCPv4 servers found.',
                 'arguments': {
-                    'servers': servers,
+                    'servers': [s.toElement() for s in servers],
                     'count': len(servers)
                 }}
 
     return wrap_handler(handle, get_response)
 
 
-# {"command": "remote-server4-set",
-#  "arguments": {"servers": [{"server-tag": "kea",
-#                             "description": "Default server"}],
-#                "remote": "mysql"}}
+# {
+#     "command": "remote-server4-set",
+#     "arguments": {
+#         "servers": [{
+#             "server-tag": "kea",
+#             "description": "Default server"
+#         }],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
 def remote_server4_set(handle):
     def get_response(args):
-        backend = get_string_arg(args, 'remote')
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
         servers = get_list_arg(args, 'servers')
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
         for desc in servers:
             server_tag = desc.get('server-tag', 'empty-server')
             description = desc.get('description', '')
-            pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
-            pool.createUpdateServer4(backend, server_tag, description)
+            pool.createUpdateServer4(backend, kea.Server(server_tag, description))
         return {'result': 0,
-                'text': 'DHCPv4 server successfully added.'}
+                'text': 'DHCPv4 server successfully set.',
+                'arguments': {
+                    'servers': servers
+                }}
 
     return wrap_handler(handle, get_response)
 
 
-# {"command": "remote-subnet4-del-by-id",
-#  "arguments": {"remote": "mysql",
-#                "subnets": [{"id": 5}]}}
+# NOTE: servers is not in the documented official hook, but I cannot get it to work without supplying
+#       that argument
+# {
+#     "command": "remote-subnet4-del-by-id",
+#     "arguments": {
+#         "servers": [{
+#             "server-tag": "server1"
+#         }],
+#         "subnets": [{
+#             "id": 5
+#         }],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
 def remote_subnet4_del_by_id(handle):
     def get_response(args):
-        backend = get_string_arg(args, 'remote')
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        server_tags = get_list_arg(args, 'server-tags')
         subnets = get_list_arg(args, 'subnets')
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        count = 0
         for subnet in subnets:
             subnet_id = subnet['id']
-            pool.deleteSubnet4(backend, 'all', subnet_id)
+            count += pool.deleteSubnet4(backend, make_selector(server_tags), subnet_id)
         return {'result': 0,
-                'text': '%s IPv4 subnet(s) deleted.' % len(subnets)}
+                'text': '%s IPv4 subnet(s) deleted.' % count}
 
     return wrap_handler(handle, get_response)
 
 
-# {"command": "remote-subnet4-list",
-#  "arguments": {"remote": "mysql",
-#                "server-tags": ["all"]}}
+# {
+#     "command": "remote-subnet4-list",
+#     "arguments": {
+#         "server-tags": ["all"],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
 def remote_subnet4_list(handle):
     def get_response(args):
-        backend = get_string_arg(args, 'remote')
-        server = get_string_arg(args, 'server-tags')
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        server_tags = get_list_arg(args, 'server-tags')
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
-        subnets = pool.getAllSubnets4(backend, server)
+        subnets = pool.getAllSubnets4(backend, make_selector(server_tags))
         return {'result': 0,
                 'text': '%s IPv4 subnet(s) found.' % len(subnets),
                 'arguments': {
@@ -157,20 +232,28 @@ def remote_subnet4_list(handle):
     return wrap_handler(handle, get_response)
 
 
-# {"command": "remote-subnet4-set",
-#  "arguments": {"subnets": [{...}],
-#                "remote": "mysql",
-#                "server-tags": ["all"]}}
+# {
+#     "command": "remote-subnet4-set",
+#     "arguments": {
+#         "subnets": [{...}],
+#         "server-tags": ["all"],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
 def remote_subnet4_set(handle):
     def get_response(args):
-        subnet = get_map_arg(args, 'subnet')
-        backend = get_string_arg(args, 'remote')
-        server = get_string_arg(args, 'server-tags')
-        subnet4 = kea.Subnet4ConfigParser().parse(subnet)
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        server_tags = get_list_arg(args, 'server-tags')
+        parser = kea.Subnet4ConfigParser()
+        subnets = [parser.parse(s) for s in get_list_arg(args, 'subnet')]
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
-        pool.createUpdateSubnet4(subnet4, backend, server)
+        for subnet in subnets:
+            pool.createUpdateSubnet4(backend, make_selector(server_tags), subnet)
         return {'result': 0,
-                'text': 'Subnet added.'}
+                'text': 'Subnet(s) added.'}
 
     return wrap_handler(handle, get_response)
 
