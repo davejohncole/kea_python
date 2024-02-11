@@ -240,6 +240,37 @@ ConfigBackendPoolDHCPv4_getAllServers4(ConfigBackendPoolDHCPv4Object *self, PyOb
 }
 
 static PyObject *
+ConfigBackendPoolDHCPv4_getSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
+    const char *backend;
+    PyObject *selector;
+    uint32_t subnet_id;
+
+    if (!PyArg_ParseTuple(args, "sOI", &backend, &selector, &subnet_id)) {
+        return (0);
+    }
+    BackendSelector backend_selector;
+    if (parse_backend_selector(backend, backend_selector) < 0) {
+        return (0);
+    }
+
+    try {
+        ServerSelector server_selector(ServerSelector::UNASSIGNED());
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
+        Subnet4Ptr subnet = self->ptr->getSubnet4(backend_selector, server_selector, subnet_id);
+        if (subnet) {
+            return (Subnet4_from_ptr(subnet));
+        }
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 ConfigBackendPoolDHCPv4_getAllSubnets4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
     const char *backend;
     PyObject *selector;
@@ -307,6 +338,8 @@ static PyMethodDef ConfigBackendPoolDHCPv4_methods[] = {
      "Deletes subnet by identifier."},
     {"getAllServers4", (PyCFunction) ConfigBackendPoolDHCPv4_getAllServers4, METH_VARARGS,
      "Retrieves all servers from the particular backend."},
+    {"getSubnet4", (PyCFunction) ConfigBackendPoolDHCPv4_getSubnet4, METH_VARARGS,
+     "Retrieves a single subnet by subnet identifier."},
     {"getAllSubnets4", (PyCFunction) ConfigBackendPoolDHCPv4_getAllSubnets4, METH_VARARGS,
      "Collection of subnets or empty collection if no subnet found."},
     {0}  // Sentinel

@@ -47,8 +47,16 @@ def remote_subnet4_del_by_id():
                  {'subnets': [{
                      'id': 5,
                   }],
-                  'remote': {'type': 'mysql'},
-                  'server-tags': ['kea']
+                  'remote': {'type': 'mysql'}
+                 })
+
+
+def remote_subnet4_get_by_id():
+    send_command('remote-subnet4-get-by-id',
+                 {'subnets': [{
+                     'id': 5,
+                  }],
+                  'remote': {'type': 'mysql'}
                  })
 
 
@@ -75,6 +83,7 @@ def main():
     parser.add_argument('--server-get-all', action='store_true')
     parser.add_argument('--subnet-set', action='store_true')
     parser.add_argument('--subnet-del-by-id', action='store_true')
+    parser.add_argument('--subnet-get-by-id', action='store_true')
     parser.add_argument('--subnet-list', action='store_true')
 
     args = parser.parse_args()
@@ -87,6 +96,9 @@ def main():
         do_all = False
     if args.subnet_del_by_id:
         remote_subnet4_del_by_id()
+        do_all = False
+    if args.subnet_get_by_id:
+        remote_subnet4_get_by_id()
         do_all = False
     if args.subnet_list:
         remote_subnet4_list()
@@ -101,9 +113,10 @@ def main():
         remote_server4_set()
         remote_server4_get_all()
         remote_subnet4_set()
-        remote_server4_get_all()
+        remote_subnet4_list()
+        remote_subnet4_get_by_id()
         remote_subnet4_del_by_id()
-        remote_server4_get_all()
+        remote_subnet4_list()
 
 
 if __name__ == '__main__':

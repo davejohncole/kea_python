@@ -173,14 +173,9 @@ def remote_server4_set(handle):
     return wrap_handler(handle, get_response)
 
 
-# NOTE: servers is not in the documented official hook, but I cannot get it to work without supplying
-#       that argument
 # {
 #     "command": "remote-subnet4-del-by-id",
 #     "arguments": {
-#         "servers": [{
-#             "server-tag": "server1"
-#         }],
 #         "subnets": [{
 #             "id": 5
 #         }],
@@ -193,15 +188,47 @@ def remote_subnet4_del_by_id(handle):
     def get_response(args):
         remote = get_map_arg(args, 'remote')
         backend = remote['type']
-        server_tags = get_list_arg(args, 'server-tags')
         subnets = get_list_arg(args, 'subnets')
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
         count = 0
         for subnet in subnets:
             subnet_id = subnet['id']
-            count += pool.deleteSubnet4(backend, make_selector(server_tags), subnet_id)
+            count += pool.deleteSubnet4(backend, 'any', subnet_id)
         return {'result': 0,
                 'text': '%s IPv4 subnet(s) deleted.' % count}
+
+    return wrap_handler(handle, get_response)
+
+
+# {
+#     "command": "remote-subnet4-get-by-id",
+#     "arguments": {
+#         "subnets": [{
+#             "id": 5
+#         }],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
+def remote_subnet4_get_by_id(handle):
+    def get_response(args):
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        subnets = get_list_arg(args, 'subnets')
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        results = []
+        for subnet in subnets:
+            subnet_id = subnet['id']
+            res = pool.getSubnet4(backend, 'any', subnet_id)
+            if res:
+                results.append(res)
+        return {'result': 0,
+                'text': '%s IPv4 subnet(s) found.' % len(results),
+                'arguments': {
+                    'subnets': [s.toElement() for s in results],
+                    'count': len(results)
+                }}
 
     return wrap_handler(handle, get_response)
 
@@ -262,6 +289,7 @@ def load(handle):
     handle.registerCommandCallout('remote-server4-get-all', remote_server4_get_all)
     handle.registerCommandCallout('remote-server4-set', remote_server4_set)
     handle.registerCommandCallout('remote-subnet4-del-by-id', remote_subnet4_del_by_id)
+    handle.registerCommandCallout('remote-subnet4-get-by-id', remote_subnet4_get_by_id)
     handle.registerCommandCallout('remote-subnet4-list', remote_subnet4_list)
     handle.registerCommandCallout('remote-subnet4-set', remote_subnet4_set)
     return 0
