@@ -62,7 +62,7 @@ def remote_subnet4_get_by_id():
 
 def remote_subnet4_set():
     send_command('remote-subnet4-set',
-                 {'subnet': [{
+                 {'subnets': [{
                      'subnet': '172.28.5.0/24',
                      'id': 5,
                      'pools': [{'pool': '172.28.5.100 - 172.28.5.200'}]

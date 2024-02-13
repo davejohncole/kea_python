@@ -275,7 +275,7 @@ def remote_subnet4_set(handle):
         backend = remote['type']
         server_tags = get_list_arg(args, 'server-tags')
         parser = kea.Subnet4ConfigParser()
-        subnets = [parser.parse(s) for s in get_list_arg(args, 'subnet')]
+        subnets = [parser.parse(s) for s in get_list_arg(args, 'subnets')]
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
         for subnet in subnets:
             pool.createUpdateSubnet4(backend, make_selector(server_tags), subnet)
