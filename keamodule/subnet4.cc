@@ -4,6 +4,7 @@ using namespace std;
 using namespace isc::hooks;
 using namespace isc::dhcp;
 using namespace isc::data;
+using namespace isc::util;
 using namespace isc::asiolink;
 
 extern "C" {
@@ -144,19 +145,40 @@ Subnet4_init(Subnet4Object *self, PyObject *args, PyObject *kwds) {
     static const char *kwlist[] = {"prefix", "length", "t1", "t2", "valid_lifetime", "id", NULL};
     const char *prefix;
     uint8_t length;
-    uint32_t t1;
-    uint32_t t2;
-    uint32_t valid_lifetime;
+    PyObject *t1_obj;
+    PyObject *t2_obj;
+    PyObject *valid_lifetime_obj;
     uint32_t subnet_id;
 
     new(&self->ptr) Subnet4Ptr;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "sbIIII", (char **)kwlist,
-         &prefix, &length, &t1, &t2, &valid_lifetime, &subnet_id)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "sbOOOI", (char **)kwlist,
+         &prefix, &length, &t1_obj, &t2_obj, &valid_lifetime_obj, &subnet_id)) {
         return (-1);
     }
 
     try {
+        Triplet<uint32_t> t1;
+        Triplet<uint32_t> t2;
+        Triplet<uint32_t> valid_lifetime;
+        if (t1_obj != Py_None) {
+            if (assert_long_value(t1_obj, "t1") < 0) {
+                return (0);
+            }
+            t1 = PyLong_AsLong(t1_obj);
+        }
+        if (t2_obj != Py_None) {
+            if (assert_long_value(t2_obj, "t2") < 0) {
+                return (0);
+            }
+            t2 = PyLong_AsLong(t2_obj);
+        }
+        if (valid_lifetime_obj != Py_None) {
+            if (assert_long_value(valid_lifetime_obj, "valid_lifetime") < 0) {
+                return (0);
+            }
+            valid_lifetime = PyLong_AsLong(valid_lifetime_obj);
+        }
         self->ptr.reset(new Subnet4(IOAddress(string(prefix)), length, t1, t2, valid_lifetime, SubnetID(subnet_id)));
     }
     catch (const exception &e) {

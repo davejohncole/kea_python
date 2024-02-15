@@ -89,6 +89,25 @@ def make_selector(server_tags):
     return server_tags
 
 
+def trim_empty(elem, names):
+    for name in names:
+        if name in elem and not elem[name]:
+            del elem[name]
+
+
+def subnet_to_element(subnet):
+    elem = subnet.toElement()
+    shared_network = subnet.getSharedNetworkName()
+    if shared_network:
+        elem['shared-network-name'] = shared_network
+    # trim out empty elements
+    for pool in elem.get('pools', []):
+        trim_empty(pool, ['option-data'])
+    trim_empty(elem.get('relay', {}), ['ip-addresses'])
+    trim_empty(elem, ['4o6-interface', '4o6-interface-id', '4o6-subnet', 'option-data', 'pools', 'relay'])
+    return elem
+
+
 # {
 #     "command": "remote-server4-del",
 #     "arguments": {
@@ -222,11 +241,11 @@ def remote_subnet4_get_by_id(handle):
             subnet_id = subnet['id']
             res = pool.getSubnet4(backend, 'any', subnet_id)
             if res:
-                results.append(res)
+                results.append(subnet_to_element(res))
         return {'result': 0,
                 'text': '%s IPv4 subnet(s) found.' % len(results),
                 'arguments': {
-                    'subnets': [s.toElement() for s in results],
+                    'subnets': results,
                     'count': len(results)
                 }}
 
@@ -248,11 +267,12 @@ def remote_subnet4_list(handle):
         backend = remote['type']
         server_tags = get_list_arg(args, 'server-tags')
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
-        subnets = pool.getAllSubnets4(backend, make_selector(server_tags))
+        subnets = [subnet_to_element(s)
+                   for s in pool.getAllSubnets4(backend, make_selector(server_tags))]
         return {'result': 0,
                 'text': '%s IPv4 subnet(s) found.' % len(subnets),
                 'arguments': {
-                    'subnets': [s.toElement() for s in subnets],
+                    'subnets': subnets,
                     'count': len(subnets)
                 }}
 
