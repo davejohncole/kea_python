@@ -65,6 +65,7 @@ def remote_subnet4_set():
                  {'subnets': [{
                      'subnet': '172.28.5.0/24',
                      'id': 5,
+                     'shared-network-name': None,
                      'pools': [{'pool': '172.28.5.100 - 172.28.5.200'}]
                   }],
                   'remote': {'type': 'mysql'},

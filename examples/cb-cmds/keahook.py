@@ -262,7 +262,16 @@ def remote_subnet4_list(handle):
 # {
 #     "command": "remote-subnet4-set",
 #     "arguments": {
-#         "subnets": [{...}],
+#         "subnets": [{
+#             "id": 5,
+#             "subnet": "192.0.2.0/24",
+#             "shared-network-name": "level3",
+#             "pools": [{"pool": "192.0.2.100-192.0.2.200"}],
+#             "option-data": [{
+#                 "name": "routers",
+#                 "data": "192.0.2.1"
+#             }]
+#         }],
 #         "server-tags": ["all"],
 #         "remote": {
 #             "type": "mysql"
@@ -275,8 +284,14 @@ def remote_subnet4_set(handle):
         backend = remote['type']
         server_tags = get_list_arg(args, 'server-tags')
         parser = kea.Subnet4ConfigParser()
-        subnets = [parser.parse(s) for s in get_list_arg(args, 'subnets')]
         pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        subnets = []
+        for elem in get_list_arg(args, 'subnets'):
+            shared_network = elem.pop('shared-network-name', None)
+            subnet = parser.parse(elem)
+            if shared_network:
+                subnet.setSharedNetworkName(shared_network)
+            subnets.append(subnet)
         for subnet in subnets:
             pool.createUpdateSubnet4(backend, make_selector(server_tags), subnet)
         return {'result': 0,

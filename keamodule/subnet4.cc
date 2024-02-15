@@ -53,6 +53,35 @@ Subnet4_inRange(Subnet4Object *self, PyObject *args) {
 }
 
 static PyObject *
+Subnet4_getSharedNetworkName(Subnet4Object *self, PyObject *args) {
+    try {
+        return (PyUnicode_FromString(self->ptr->getSharedNetworkName().c_str()));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Subnet4_setSharedNetworkName(Subnet4Object *self, PyObject *args) {
+    const char *name;
+
+    if (!PyArg_ParseTuple(args, "s", &name)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->setSharedNetworkName(name);
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Subnet4_toText(Subnet4Object *self, PyObject *args) {
     try {
         string text = self->ptr->toText();
@@ -83,6 +112,10 @@ static PyMethodDef Subnet4_methods[] = {
      "Return unique ID for subnet."},
     {"inRange", (PyCFunction) Subnet4_inRange, METH_VARARGS,
      "Checks if specified address is in range."},
+    {"getSharedNetworkName", (PyCFunction) Subnet4_getSharedNetworkName, METH_NOARGS,
+     "Returns shared network name."},
+    {"setSharedNetworkName", (PyCFunction) Subnet4_setSharedNetworkName, METH_VARARGS,
+     "Sets new shared network name."},
     {"toText", (PyCFunction) Subnet4_toText, METH_NOARGS,
      "Returns text representation of the subnet."},
     {"toElement", (PyCFunction) Subnet4_toElement, METH_NOARGS,
