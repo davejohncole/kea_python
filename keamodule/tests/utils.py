@@ -99,3 +99,20 @@ class BaseTestCase(unittest.TestCase):
         msg = '%s() takes no keyword arguments' % method.__name__
         self.assertEqual((msg,), cm.exception.args)
 
+    def assert_method_three_args_no_keywords(self, method):
+        with self.assertRaises(TypeError) as cm:
+            method()
+        self.assertEqual(('function takes exactly 3 arguments (0 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            method(1)
+        self.assertEqual(('function takes exactly 3 arguments (1 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            method(1, 2)
+        self.assertEqual(('function takes exactly 3 arguments (2 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            method(1, 2, 3, 4)
+        self.assertEqual(('function takes exactly 3 arguments (4 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            method(x=1)
+        msg = '%s() takes no keyword arguments' % method.__name__
+        self.assertEqual((msg,), cm.exception.args)

@@ -2,6 +2,12 @@ import kea
 import utils
 
 
+class TestCfgMgr_new(utils.BaseTestCase):
+
+    def test_ok(self):
+        self.assert_cannot_construct(kea.CfgMgr)
+
+
 class TestCfgMgr_instance(utils.BaseTestCase):
 
     def test_badarg_count(self):

@@ -28,7 +28,7 @@ parse_backend_selector(const char *backend, BackendSelector& selector) {
         selector = BackendSelector::UNSPEC();
         return (0);
     }
-    PyErr_Format(PyExc_TypeError, "Unrecognised BackendSelector %s", backend);
+    PyErr_Format(PyExc_TypeError, "unrecognised selector: %s", backend);
     return (-1);
 }
 
@@ -70,7 +70,7 @@ parse_server_selector(PyObject *selector, ServerSelector& server_selector) {
                 return (-1);
             }
             if (!PyUnicode_Check(elem)) {
-                PyErr_Format(PyExc_TypeError, "Expected string for element %d", i);
+                PyErr_Format(PyExc_TypeError, "expected string for server selector element %d", i);
                 return (-1);
             }
             PyObject *selector_utf8 = PyUnicode_AsUTF8String(selector);
@@ -91,7 +91,7 @@ parse_server_selector(PyObject *selector, ServerSelector& server_selector) {
         server_selector = ServerSelector::MULTIPLE(tags);
         return (0);
     }
-    PyErr_SetString(PyExc_TypeError, "Expected string or list of strings.");
+    PyErr_SetString(PyExc_TypeError, "server selector must be string or list of strings");
     return (-1);
 }
 

@@ -26,6 +26,18 @@ CfgSubnets4_add(CfgSubnets4Object *self, PyObject *args) {
 }
 
 static PyObject *
+CfgSubnets4_clear(CfgSubnets4Object *self, PyObject *args) {
+    try {
+        self->ptr->clear();
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 CfgSubnets4_delSubnetID(CfgSubnets4Object *self, PyObject *args) {
     uint32_t subnet_id;
 
@@ -146,6 +158,8 @@ CfgSubnets4_toElement(CfgSubnets4Object *self, PyObject *args) {
 static PyMethodDef CfgSubnets4_methods[] = {
     {"add", (PyCFunction) CfgSubnets4_add, METH_VARARGS,
      "Adds new subnet to the configuration."},
+    {"clear", (PyCFunction) CfgSubnets4_clear, METH_NOARGS,
+     "Clears all subnets from the configuration."},
     {"delSubnetID", (PyCFunction) CfgSubnets4_delSubnetID, METH_VARARGS,
      "Removes subnet from the configuration."},
     {"replace", (PyCFunction) CfgSubnets4_replace, METH_VARARGS,

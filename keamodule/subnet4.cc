@@ -162,20 +162,23 @@ Subnet4_init(Subnet4Object *self, PyObject *args, PyObject *kwds) {
         Triplet<uint32_t> t2;
         Triplet<uint32_t> valid_lifetime;
         if (t1_obj != Py_None) {
-            if (assert_long_value(t1_obj, "t1") < 0) {
-                return (0);
+            if (!PyLong_Check(t1_obj)) {
+                PyErr_SetString(PyExc_TypeError, "'t1' must be int or None");
+                return (-1);
             }
             t1 = PyLong_AsLong(t1_obj);
         }
         if (t2_obj != Py_None) {
-            if (assert_long_value(t2_obj, "t2") < 0) {
-                return (0);
+            if (!PyLong_Check(t2_obj)) {
+                PyErr_SetString(PyExc_TypeError, "'t2' must be int or None");
+                return (-1);
             }
             t2 = PyLong_AsLong(t2_obj);
         }
         if (valid_lifetime_obj != Py_None) {
-            if (assert_long_value(valid_lifetime_obj, "valid_lifetime") < 0) {
-                return (0);
+            if (!PyLong_Check(valid_lifetime_obj)) {
+                PyErr_SetString(PyExc_TypeError, "'valid_lifetime' must be int or None");
+                return (-1);
             }
             valid_lifetime = PyLong_AsLong(valid_lifetime_obj);
         }

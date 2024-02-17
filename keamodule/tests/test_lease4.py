@@ -28,7 +28,7 @@ class TestLease4_addr(utils.BaseTestCase):
                          cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             x.addr = 0
-        self.assertEqual(('The addr attribute value must be a str',), cm.exception.args)
+        self.assertEqual(('the addr attribute value must be a str',), cm.exception.args)
 
 
 class TestLease4_valid_lft(utils.BaseTestCase):
@@ -43,7 +43,7 @@ class TestLease4_valid_lft(utils.BaseTestCase):
         x = kea.Lease4()
         with self.assertRaises(TypeError) as cm:
             x.valid_lft = 'bogus'
-        self.assertEqual(('The valid_lft attribute value must be an int',), cm.exception.args)
+        self.assertEqual(('the valid_lft attribute value must be an int',), cm.exception.args)
 
 
 class TestLease4_cltt(utils.BaseTestCase):
@@ -58,7 +58,7 @@ class TestLease4_cltt(utils.BaseTestCase):
         x = kea.Lease4()
         with self.assertRaises(TypeError) as cm:
             x.cltt = 'bogus'
-        self.assertEqual(('The cltt attribute value must be an int',), cm.exception.args)
+        self.assertEqual(('the cltt attribute value must be an int',), cm.exception.args)
 
 
 class TestLease4_subnet_id(utils.BaseTestCase):
@@ -73,7 +73,7 @@ class TestLease4_subnet_id(utils.BaseTestCase):
         x = kea.Lease4()
         with self.assertRaises(TypeError) as cm:
             x.subnet_id = 'bogus'
-        self.assertEqual(('The subnet_id attribute value must be an int',), cm.exception.args)
+        self.assertEqual(('the subnet_id attribute value must be an int',), cm.exception.args)
 
 
 class TestLease4_hostname(utils.BaseTestCase):
@@ -90,7 +90,7 @@ class TestLease4_hostname(utils.BaseTestCase):
         x = kea.Lease4()
         with self.assertRaises(TypeError) as cm:
             x.hostname = 3
-        self.assertEqual(('The hostname attribute value must be a str',), cm.exception.args)
+        self.assertEqual(('the hostname attribute value must be a str',), cm.exception.args)
 
 
 class TestLease4_fqdn_fwd(utils.BaseTestCase):
@@ -107,7 +107,7 @@ class TestLease4_fqdn_fwd(utils.BaseTestCase):
         x = kea.Lease4()
         with self.assertRaises(TypeError) as cm:
             x.fqdn_fwd = 'bogus'
-        self.assertEqual(('The fqdn_fwd attribute value must be a bool',), cm.exception.args)
+        self.assertEqual(('the fqdn_fwd attribute value must be a bool',), cm.exception.args)
 
 
 class TestLease4_fqdn_rev(utils.BaseTestCase):
@@ -124,7 +124,7 @@ class TestLease4_fqdn_rev(utils.BaseTestCase):
         x = kea.Lease4()
         with self.assertRaises(TypeError) as cm:
             x.fqdn_rev = 'bogus'
-        self.assertEqual(('The fqdn_rev attribute value must be a bool',), cm.exception.args)
+        self.assertEqual(('the fqdn_rev attribute value must be a bool',), cm.exception.args)
 
 
 class TestLease4_hwaddr(utils.BaseTestCase):
@@ -170,7 +170,7 @@ class TestLease4_state(utils.BaseTestCase):
         x = kea.Lease4()
         with self.assertRaises(TypeError) as cm:
             x.state = 'bogus'
-        self.assertEqual(('The state attribute value must be an int',), cm.exception.args)
+        self.assertEqual(('the state attribute value must be an int',), cm.exception.args)
 
 
 class TestLease4_setContext(utils.BaseTestCase):

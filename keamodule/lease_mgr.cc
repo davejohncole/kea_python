@@ -87,7 +87,7 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
             return (lease_list_from_collection(leases));
         }
         else {
-            PyErr_SetString(PyExc_TypeError, "Invalid argument combination");
+            PyErr_SetString(PyExc_TypeError, "invalid argument combination");
             return (0);
         }
         if (!ptr) {
@@ -158,7 +158,7 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
             leases = self->mgr->getLeases4(IOAddress(string(lower_bound_address)), LeasePageSize(page_size));
         }
         else {
-            PyErr_SetString(PyExc_TypeError, "Invalid argument combination");
+            PyErr_SetString(PyExc_TypeError, "invalid argument combination");
             return (0);
         }
 

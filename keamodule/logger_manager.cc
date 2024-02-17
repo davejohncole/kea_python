@@ -14,7 +14,7 @@ LoggerManager_static_init(LoggerManagerObject *self, PyObject *args) {
     }
 
     try {
-        LoggerManager::init(root);
+        LoggerManager::init(root, Severity::DEFAULT, 0, "/dev/null");
         Py_RETURN_NONE;
     }
     catch (const exception &e) {
