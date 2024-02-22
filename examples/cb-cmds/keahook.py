@@ -100,6 +100,11 @@ def subnet_to_element(subnet):
     shared_network = subnet.getSharedNetworkName()
     if shared_network:
         elem['shared-network-name'] = shared_network
+    metadata = subnet.getMetadata()
+    if metadata:
+        trim_empty(metadata, ['server-tags'])
+        if metadata:
+            elem['metadata'] = metadata
     # trim out empty elements
     for pool in elem.get('pools', []):
         trim_empty(pool, ['option-data'])
@@ -314,8 +319,17 @@ def remote_subnet4_set(handle):
             subnets.append(subnet)
         for subnet in subnets:
             pool.createUpdateSubnet4(backend, make_selector(server_tags), subnet)
+        results = []
+        for subnet in subnets:
+            res = pool.getSubnet4(backend, 'any', subnet.getID())
+            if res:
+                results.append(subnet_to_element(res))
         return {'result': 0,
-                'text': 'Subnet(s) added.'}
+                'text': '%s IPv4 subnet(s) added.' % len(results),
+                'arguments': {
+                    'subnets': results,
+                    'count': len(results)
+                }}
 
     return wrap_handler(handle, get_response)
 

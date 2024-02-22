@@ -72,6 +72,45 @@ class TestSubnet4_new(utils.BaseTestCase):
                           'subnet': '192.168.1.0/24'}, s.toElement())
 
 
+class TestSubnet4_delServerTag(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        self.assert_method_one_arg_no_keywords(s.delServerTag)
+
+    def test_ok(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        s.setServerTag('level3')
+        s.delServerTag('level3')
+        self.assertEqual(set(), s.getServerTags())
+
+
+class TestSubnet4_getServerTags(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        self.assert_method_no_arguments(s.getServerTags)
+
+    def test_ok(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        self.assertEqual(set(), s.getServerTags())
+        s.setServerTag('level3')
+        self.assertEqual(set(['level3']), s.getServerTags())
+
+
+class TestSubnet4_getMetadata(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        self.assert_method_no_arguments(s.getMetadata)
+
+    def test_ok(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        self.assertEqual({'server-tags': []}, s.getMetadata())
+        s.setServerTag('level3')
+        self.assertEqual({'server-tags': ['level3']}, s.getMetadata())
+
+
 class TestSubnet4_getSharedNetworkName(utils.BaseTestCase):
 
     def test_badarg_count(self):
@@ -83,6 +122,20 @@ class TestSubnet4_getSharedNetworkName(utils.BaseTestCase):
         self.assertEqual('', s.getSharedNetworkName())
         s.setSharedNetworkName('level3')
         self.assertEqual('level3', s.getSharedNetworkName())
+
+
+class TestSubnet4_setServerTag(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        self.assert_method_one_arg_no_keywords(s.setServerTag)
+
+    def test_ok(self):
+        s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)
+        s.setServerTag('one')
+        self.assertEqual(set(['one']), s.getServerTags())
+        s.setServerTag('two')
+        self.assertEqual(set(['one', 'two']), s.getServerTags())
 
 
 class TestSubnet4_setSharedNetworkName(utils.BaseTestCase):

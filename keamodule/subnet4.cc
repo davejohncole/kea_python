@@ -10,6 +10,24 @@ using namespace isc::asiolink;
 extern "C" {
 
 static PyObject *
+Subnet4_delServerTag(Subnet4Object *self, PyObject *args) {
+    const char *server_tag;
+
+    if (!PyArg_ParseTuple(args, "s", &server_tag)) {
+        return (0);
+    }
+
+    try {
+        self->ptr->delServerTag(server_tag);
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Subnet4_getID(Subnet4Object *self, PyObject *args) {
     try {
         SubnetID subnet_id = self->ptr->getID();
@@ -22,10 +40,59 @@ Subnet4_getID(Subnet4Object *self, PyObject *args) {
 }
 
 static PyObject *
+Subnet4_getMetadata(Subnet4Object *self, PyObject *args) {
+    try {
+        ElementPtr ptr = self->ptr->getMetadata();
+        return (element_to_object(ptr));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 Subnet4_getValid(Subnet4Object *self, PyObject *args) {
     try {
         uint32_t valid = self->ptr->getValid();
         return (PyLong_FromLong(valid));
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+Subnet4_getServerTags(Subnet4Object *self, PyObject *args) {
+    PyObject *tags = PySet_New(NULL);
+    if (!tags) {
+        return (0);
+    }
+    try {
+        auto server_tags = self->ptr->getServerTags();
+        for (auto it = server_tags.begin(); it != server_tags.cend(); ++it) {
+            PyObject *elem = PyUnicode_FromString(it->get().c_str());
+            if (!elem || PySet_Add(tags, elem) < 0) {
+                Py_DECREF(tags);
+                Py_XDECREF(elem);
+                return (0);
+            }
+            Py_DECREF(elem);
+        }
+    }
+    catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        Py_DECREF(tags);
+        return (0);
+    }
+    return (tags);
+}
+
+static PyObject *
+Subnet4_getSharedNetworkName(Subnet4Object *self, PyObject *args) {
+    try {
+        return (PyUnicode_FromString(self->ptr->getSharedNetworkName().c_str()));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -54,9 +121,16 @@ Subnet4_inRange(Subnet4Object *self, PyObject *args) {
 }
 
 static PyObject *
-Subnet4_getSharedNetworkName(Subnet4Object *self, PyObject *args) {
+Subnet4_setServerTag(Subnet4Object *self, PyObject *args) {
+    const char *server_tag;
+
+    if (!PyArg_ParseTuple(args, "s", &server_tag)) {
+        return (0);
+    }
+
     try {
-        return (PyUnicode_FromString(self->ptr->getSharedNetworkName().c_str()));
+        self->ptr->setServerTag(server_tag);
+        Py_RETURN_NONE;
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -107,14 +181,22 @@ Subnet4_toElement(Subnet4Object *self, PyObject *args) {
 }
 
 static PyMethodDef Subnet4_methods[] = {
+    {"delServerTag", (PyCFunction) Subnet4_delServerTag, METH_VARARGS,
+     "Deletes server tag. Remove the first occurrence of the given server tag."},
     {"getID", (PyCFunction) Subnet4_getID, METH_NOARGS,
      "Return unique ID for subnet."},
+    {"getMetadata", (PyCFunction) Subnet4_getMetadata, METH_NOARGS,
+     "Returns an object representing metadata to be returned with objects from the configuration backend."},
     {"getValid", (PyCFunction) Subnet4_getValid, METH_NOARGS,
      "Return unique ID for subnet."},
-    {"inRange", (PyCFunction) Subnet4_inRange, METH_VARARGS,
-     "Checks if specified address is in range."},
+    {"getServerTags", (PyCFunction) Subnet4_getServerTags, METH_NOARGS,
+     "Returns server tags."},
     {"getSharedNetworkName", (PyCFunction) Subnet4_getSharedNetworkName, METH_NOARGS,
      "Returns shared network name."},
+    {"inRange", (PyCFunction) Subnet4_inRange, METH_VARARGS,
+     "Checks if specified address is in range."},
+    {"setServerTag", (PyCFunction) Subnet4_setServerTag, METH_VARARGS,
+     "Adds new server tag."},
     {"setSharedNetworkName", (PyCFunction) Subnet4_setSharedNetworkName, METH_VARARGS,
      "Sets new shared network name."},
     {"toText", (PyCFunction) Subnet4_toText, METH_NOARGS,

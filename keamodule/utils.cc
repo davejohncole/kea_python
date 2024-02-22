@@ -127,9 +127,11 @@ element_to_object(ConstElementPtr ptr) {
                     PyObject *elem = element_to_object(it->second);
                     if (!elem || PyDict_SetItemString(dict, it->first.c_str(), elem) < 0) {
                         Py_DECREF(dict);
+                        Py_XDECREF(elem);
                         return (0);
                     }
-                }
+                    Py_DECREF(elem);
+               }
             }
             catch (const exception &e) {
                 PyErr_SetString(PyExc_TypeError, e.what());
