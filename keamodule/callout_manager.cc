@@ -11,6 +11,7 @@ static PyMethodDef CalloutManager_methods[] = {
 
 static PyObject *
 CalloutManager_use_count(CalloutManagerObject *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->manager.use_count()));
 }
 
@@ -19,12 +20,14 @@ static PyGetSetDef CalloutManager_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 CalloutManager_dealloc(CalloutManagerObject *self) {
     self->manager.~CalloutManagerPtr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 CalloutManager_init(CalloutManagerObject *self, PyObject *args, PyObject *kwds) {
     new(&self->manager) CalloutManagerPtr;
@@ -48,6 +51,7 @@ CalloutManager_init(CalloutManagerObject *self, PyObject *args, PyObject *kwds) 
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 CalloutManager_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CalloutManagerObject *self;
@@ -101,10 +105,12 @@ PyTypeObject CalloutManagerType = {
 
 int
 CalloutManager_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&CalloutManagerType) < 0) {
         return (1);
     }
     Py_INCREF(&CalloutManagerType);
+    // REFCOUNT: PyModule_AddObject - steals reference on success
     if (PyModule_AddObject(kea_module, "CalloutManager", (PyObject *) &CalloutManagerType) < 0) {
         Py_DECREF(&CalloutManagerType);
         return (1);

@@ -10,6 +10,7 @@ extern "C" {
 static PyObject *
 Option_getType(OptionObject *self, PyObject *args) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->getType()));
     } catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -21,6 +22,7 @@ static PyObject *
 Option_getBytes(OptionObject *self, PyObject *args) {
     try {
         vector<uint8_t> value = self->ptr->toBinary();
+        // REFCOUNT: PyBytes_FromStringAndSize - returns new reference
         return (PyBytes_FromStringAndSize((const char *) &value[0], value.size()));
     } catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -32,6 +34,7 @@ static PyObject *
 Option_setBytes(OptionObject *self, PyObject *args) {
     PyObject *data;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "S", &data)) {
         return (0);
     }
@@ -42,6 +45,7 @@ Option_setBytes(OptionObject *self, PyObject *args) {
 
         PyBytes_AsStringAndSize(data, &buff, &len);
         self->ptr->setData(&buff[0], &buff[len]);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -54,6 +58,7 @@ static PyObject *
 Option_getString(OptionObject *self, PyObject *args) {
     try {
         vector<uint8_t> value = self->ptr->toBinary();
+        // REFCOUNT: PyUnicode_FromStringAndSize - returns new reference
         return (PyUnicode_FromStringAndSize((const char *) &value[0], value.size()));
     } catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -72,6 +77,7 @@ Option_setString(OptionObject *self, PyObject *args) {
 
     try {
         self->ptr->setData(&data[0], &data[len]);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -83,6 +89,7 @@ Option_setString(OptionObject *self, PyObject *args) {
 static PyObject *
 Option_getUint8(OptionObject *self, PyObject *args) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->getUint8()));
     } catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -100,6 +107,7 @@ Option_setUint8(OptionObject *self, PyObject *args) {
 
     try {
         self->ptr->setUint8(value);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -111,6 +119,7 @@ Option_setUint8(OptionObject *self, PyObject *args) {
 static PyObject *
 Option_getUint16(OptionObject *self, PyObject *args) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->getUint16()));
     } catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -128,6 +137,7 @@ Option_setUint16(OptionObject *self, PyObject *args) {
 
     try {
         self->ptr->setUint16(value);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -139,6 +149,7 @@ Option_setUint16(OptionObject *self, PyObject *args) {
 static PyObject *
 Option_getUint32(OptionObject *self, PyObject *args) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->getUint32()));
     } catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -156,6 +167,7 @@ Option_setUint32(OptionObject *self, PyObject *args) {
 
     try {
         self->ptr->setUint32(value);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -168,12 +180,14 @@ static PyObject *
 Option_addOption(OptionObject *self, PyObject *args) {
     PyObject *value;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &OptionType, &value)) {
         return (0);
     }
 
     try {
         self->ptr->addOption(((OptionObject *)value)->ptr);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     } catch (const exception &e) {
@@ -193,6 +207,7 @@ Option_getOption(OptionObject *self, PyObject *args) {
     try {
         OptionPtr ptr = self->ptr->getOption(type);
         if (ptr) {
+            // REFCOUNT: Option_from_ptr - returns new reference
             return Option_from_ptr(ptr);
         }
         Py_RETURN_NONE;
@@ -207,6 +222,7 @@ Option_pack(OptionObject *self, PyObject *args) {
     try {
         OutputBuffer buf(64);
         self->ptr->pack(buf);
+        // REFCOUNT: PyBytes_FromStringAndSize - returns new reference
         return (PyBytes_FromStringAndSize((char *)buf.getData(), buf.getLength()));
     }
     catch (const exception &e) {
@@ -219,6 +235,7 @@ static PyObject *
 Option_toText(OptionObject *self, PyObject *args) {
     try {
         string addr = self->ptr->toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -263,6 +280,7 @@ static PyMethodDef Option_methods[] = {
 
 static PyObject *
 Option_use_count(OptionObject *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->ptr.use_count()));
 }
 
@@ -271,12 +289,14 @@ static PyGetSetDef Option_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Option_dealloc(OptionObject *self) {
     self->ptr.~OptionPtr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 Option_init(OptionObject *self, PyObject *args, PyObject *kwds) {
     unsigned short type;
@@ -295,6 +315,7 @@ Option_init(OptionObject *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 Option_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     OptionObject *self;
@@ -348,6 +369,7 @@ PyTypeObject OptionType = {
 
 PyObject *
 Option_from_ptr(OptionPtr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
     OptionObject *self = PyObject_New(OptionObject, &OptionType);
     if (self) {
         new(&self->ptr) OptionPtr;
@@ -358,10 +380,12 @@ Option_from_ptr(OptionPtr &ptr) {
 
 int
 Option_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&OptionType) < 0) {
         return (1);
     }
     Py_INCREF(&OptionType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "Option", (PyObject *) &OptionType) < 0) {
         Py_DECREF(&OptionType);
         return (1);

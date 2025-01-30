@@ -31,6 +31,7 @@ static PyObject *
 Subnet4_getID(Subnet4Object *self, PyObject *args) {
     try {
         SubnetID subnet_id = self->ptr->getID();
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(subnet_id));
     }
     catch (const exception &e) {
@@ -43,6 +44,7 @@ static PyObject *
 Subnet4_getMetadata(Subnet4Object *self, PyObject *args) {
     try {
         ElementPtr ptr = self->ptr->getMetadata();
+        // REFCOUNT: element_to_object - returns new reference
         return (element_to_object(ptr));
     }
     catch (const exception &e) {
@@ -55,6 +57,7 @@ static PyObject *
 Subnet4_getValid(Subnet4Object *self, PyObject *args) {
     try {
         uint32_t valid = self->ptr->getValid();
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(valid));
     }
     catch (const exception &e) {
@@ -65,6 +68,7 @@ Subnet4_getValid(Subnet4Object *self, PyObject *args) {
 
 static PyObject *
 Subnet4_getServerTags(Subnet4Object *self, PyObject *args) {
+    // REFCOUNT: PySet_New - returns new reference
     PyObject *tags = PySet_New(NULL);
     if (!tags) {
         return (0);
@@ -72,7 +76,9 @@ Subnet4_getServerTags(Subnet4Object *self, PyObject *args) {
     try {
         auto server_tags = self->ptr->getServerTags();
         for (auto it = server_tags.begin(); it != server_tags.cend(); ++it) {
+            // REFCOUNT: PyUnicode_FromString - returns new reference
             PyObject *elem = PyUnicode_FromString(it->get().c_str());
+            // REFCOUNT: PySet_Add - reference neutral
             if (!elem || PySet_Add(tags, elem) < 0) {
                 Py_DECREF(tags);
                 Py_XDECREF(elem);
@@ -92,6 +98,7 @@ Subnet4_getServerTags(Subnet4Object *self, PyObject *args) {
 static PyObject *
 Subnet4_getSharedNetworkName(Subnet4Object *self, PyObject *args) {
     try {
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(self->ptr->getSharedNetworkName().c_str()));
     }
     catch (const exception &e) {
@@ -160,6 +167,7 @@ static PyObject *
 Subnet4_toText(Subnet4Object *self, PyObject *args) {
     try {
         string text = self->ptr->toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(text.c_str()));
     }
     catch (const exception &e) {
@@ -172,6 +180,7 @@ static PyObject *
 Subnet4_toElement(Subnet4Object *self, PyObject *args) {
     try {
         ElementPtr ptr = self->ptr->toElement();
+        // REFCOUNT: element_to_object - returns new reference
         return (element_to_object(ptr));
     }
     catch (const exception &e) {
@@ -208,6 +217,7 @@ static PyMethodDef Subnet4_methods[] = {
 
 static PyObject *
 Subnet4_use_count(OptionObject *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->ptr.use_count()));
 }
 
@@ -216,12 +226,14 @@ static PyGetSetDef Subnet4_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Subnet4_dealloc(Subnet4Object *self) {
     self->ptr.~Subnet4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 Subnet4_init(Subnet4Object *self, PyObject *args, PyObject *kwds) {
     static const char *kwlist[] = {"prefix", "length", "t1", "t2", "valid_lifetime", "id", NULL};
@@ -234,6 +246,7 @@ Subnet4_init(Subnet4Object *self, PyObject *args, PyObject *kwds) {
 
     new(&self->ptr) Subnet4Ptr;
 
+    // REFCOUNT: PyArg_ParseTupleAndKeywords - returns borrowed references
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "sbOOOI", (char **)kwlist,
          &prefix, &length, &t1_obj, &t2_obj, &valid_lifetime_obj, &subnet_id)) {
         return (-1);
@@ -274,6 +287,7 @@ Subnet4_init(Subnet4Object *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 Subnet4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Subnet4Object *self;
@@ -327,6 +341,7 @@ PyTypeObject Subnet4Type = {
 
 PyObject *
 Subnet4_from_ptr(Subnet4Ptr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
     Subnet4Object *self = PyObject_New(Subnet4Object, &Subnet4Type);
     if (self) {
         new(&self->ptr) Subnet4Ptr;
@@ -337,10 +352,12 @@ Subnet4_from_ptr(Subnet4Ptr &ptr) {
 
 int
 Subnet4_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&Subnet4Type) < 0) {
         return (1);
     }
     Py_INCREF(&Subnet4Type);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "Subnet4", (PyObject *) &Subnet4Type) < 0) {
         Py_DECREF(&Subnet4Type);
         return (1);

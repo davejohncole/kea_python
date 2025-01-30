@@ -9,16 +9,17 @@ using namespace std;
 
 extern "C" {
 
-PyObject *hook_module;
+PyObject *hook_module;                  // imported python hook module
 Logger *kea_logger = 0;
 MessageID *kea_message_id = 0;
-static bool embedded_mode;
-static PyThreadState *thread_state;
-static bool allowed_threads;
+static bool embedded_mode;              // loaded inside Kea
+static PyThreadState *thread_state;     // save result of PyEval_SaveThread()
+static bool allowed_threads;            // avoid calling PyEval_RestoreThread() before PyEval_SaveThread()
 
 void
 begin_allow_threads() {
     if (embedded_mode) {
+        // release the GIL
         thread_state = PyEval_SaveThread();
         allowed_threads = true;
     }
@@ -27,6 +28,7 @@ begin_allow_threads() {
 void
 end_allow_threads() {
     if (embedded_mode && allowed_threads) {
+        // acquire the GIL
         PyEval_RestoreThread(thread_state);
         allowed_threads = false;
     }
@@ -135,10 +137,11 @@ Logger_exception(LoggerObject *self, PyObject *args) {
         return (0);
     }
     PyObject *exc_type, *exc_value, *exc_traceback;
+    // REFCOUNT: PyErr_GetExcInfo - returns new references
     PyErr_GetExcInfo(&exc_type, &exc_value, &exc_traceback);
     try {
         string traceback;
-        // steals reference to exc_* objects
+        // REFCOUNT: steals reference to exc_* objects
         if (!format_python_traceback(exc_type, exc_value, exc_traceback, traceback)) {
             if (strlen(msg) == 0) {
                 LOG_ERROR(*kea_logger, *kea_message_id).arg(traceback);
@@ -175,6 +178,7 @@ static PyMethodDef Logger_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Logger_dealloc(LoggerObject *self) {
     Py_TYPE(self)->tp_free((PyObject *)self);
@@ -235,16 +239,20 @@ log_error(string msg) {
         PyObject *logger = 0;
         PyObject *res = 0;
 
+        // REFCOUNT: PyErr_Fetch - save current error and reset error status
         PyErr_Fetch(&exc_type, &exc_value, &exc_traceback);
+        // REFCOUNT: PyObject_GetAttrString - returns new reference
         logger = PyObject_GetAttrString(kea_module, "logger");
         if (!logger) {
             goto error;
         }
+        // REFCOUNT: PyObject_CallMethod - returns new reference
         res = PyObject_CallMethod(logger, "error", "s", msg.c_str());
 
 error:
         Py_XDECREF(logger);
         Py_XDECREF(res);
+        // REFCOUNT: PyErr_Restore - restore error status
         PyErr_Restore(exc_type, exc_value, exc_traceback);
     }
 }
@@ -281,17 +289,21 @@ insert_python_path(const string module_path) {
     PyObject *path = 0;
     PyObject *cwd = 0;
 
+    // REFCOUNT: PyImport_ImportModule - returns new reference
     sys_module = PyImport_ImportModule("sys");
     if (!sys_module) {
         log_error("PyImport_ImportModule(\"sys\") failed");
         goto error;
     }
+    // REFCOUNT: PyObject_GetAttrString - returns new reference
     path = PyObject_GetAttrString(sys_module, "path");
     if (!path) {
         log_error("PyObject_GetAttrString(sys_module, \"path\") failed");
         goto error;
     }
+    // REFCOUNT: PyUnicode_DecodeFSDefault - returns new reference
     cwd = PyUnicode_DecodeFSDefault(module_path.c_str());
+    // REFCOUNT: PyList_Insert - reference neutral
     if (PyList_Insert(path, 0, cwd) < 0) {
         log_error("PyList_Insert(path, 0, cwd) failed");
         goto error;
@@ -317,24 +329,28 @@ Kea_Load(LibraryHandle *handle, const char *module) {
         return (1);
     }
 
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&LoggerType) < 0) {
         return (1);
     }
     Py_INCREF(&LoggerType);
+    // REFCOUNT: PyObject_New - returns new reference
     LoggerObject *logger = PyObject_New(LoggerObject, &LoggerType);
     if (!logger) {
         return (1);
     }
-    // PyModule_AddObject steals reference on success
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "logger", (PyObject *)logger) < 0) {
         Py_DECREF(logger);
         return (1);
     }
+    // REFCOUNT: PyImport_ImportModule - returns new reference
     hook_module = PyImport_ImportModule(module_name.c_str());
     if (!hook_module) {
         log_python_traceback();
         return (1);
     }
+    // imports traceback module for use in format_python_traceback()
     if (Errors_initialize()) {
         return (1);
     }
@@ -357,6 +373,7 @@ Kea_Unload() {
     Callouts_unregister();
     Errors_finalize();
     Py_INCREF(Py_None);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {
         Py_DECREF(Py_None);
     }
@@ -380,12 +397,14 @@ Capsule_define() {
     kea_capsule[Kea_Unload_NUM] = (void *)Kea_Unload;
     // create a Capsule containing the API pointer array's address
     c_api_object = PyCapsule_New((void *)kea_capsule, "kea._C_API", 0);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "_C_API", c_api_object) < 0) {
         Py_XDECREF(c_api_object);
         return (1);
     }
     // initialize logger of None - will be replaced with Capsule Kea_Load
     Py_INCREF(Py_None);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "logger", Py_None) < 0) {
         Py_DECREF(Py_None);
         return (1);

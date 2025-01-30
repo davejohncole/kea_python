@@ -31,28 +31,24 @@ extern int Errors_finalize();
 extern int format_python_traceback(PyObject *exc_type, PyObject *exc_value, PyObject *exc_traceback, std::string &traceback);
 extern int log_python_traceback();
 
-// callouts.cc
+// CalloutClosureObject contains a FFI callout that binds to a python function.
+// Objects are defined in callout_closure.cc, but instances are created and
+// managed in callouts.cc
 typedef struct {
     PyObject_HEAD
 
-    PyObject *name;
-    PyObject *callout;
-    ffi_cif cif;
-    ffi_type *args[1];
-    void *bound_callout;
-    ffi_closure *closure;
+    PyObject *name;         // name of callout
+    PyObject *callout;      // python function to call for callout
+    ffi_cif cif;            // ffi_prep_cif return value (via pointer arg)
+    ffi_type *args[1];      // describe ffi function argument
+    void *bound_callout;    // ffi_closure_alloc return value (via pointer arg) - the function to call
+    ffi_closure *closure;   // ffi_closure_alloc return value - function to call
 } CalloutClosureObject;
 
+// callouts.cc
 extern int Callouts_add_closure(CalloutClosureObject *obj);
 extern int Callouts_register(isc::hooks::LibraryHandle *handle);
 extern int Callouts_unregister();
-
-// utils.cc
-extern int assert_long_value(PyObject *value, const char *name);
-extern int assert_string_value(PyObject *value, const char *name, bool allow_none);
-extern int assert_bool_value(PyObject *value, const char *name);
-extern PyObject *element_to_object(isc::data::ConstElementPtr ptr);
-extern isc::data::ElementPtr object_to_element(PyObject *obj);
 
 // callout_closure.cc
 extern PyObject *CalloutClosure_from_object(PyObject *name, PyObject *callout);
@@ -63,9 +59,10 @@ typedef struct {
     PyObject_HEAD
 
     isc::hooks::CalloutHandle *handle;
-    bool is_owner;
+    bool is_owner;                          // tracks whether we created the handle or not
 } CalloutHandleObject;
 
+// wrap a Python object in a boost shared_ptr so that when the C++ object is freed the Python object is DECREF'ed
 class ObjectHolder {
 public:
     ObjectHolder(PyObject *obj);
@@ -95,6 +92,7 @@ extern int CalloutManager_define();
 extern PyObject *hook_module;
 extern isc::log::Logger *kea_logger;
 extern isc::log::MessageID *kea_message_id;
+// call begin_allow_threads when going back into Kea and end_allow_threads when called by Kea
 extern void begin_allow_threads();
 extern void end_allow_threads();
 
@@ -301,5 +299,12 @@ typedef struct {
 #define Subnet4ConfigParser_Check(op) (Py_TYPE(op) == &Subnet4ConfigParserType)
 extern PyTypeObject Subnet4ConfigParserType;
 extern int Subnet4ConfigParser_define();
+
+// utils.cc
+extern int assert_long_value(PyObject *value, const char *name);
+extern int assert_string_value(PyObject *value, const char *name, bool allow_none);
+extern int assert_bool_value(PyObject *value, const char *name);
+extern PyObject *element_to_object(isc::data::ConstElementPtr ptr);
+extern isc::data::ElementPtr object_to_element(PyObject *obj);
 
 }

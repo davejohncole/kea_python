@@ -29,11 +29,13 @@ static PyMethodDef LoggerManager_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 LoggerManager_dealloc(LoggerManagerObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 LoggerManager_init(LoggerManagerObject *self, PyObject *args, PyObject *kwds) {
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
@@ -83,10 +85,12 @@ PyTypeObject LoggerManagerType = {
 
 int
 LoggerManager_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&LoggerManagerType) < 0) {
         return (1);
     }
     Py_INCREF(&LoggerManagerType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "LoggerManager", (PyObject *) &LoggerManagerType) < 0) {
         Py_DECREF(&LoggerManagerType);
         return (1);

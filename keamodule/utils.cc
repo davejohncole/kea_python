@@ -55,6 +55,7 @@ element_to_object(ConstElementPtr ptr) {
     switch (ptr->getType()) {
         case Element::integer:
             try {
+                // REFCOUNT: PyLong_FromLong - returns new reference
                 return (PyLong_FromLong(ptr->intValue()));
             }
             catch (const exception &e) {
@@ -64,6 +65,7 @@ element_to_object(ConstElementPtr ptr) {
 
         case Element::real:
             try {
+                // REFCOUNT: PyFloat_FromDouble - returns new reference
                 return (PyFloat_FromDouble(ptr->doubleValue()));
             }
             catch (const exception &e) {
@@ -73,6 +75,7 @@ element_to_object(ConstElementPtr ptr) {
 
         case Element::boolean:
             try {
+                // REFCOUNT: PyBool_FromLong - returns new reference
                 return (PyBool_FromLong(ptr->boolValue()));
             }
             catch (const exception &e) {
@@ -85,6 +88,7 @@ element_to_object(ConstElementPtr ptr) {
 
         case Element::string:
             try {
+                // REFCOUNT: PyUnicode_FromString - returns new reference
                 return (PyUnicode_FromString(ptr->stringValue().c_str()));
             }
             catch (const exception &e) {
@@ -94,6 +98,7 @@ element_to_object(ConstElementPtr ptr) {
 
         case Element::list: {
             auto list_ptr = ptr->listValue();
+            // REFCOUNT: PyList_New - returns new reference
             PyObject *list = PyList_New(list_ptr.size());
             if (!list) {
                 return (0);
@@ -101,7 +106,9 @@ element_to_object(ConstElementPtr ptr) {
             try {
                 for (std::vector<ElementPtr>::const_iterator it = list_ptr.begin(); it != list_ptr.cend(); ++it) {
                     auto pos = it - list_ptr.begin();
+                    // REFCOUNT: element_to_object - returns new reference
                     PyObject *elem = element_to_object(*it);
+                    // REFCOUNT: PyList_SetItem - steals reference
                     if (!elem || PyList_SetItem(list, pos, elem) < 0) {
                         Py_DECREF(list);
                         return (0);
@@ -118,13 +125,16 @@ element_to_object(ConstElementPtr ptr) {
 
         case Element::map: {
             auto map_ptr = ptr->mapValue();
+            // REFCOUNT: PyDict_New - returns new reference
             PyObject *dict = PyDict_New();
             if (!dict) {
                 return (0);
             }
             try {
                 for (std::map<std::string, ConstElementPtr>::const_iterator it = map_ptr.begin(); it != map_ptr.end(); ++it) {
+                    // REFCOUNT: element_to_object - returns new reference
                     PyObject *elem = element_to_object(it->second);
+                    // REFCOUNT: PyDict_SetItemString - reference neutral
                     if (!elem || PyDict_SetItemString(dict, it->first.c_str(), elem) < 0) {
                         Py_DECREF(dict);
                         Py_XDECREF(elem);
@@ -149,30 +159,32 @@ element_to_object(ConstElementPtr ptr) {
 ElementPtr
 object_to_element(PyObject *obj) {
     if (obj == Py_None) {
-        return Element::create();
+        return (Element::create());
     }
     if (PyBool_Check(obj)) {
-        return Element::create((bool) (obj == Py_True));
+        return (Element::create((bool) (obj == Py_True)));
     }
     if (PyLong_Check(obj)) {
-        return Element::create(PyLong_AsLong(obj));
+        return (Element::create(PyLong_AsLong(obj)));
     }
     if (PyFloat_Check(obj)) {
-        return Element::create(PyFloat_AsDouble(obj));
+        return (Element::create(PyFloat_AsDouble(obj)));
     }
     if (PyUnicode_Check(obj)) {
-        return Element::create(PyUnicode_AsUTF8(obj));
+        // REFCOUNT: PyUnicode_AsUTF8 - returns UTF-8 encoding of str - buffer cached in str
+        return (Element::create(string(PyUnicode_AsUTF8(obj))));
     }
     if (PyList_Check(obj)) {
         ElementPtr ptr = Element::createList();
         for (Py_ssize_t i = 0; i < PyList_Size(obj); i++) {
+            // REFCOUNT: PyList_GetItem - returns borrowed reference
             ElementPtr item = object_to_element(PyList_GetItem(obj, i));
             if (!item) {
                 return (0);
             }
             ptr->add(item);
         }
-        return ptr;
+        return (ptr);
     }
     if (PyDict_Check(obj)) {
         ElementPtr ptr = Element::createMap();
@@ -180,6 +192,7 @@ object_to_element(PyObject *obj) {
         PyObject *value;
         Py_ssize_t pos = 0;
 
+        // REFCOUNT: PyDict_Next - returns borrowed references
         while (PyDict_Next(obj, &pos, &key, &value)) {
             if (!PyUnicode_Check(key)) {
                 PyErr_SetString(PyExc_TypeError, "keys must be string");
@@ -189,9 +202,10 @@ object_to_element(PyObject *obj) {
             if (!item) {
                 return (0);
             }
+            // REFCOUNT: PyUnicode_AsUTF8 - returns UTF-8 encoding of str - buffer cached in str
             ptr->set(PyUnicode_AsUTF8(key), item);
         }
-        return ptr;
+        return (ptr);
     }
 
     PyErr_Format(PyExc_TypeError, "unhandled type %s", Py_TYPE(obj)->tp_name);

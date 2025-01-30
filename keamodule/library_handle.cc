@@ -11,6 +11,7 @@ LibraryHandle_registerCommandCallout(LibraryHandleObject *self, PyObject *args) 
     PyObject *name;
     PyObject *callout;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!O", &PyUnicode_Type, &name, &callout)) {
         return (0);
     }
@@ -23,17 +24,19 @@ LibraryHandle_registerCommandCallout(LibraryHandleObject *self, PyObject *args) 
         return (0);
     }
 
+    // REFCOUNT: CalloutClosure_from_object - returns new reference
     CalloutClosureObject *obj = (CalloutClosureObject *) CalloutClosure_from_object(name, callout);
     if (!obj) {
         return (0);
     }
-    // give ownership of obj to dict in callouts.cc
+    // REFCOUNT: transfer ownership of obj to dict in callouts.cc
     if (Callouts_add_closure(obj)) {
         Py_DECREF(obj);
         return (0);
     }
     Py_DECREF(obj);
     try {
+        // REFCOUNT: PyUnicode_AsUTF8 - returns UTF-8 encoding of str - buffer cached in str
         self->handle->registerCommandCallout(PyUnicode_AsUTF8(name), (CalloutPtr)obj->bound_callout);
     }
     catch (const exception &e) {
@@ -50,6 +53,7 @@ static PyMethodDef LibraryHandle_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 LibraryHandle_dealloc(LibraryHandleObject *self) {
     if (self->is_owner) {
@@ -58,6 +62,7 @@ LibraryHandle_dealloc(LibraryHandleObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
     CalloutManagerObject *manager = 0;
@@ -66,6 +71,7 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (-1);
     }
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &CalloutManagerType, &manager)) {
         return (-1);
     }
@@ -86,6 +92,7 @@ LibraryHandle_init(LibraryHandleObject *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 LibraryHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     LibraryHandleObject *self;
@@ -140,6 +147,7 @@ PyTypeObject LibraryHandleType = {
 
 PyObject *
 LibraryHandle_from_handle(LibraryHandle *handle) {
+    // REFCOUNT: PyObject_New - returns new reference
     LibraryHandleObject *obj = PyObject_New(LibraryHandleObject, &LibraryHandleType);
     if (obj) {
         obj->handle = handle;
@@ -150,10 +158,12 @@ LibraryHandle_from_handle(LibraryHandle *handle) {
 
 int
 LibraryHandle_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&LibraryHandleType) < 0) {
         return (1);
     }
     Py_INCREF(&LibraryHandleType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "LibraryHandle", (PyObject *) &LibraryHandleType) < 0) {
         Py_DECREF(&LibraryHandleType);
         return (1);

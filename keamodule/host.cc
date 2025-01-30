@@ -11,6 +11,7 @@ static PyObject *
 Host_getHostId(HostObject *self, PyObject *args) {
     try {
         HostID host_id = (self->is_const ? self->const_ptr : self->ptr)->getHostId();
+        // REFCOUNT: PyLong_FromUnsignedLongLong - returns new reference
         return (PyLong_FromUnsignedLongLong(host_id));
     }
     catch (const exception &e) {
@@ -23,6 +24,7 @@ static PyObject *
 Host_toElement(HostObject *self, PyObject *args) {
     try {
         ElementPtr ptr = (self->is_const ? self->const_ptr : self->ptr)->toElement4();
+        // element_to_object - returns new reference
         return (element_to_object(ptr));
     }
     catch (const exception &e) {
@@ -41,6 +43,7 @@ static PyMethodDef Host_methods[] = {
 
 static PyObject *
 Host_use_count(HostObject *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->is_const ? self->const_ptr.use_count() : self->ptr.use_count()));
 }
 
@@ -49,6 +52,7 @@ static PyGetSetDef Host_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Host_dealloc(HostObject *self) {
     self->ptr.~HostPtr();
@@ -56,6 +60,7 @@ Host_dealloc(HostObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 Host_init(HostObject *self, PyObject *args, PyObject *kwds) {
     static const char *kwlist[] = {"identifier", "identifier_type", "subnet_id", "ipv4_reservation", NULL};
@@ -85,6 +90,7 @@ Host_init(HostObject *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 Host_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     HostObject *self;
@@ -139,6 +145,7 @@ PyTypeObject HostType = {
 
 PyObject *
 Host_from_ptr(HostPtr host) {
+    // REFCOUNT: PyObject_New - returns new reference
     HostObject *self = PyObject_New(HostObject, &HostType);
     if (self) {
         new(&self->ptr) HostPtr;
@@ -151,6 +158,7 @@ Host_from_ptr(HostPtr host) {
 
 PyObject *
 Host_from_constptr(ConstHostPtr host) {
+    // REFCOUNT: PyObject_New - returns new reference
     HostObject *self = PyObject_New(HostObject, &HostType);
     if (self) {
         new(&self->ptr) HostPtr;
@@ -163,10 +171,12 @@ Host_from_constptr(ConstHostPtr host) {
 
 int
 Host_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&HostType) < 0) {
         return (1);
     }
     Py_INCREF(&HostType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "Host", (PyObject *) &HostType) < 0) {
         Py_DECREF(&HostType);
         return (1);

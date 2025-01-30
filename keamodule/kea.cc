@@ -20,6 +20,7 @@ static PyModuleDef kea_module_def = {
 
 PyMODINIT_FUNC
 PyInit_kea(void) {
+    // REFCOUNT: PyModule_Create - returns new reference
     kea_module = PyModule_Create(&kea_module_def);
     if (!kea_module) {
         return (0);

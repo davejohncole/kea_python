@@ -12,6 +12,7 @@ static PyObject *
 CfgSubnets4_add(CfgSubnets4Object *self, PyObject *args) {
     Subnet4Object *subnet;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &Subnet4Type, &subnet)) {
         return (0);
     }
@@ -58,6 +59,7 @@ static PyObject *
 CfgSubnets4_replace(CfgSubnets4Object *self, PyObject *args) {
     Subnet4Object *subnet;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &Subnet4Type, &subnet)) {
         return (0);
     }
@@ -66,6 +68,7 @@ CfgSubnets4_replace(CfgSubnets4Object *self, PyObject *args) {
         if (!ptr) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: Subnet4_from_ptr - returns new reference
         return (Subnet4_from_ptr(ptr));
     }
     catch (const exception &e) {
@@ -81,17 +84,20 @@ CfgSubnets4_getAll(CfgSubnets4Object *self, PyObject *args) {
         if (!all) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: PyList_New - returns new reference
         PyObject *list = PyList_New(0);
         if (!list) {
             return (0);
         }
         for (Subnet4Ptr ptr : *all) {
+            // REFCOUNT: Subnet4_from_ptr - returns new reference
             PyObject *subnet = Subnet4_from_ptr(ptr);
+            // REFCOUNT: PyList_Append - reference neutral
             if (!subnet || PyList_Append(list, subnet) < 0) {
                 Py_DECREF(list);
                 return (0);
             }
-
+            Py_DECREF(subnet);
         }
         return (list);
     }
@@ -114,6 +120,7 @@ CfgSubnets4_getSubnet(CfgSubnets4Object *self, PyObject *args) {
         if (!ptr) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: Subnet4_from_ptr - returns new reference
         return (Subnet4_from_ptr(ptr));
     }
     catch (const exception &e) {
@@ -135,6 +142,7 @@ CfgSubnets4_selectSubnet(CfgSubnets4Object *self, PyObject *args) {
         if (!ptr) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: Subnet4_from_ptr - returns new reference
         return (Subnet4_from_ptr(ptr));
     }
     catch (const exception &e) {
@@ -147,6 +155,7 @@ static PyObject *
 CfgSubnets4_toElement(CfgSubnets4Object *self, PyObject *args) {
     try {
         ElementPtr ptr = self->ptr->toElement();
+        // element_to_object - returns new reference
         return (element_to_object(ptr));
     }
     catch (const exception &e) {
@@ -178,6 +187,7 @@ static PyMethodDef CfgSubnets4_methods[] = {
 
 static PyObject *
 CfgSubnets4_use_count(OptionObject *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->ptr.use_count()));
 }
 
@@ -186,12 +196,14 @@ static PyGetSetDef CfgSubnets4_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 CfgSubnets4_dealloc(CfgSubnets4Object *self) {
     self->ptr.~CfgSubnets4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 CfgSubnets4_init(CfgSubnets4Object *self, PyObject *args, PyObject *kwds) {
     new(&self->ptr) CfgSubnets4Ptr;
@@ -200,6 +212,7 @@ CfgSubnets4_init(CfgSubnets4Object *self, PyObject *args, PyObject *kwds) {
     return (-1);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 CfgSubnets4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CfgSubnets4Object *self;
@@ -253,6 +266,7 @@ PyTypeObject CfgSubnets4Type = {
 
 PyObject *
 CfgSubnets4_from_ptr(CfgSubnets4Ptr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
     CfgSubnets4Object *self = PyObject_New(CfgSubnets4Object, &CfgSubnets4Type);
     if (self) {
         new(&self->ptr) CfgSubnets4Ptr;
@@ -263,9 +277,12 @@ CfgSubnets4_from_ptr(CfgSubnets4Ptr &ptr) {
 
 int
 CfgSubnets4_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&CfgSubnets4Type) < 0) {
         return (1);
     }
+    Py_INCREF(&CfgSubnets4Type);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "CfgSubnets4", (PyObject *) &CfgSubnets4Type) < 0) {
         Py_DECREF(&CfgSubnets4Type);
         return (1);

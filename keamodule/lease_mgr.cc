@@ -9,14 +9,22 @@ extern "C" {
 
 static PyObject *
 lease_list_from_collection(Lease4Collection &leases) {
-    PyObject *list = PyList_New(0);
+    // REFCOUNT: PyList_New - returns new reference
+    PyObject *list = PyList_New(leases.size());
     if (!list) {
         return (0);
     }
     try {
+        int pos = 0;
         for (auto lease : leases) {
+            // REFCOUNT: Lease4_from_ptr - returns new reference
             PyObject *obj = Lease4_from_ptr(lease);
-            if (!obj || PyList_Append(list, obj) < 0) {
+            if (obj == 0) {
+                Py_DECREF(list);
+                return (0);
+            }
+            // REFCOUNT: PyList_SetItem - steals reference
+            if (PyList_SetItem(list, pos++, obj) < 0) {
                 Py_DECREF(list);
                 return (0);
             }
@@ -45,10 +53,10 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
         return (0);
     }
     if (kwargs != 0) {
+        // REFCOUNT: PyDict_GetItemString - returns borrowed reference
         PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
         if (tmp) {
             have_subnet_id = true;
-            Py_DECREF(tmp);
         }
     }
 
@@ -78,12 +86,14 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
             // Lease4Collection getLease4(const HWAddr &hwaddr)
             HWAddr hw = HWAddr::fromText(hwaddr);
             Lease4Collection leases = self->mgr->getLease4(hw);
+            // REFCOUNT: lease_list_from_collection - returns new reference
             return (lease_list_from_collection(leases));
         }
         else if (!addr && !hwaddr && client_id != 0 && !have_subnet_id) {
             // Lease4Collection getLease4(const ClientId &clientid)
             ClientIdPtr clientid_ptr = ClientId::fromText(client_id);
             Lease4Collection leases = self->mgr->getLease4(*clientid_ptr);
+            // REFCOUNT: lease_list_from_collection - returns new reference
             return (lease_list_from_collection(leases));
         }
         else {
@@ -93,6 +103,7 @@ LeaseMgr_getLease4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
         if (!ptr) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: Lease4_from_ptr - returns new reference
         return (Lease4_from_ptr(ptr));
     }
     catch (const exception &e) {
@@ -125,15 +136,15 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
         return (0);
     }
     if (kwargs != 0) {
+        // REFCOUNT: PyDict_GetItemString - returns borrowed reference
         PyObject *tmp = PyDict_GetItemString(kwargs, "subnet_id");
         if (tmp) {
             have_subnet_id = true;
-            Py_DECREF(tmp);
         }
+        // REFCOUNT: PyDict_GetItemString - returns borrowed reference
         tmp = PyDict_GetItemString(kwargs, "page_size");
         if (tmp) {
             have_page_size = true;
-            Py_DECREF(tmp);
         }
     }
 
@@ -162,6 +173,7 @@ LeaseMgr_getLeases4(LeaseMgrObject *self, PyObject *args, PyObject *kwargs) {
             return (0);
         }
 
+        // REFCOUNT: lease_list_from_collection - returns new reference
         return (lease_list_from_collection(leases));
     }
     catch (const exception &e) {
@@ -174,6 +186,7 @@ static PyObject *
 LeaseMgr_addLease(LeaseMgrObject *self, PyObject *args) {
     Lease4Object *lease;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
         return (0);
     }
@@ -199,6 +212,7 @@ LeaseMgr_deleteLease(LeaseMgrObject *self, PyObject *args) {
 #else
     Lease4Object *lease;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
         return (0);
     }
@@ -225,6 +239,7 @@ static PyObject *
 LeaseMgr_updateLease4(LeaseMgrObject *self, PyObject *args) {
     Lease4Object *lease;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &Lease4Type, &lease)) {
         return (0);
     }
@@ -249,6 +264,7 @@ LeaseMgr_wipeLeases4(LeaseMgrObject *self, PyObject *args) {
 
     try {
         size_t result = self->mgr->wipeLeases4((SubnetID) subnet_id);
+        // REFCOUNT: PyLong_FromLong - returns new references
         return (PyLong_FromLong(result));
     }
     catch (const exception &e) {
@@ -275,11 +291,13 @@ static PyMethodDef LeaseMgr_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 LeaseMgr_dealloc(LeaseMgrObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 LeaseMgr_init(LeaseMgrObject *self, PyObject *args, PyObject *kwds) {
     if (kwds != 0) {
@@ -301,6 +319,7 @@ LeaseMgr_init(LeaseMgrObject *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 LeaseMgr_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     LeaseMgrObject *self;
@@ -354,10 +373,12 @@ PyTypeObject LeaseMgrType = {
 
 int
 LeaseMgr_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&LeaseMgrType) < 0) {
         return (1);
     }
     Py_INCREF(&LeaseMgrType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "LeaseMgr", (PyObject *) &LeaseMgrType) < 0) {
         Py_DECREF(&LeaseMgrType);
         return (1);

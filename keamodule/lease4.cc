@@ -11,12 +11,15 @@ static PyObject *
 Lease4_setContext(Lease4Object *self, PyObject *args) {
     PyObject *ctx;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O", &ctx)) {
         return (0);
     }
 
     try {
+        // REFCOUNT: object_to_element - reference neutral
         self->ptr->setContext(object_to_element(ctx));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -29,6 +32,7 @@ Lease4_setContext(Lease4Object *self, PyObject *args) {
 static PyObject *
 Lease4_getContext(Lease4Object *self, PyObject *args) {
     try {
+        // REFCOUNT: element_to_object - returns new reference
         return (element_to_object(self->ptr->getContext()));
     }
     catch (const exception &e) {
@@ -46,6 +50,7 @@ Lease4_toElement(Lease4Object *self, PyObject *args) {
             return (0);
         }
         ElementPtr ptr = self->ptr->toElement();
+        // REFCOUNT: element_to_object - returns new reference
         return (element_to_object(ptr));
     }
     catch (const exception &e) {
@@ -66,6 +71,7 @@ static PyMethodDef Lease4_methods[] = {
 
 static PyObject *
 Lease4_use_count(Lease4Object *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->ptr.use_count()));
 }
 
@@ -73,6 +79,7 @@ static PyObject *
 Lease4_get_addr(Lease4Object *self, void *closure) {
     try {
         string addr = self->ptr->addr_.toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -87,6 +94,7 @@ Lease4_set_addr(Lease4Object *self, PyObject *value, void *closure) {
         return (1);
     }
     try {
+        // REFCOUNT: PyUnicode_AsUTF8 - returns UTF-8 encoding of str - buffer cached in str
         const char *addr = PyUnicode_AsUTF8(value);
         self->ptr->addr_ = isc::asiolink::IOAddress(string(addr));
         return (0);
@@ -100,6 +108,7 @@ Lease4_set_addr(Lease4Object *self, PyObject *value, void *closure) {
 static PyObject *
 Lease4_get_valid_lft(Lease4Object *self, void *closure) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->valid_lft_));
     }
     catch (const exception &e) {
@@ -126,6 +135,7 @@ Lease4_set_valid_lft(Lease4Object *self, PyObject *value, void *closure) {
 static PyObject *
 Lease4_get_cltt(Lease4Object *self, void *closure) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->cltt_));
     }
     catch (const exception &e) {
@@ -152,6 +162,7 @@ Lease4_set_cltt(Lease4Object *self, PyObject *value, void *closure) {
 static PyObject *
 Lease4_get_subnet_id(Lease4Object *self, void *closure) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->subnet_id_));
     }
     catch (const exception &e) {
@@ -181,6 +192,7 @@ Lease4_get_hostname(Lease4Object *self, void *closure) {
         if (self->ptr->hostname_.empty()) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(self->ptr->hostname_.c_str()));
     }
     catch (const exception &e) {
@@ -199,6 +211,7 @@ Lease4_set_hostname(Lease4Object *self, PyObject *value, void *closure) {
             self->ptr->hostname_.clear();
         }
         else {
+            // REFCOUNT: PyUnicode_AsUTF8 - returns UTF-8 encoding of str - buffer cached in str
             self->ptr->hostname_ = PyUnicode_AsUTF8(value);
             boost::algorithm::to_lower(self->ptr->hostname_);
         }
@@ -275,6 +288,7 @@ Lease4_get_hwaddr(Lease4Object *self, void *closure) {
             Py_RETURN_NONE;
         }
         string hwaddr = self->ptr->hwaddr_->toText(false);
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(hwaddr.c_str()));
     }
     catch (const exception &e) {
@@ -289,6 +303,7 @@ Lease4_set_hwaddr(Lease4Object *self, PyObject *value, void *closure) {
         return (1);
     }
     try {
+        // REFCOUNT: PyUnicode_AsUTF8 - returns UTF-8 encoding of str - buffer cached in str
         HWAddr hw = HWAddr::fromText(PyUnicode_AsUTF8(value));
         self->ptr->hwaddr_ = HWAddrPtr(new HWAddr(hw));
         return (0);
@@ -305,6 +320,7 @@ Lease4_get_client_id(Lease4Object *self, void *closure) {
         if (!self->ptr->client_id_) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(self->ptr->client_id_->toText().c_str()));
     }
     catch (const exception &e) {
@@ -323,6 +339,7 @@ Lease4_set_client_id(Lease4Object *self, PyObject *value, void *closure) {
             self->ptr->client_id_.reset();
         }
         else {
+            // REFCOUNT: PyUnicode_AsUTF8 - returns UTF-8 encoding of str - buffer cached in str
             self->ptr->client_id_ = ClientId::fromText(PyUnicode_AsUTF8(value));
         }
         return (0);
@@ -336,6 +353,7 @@ Lease4_set_client_id(Lease4Object *self, PyObject *value, void *closure) {
 static PyObject *
 Lease4_get_state(Lease4Object *self, void *closure) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(self->ptr->state_));
     }
     catch (const exception &e) {
@@ -374,12 +392,14 @@ static PyGetSetDef Lease4_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Lease4_dealloc(Lease4Object *self) {
     self->ptr.~Lease4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 Lease4_init(Lease4Object *self, PyObject *args, PyObject *kwds) {
     new(&self->ptr) Lease4Ptr;
@@ -396,6 +416,7 @@ Lease4_init(Lease4Object *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 Lease4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Lease4Object *self;
@@ -449,6 +470,7 @@ PyTypeObject Lease4Type = {
 
 PyObject *
 Lease4_from_ptr(Lease4Ptr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
     Lease4Object *self = PyObject_New(Lease4Object, &Lease4Type);
     if (self) {
         new(&self->ptr) Lease4Ptr;
@@ -459,10 +481,12 @@ Lease4_from_ptr(Lease4Ptr &ptr) {
 
 int
 Lease4_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&Lease4Type) < 0) {
         return (1);
     }
     Py_INCREF(&Lease4Type);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "Lease4", (PyObject *) &Lease4Type) < 0) {
         Py_DECREF(&Lease4Type);
         return (1);

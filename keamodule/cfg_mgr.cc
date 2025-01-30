@@ -9,6 +9,7 @@ static PyObject *
 CfgMgr_getCurrentCfg(CfgMgrObject *self, PyObject *args) {
     try {
         SrvConfigPtr ptr = CfgMgr::instance().getCurrentCfg();
+        // REFCOUNT: SrvConfig_from_ptr - returns new reference
         return (SrvConfig_from_ptr(ptr));
     }
     catch (const exception &e) {
@@ -21,6 +22,7 @@ static PyObject *
 CfgMgr_getStagingCfg(CfgMgrObject *self, PyObject *args) {
     try {
         SrvConfigPtr ptr = CfgMgr::instance().getStagingCfg();
+        // REFCOUNT: SrvConfig_from_ptr - returns new reference
         return (SrvConfig_from_ptr(ptr));
     }
     catch (const exception &e) {
@@ -31,6 +33,7 @@ CfgMgr_getStagingCfg(CfgMgrObject *self, PyObject *args) {
 
 PyObject *
 CfgMgr_from_ptr(CfgMgr *mgr) {
+    // REFCOUNT: PyObject_New - returns new reference
     CfgMgrObject *self = PyObject_New(CfgMgrObject, &CfgMgrType);
     if (self) {
         self->mgr = mgr;
@@ -42,6 +45,7 @@ static PyObject *
 CfgMgr_instance(CfgMgrObject *self, PyObject *args) {
     try {
         CfgMgr& mgr = CfgMgr::instance();
+        // REFCOUNT: CfgMgr_from_ptr - returns new reference
         return (CfgMgr_from_ptr(&mgr));
     }
     catch (const exception &e) {
@@ -61,11 +65,13 @@ static PyMethodDef CfgMgr_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 CfgMgr_dealloc(CfgMgrObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 CfgMgr_init(CfgMgrObject *self, PyObject *args, PyObject *kwds) {
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
@@ -115,10 +121,12 @@ PyTypeObject CfgMgrType = {
 
 int
 CfgMgr_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&CfgMgrType) < 0) {
         return (1);
     }
     Py_INCREF(&CfgMgrType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "CfgMgr", (PyObject *) &CfgMgrType) < 0) {
         Py_DECREF(&CfgMgrType);
         return (1);

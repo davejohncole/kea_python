@@ -11,12 +11,14 @@ HostReservationParser4_parse(HostReservationParser4Object *self, PyObject *args)
     unsigned long subnet_id;
     PyObject *config;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "kO", &subnet_id, &config)) {
         return (0);
     }
     try {
         ElementPtr data = object_to_element(config);
         HostPtr host = self->parser->parse(subnet_id, data);
+        // REFCOUNT: Host_from_ptr - returns new reference
         return Host_from_ptr(host);
     }
     catch (const exception &e) {
@@ -32,12 +34,14 @@ static PyMethodDef HostReservationParser4_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 HostReservationParser4_dealloc(HostReservationParser4Object *self) {
     delete self->parser;
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 HostReservationParser4_init(HostReservationParser4Object *self, PyObject *args, PyObject *kwds) {
     if (kwds != 0) {
@@ -51,6 +55,7 @@ HostReservationParser4_init(HostReservationParser4Object *self, PyObject *args, 
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 HostReservationParser4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     HostReservationParser4Object *self;
@@ -102,10 +107,12 @@ PyTypeObject HostReservationParser4Type = {
 
 int
 HostReservationParser4_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&HostReservationParser4Type) < 0) {
         return (1);
     }
     Py_INCREF(&HostReservationParser4Type);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "HostReservationParser4", (PyObject *) &HostReservationParser4Type) < 0) {
         Py_DECREF(&HostReservationParser4Type);
         return (1);

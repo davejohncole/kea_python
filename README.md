@@ -105,12 +105,12 @@ by simply running `make`:
 ```
 djc@laptop:~/play/kea_python$ make
 run on host
-  build-kea-dev   - build kea-dev:1.8.2 image
-  build-kea       - build kea:1.8.2 image
+  build-kea-dev   - build kea-dev:2.6.1 image
+  build-kea       - build kea:2.6.1 image
   build-dhtest    - build dhtest image
-  run-kea-dev     - run kea-dev:1.8.2 shell
-  run-kea         - run kea:1.8.2 shell
-  run-mysql       - run mariadb for kea with schema for 1.8.2
+  run-kea-dev     - run kea-dev:2.6.1 shell
+  run-kea         - run kea:2.6.1 shell
+  run-mysql       - run mariadb for kea with schema for 2.6.1
   run-dhtest      - run dhtest shell
 run on host or inside kea-dev shell
   build           - build-hook and build-module
@@ -124,7 +124,7 @@ run on host or inside kea-dev shell
   test-module     - run unit tests for kea extension module
 ```
 
-By default the project works with kea 1.8.2.  You can override that by specifying the version
+By default the project works with kea 2.6.1.  You can override that by specifying the version
 in the environment:
 ```
 djc@laptop:~/play/kea_python$ VER=1.7.5 make
@@ -166,10 +166,9 @@ The `kea` image uses `kea-dev` to compile the `kea_python` hook and then discard
 development related files.  The saving is huge:
 ```
 djc@laptop:~/play/kea_python$ docker images
-REPOSITORY                    TAG           IMAGE ID       CREATED             SIZE
-kea                           1.8.2         0df9286a45a2   About an hour ago   543MB
-kea-dev                       1.8.2         75fa98de7b1f   About an hour ago   6.24GB
-ubuntu                        21.04         58fb7079c94b   3 weeks ago         80.9MB
+REPOSITORY                    TAG            IMAGE ID       CREATED          SIZE
+kea                           2.6.1          e6a0b5cf09b4   21 minutes ago   641MB
+kea-dev                       2.6.1          10d9b8f5a020   2 hours ago      7.96GB
 ```
 
 ## Running examples
@@ -200,14 +199,31 @@ The `kea-dev` image is used when making changes to the `kea_python.so` hook.  Al
 to do is the following:
 ```
 djc@laptop:~/play/kea_python$ make run-kea-dev 
-root@a742a1b8b485:/source# cd /workdir
 root@a742a1b8b485:/workdir# make install
 ```
-Once the build finishes your container is able to run python hooks in the same was as the `kea`
+Once the build finishes your container is able to run python hooks in the same way as the `kea`
 image.  Your working directory is mounted as `/workdir` in the container.
 
 Any time you make a change to the `keamodule` code you should rebuild it and run the unit tests
 like this:
 ```
 root@a742a1b8b485:/workdir# make clean-module build-module test-module
+```
+
+## Debugging
+If you get an undefined symbol when loading kea:
+```
+c++filt -n _ZN3isc4data7Element6createEdRKNS1_8PositionE
+```
+
+```
+djc@laptop:~/play/kea_python$ docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged --name kea-dev -v `pwd`:/workdir kea-dev:1.9.9
+root@0c43b31fcc0e:/source# cd /workdir
+root@0c43b31fcc0e:/workdir# rm settings.mk
+root@0c43b31fcc0e:/workdir# make build install
+root@0c43b31fcc0e:/workdir# gdb /usr/local/sbin/kea-dhcp4
+(gdb) b ConfigBackendDHCPv4Mgr::instance
+(gdb) b BaseConfigBackendPool::addBackend
+(gdb) b BaseConfigBackendPool::createUpdateDeleteProperty
+(gdb) run -c examples/cb-cmds/kea.conf
 ```

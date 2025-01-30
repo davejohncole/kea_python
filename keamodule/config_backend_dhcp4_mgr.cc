@@ -29,6 +29,7 @@ static PyObject *
 ConfigBackendDHCPv4Mgr_getPool(ConfigBackendDHCPv4MgrObject *self, PyObject *args) {
     try {
         boost::shared_ptr<isc::dhcp::ConfigBackendPoolDHCPv4> pool = self->mgr->getPool();
+        // REFCOUNT: ConfigBackendPoolDHCPv4_from_ptr - returns new reference
         return (ConfigBackendPoolDHCPv4_from_ptr(pool));
     }
     catch (const exception &e) {
@@ -39,6 +40,7 @@ ConfigBackendDHCPv4Mgr_getPool(ConfigBackendDHCPv4MgrObject *self, PyObject *arg
 
 PyObject *
 ConfigBackendDHCPv4Mgr_from_ptr(ConfigBackendDHCPv4Mgr *mgr) {
+    // REFCOUNT: PyObject_New - returns new reference
     ConfigBackendDHCPv4MgrObject *self = PyObject_New(ConfigBackendDHCPv4MgrObject, &ConfigBackendDHCPv4MgrType);
     if (self) {
         self->mgr = mgr;
@@ -50,6 +52,7 @@ static PyObject *
 ConfigBackendDHCPv4Mgr_instance(ConfigBackendDHCPv4MgrObject *self, PyObject *args) {
     try {
         ConfigBackendDHCPv4Mgr& mgr = ConfigBackendDHCPv4Mgr::instance();
+        // REFCOUNT: ConfigBackendDHCPv4Mgr_from_ptr - returns new reference
         return (ConfigBackendDHCPv4Mgr_from_ptr(&mgr));
     }
     catch (const exception &e) {
@@ -68,6 +71,7 @@ static PyMethodDef ConfigBackendDHCPv4Mgr_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_init - called after tp_new has returned an instance
 static int
 ConfigBackendDHCPv4Mgr_init(ConfigBackendDHCPv4MgrObject *self, PyObject *args, PyObject *kwds) {
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
@@ -117,10 +121,12 @@ PyTypeObject ConfigBackendDHCPv4MgrType = {
 
 int
 ConfigBackendDHCPv4Mgr_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&ConfigBackendDHCPv4MgrType) < 0) {
         return (1);
     }
     Py_INCREF(&ConfigBackendDHCPv4MgrType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "ConfigBackendDHCPv4Mgr", (PyObject *) &ConfigBackendDHCPv4MgrType) < 0) {
         Py_DECREF(&ConfigBackendDHCPv4MgrType);
         return (1);

@@ -11,6 +11,7 @@ static PyObject *
 Pkt4_getType(Pkt4Object *self, PyObject *args) {
     try {
         uint8_t type = self->ptr->getType();
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(type));
     }
     catch (const exception &e) {
@@ -29,6 +30,7 @@ Pkt4_setType(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setType(type);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -42,6 +44,7 @@ static PyObject *
 Pkt4_getFlags(Pkt4Object *self, PyObject *args) {
     try {
         uint16_t flags = self->ptr->getFlags();
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(flags));
     }
     catch (const exception &e) {
@@ -60,6 +63,7 @@ Pkt4_setFlags(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setFlags(flags);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -73,6 +77,7 @@ static PyObject *
 Pkt4_getLocalAddr(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->getLocalAddr().toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -91,6 +96,7 @@ Pkt4_setLocalAddr(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setLocalAddr(IOAddress(string(addr)));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -104,6 +110,7 @@ static PyObject *
 Pkt4_getRemoteAddr(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->getRemoteAddr().toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -122,6 +129,7 @@ Pkt4_setRemoteAddr(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setRemoteAddr(IOAddress(string(addr)));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -135,6 +143,7 @@ static PyObject *
 Pkt4_getCiaddr(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->getCiaddr().toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -153,6 +162,7 @@ Pkt4_setCiaddr(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setCiaddr(IOAddress(string(addr)));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -166,6 +176,7 @@ static PyObject *
 Pkt4_getGiaddr(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->getGiaddr().toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -184,6 +195,7 @@ Pkt4_setGiaddr(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setGiaddr(IOAddress(string(addr)));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -197,6 +209,7 @@ static PyObject *
 Pkt4_getSiaddr(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->getSiaddr().toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -215,6 +228,7 @@ Pkt4_setSiaddr(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setSiaddr(IOAddress(string(addr)));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -228,6 +242,7 @@ static PyObject *
 Pkt4_getYiaddr(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->getYiaddr().toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -246,6 +261,7 @@ Pkt4_setYiaddr(Pkt4Object *self, PyObject *args) {
 
     try {
         self->ptr->setYiaddr(IOAddress(string(addr)));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -259,6 +275,7 @@ static PyObject *
 Pkt4_getHWAddr(Pkt4Object *self, PyObject *args) {
     try {
         string hwaddr = self->ptr->getHWAddr()->toText(false);
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(hwaddr.c_str()));
     }
     catch (const exception &e) {
@@ -278,6 +295,7 @@ Pkt4_setHWAddr(Pkt4Object *self, PyObject *args) {
     try {
         HWAddr hw = HWAddr::fromText(addr);
         self->ptr->setHWAddr(HWAddrPtr(new HWAddr(hw)));
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -297,6 +315,7 @@ Pkt4_delOption(Pkt4Object *self, PyObject *args) {
 
     try {
         bool res = self->ptr->delOption(type);
+        // REFCOUNT: PyBool_FromLong - returns new reference
         return (PyBool_FromLong(res));
     }
     catch (const exception &e) {
@@ -309,12 +328,14 @@ static PyObject *
 Pkt4_addOption(Pkt4Object *self, PyObject *args) {
     PyObject *opt;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &OptionType, &opt)) {
         return (0);
     }
 
     try {
         self->ptr->addOption(((OptionObject *)opt)->ptr);
+        // REFCOUNT: return new reference to self
         Py_INCREF(self);
         return ((PyObject *)self);
     }
@@ -337,6 +358,7 @@ Pkt4_getOption(Pkt4Object *self, PyObject *args) {
         if (!ptr) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: Option_from_ptr - returns new reference
         return (Option_from_ptr(ptr));
     }
     catch (const exception &e) {
@@ -349,6 +371,7 @@ static PyObject *
 Pkt4_toText(Pkt4Object *self, PyObject *args) {
     try {
         string addr = self->ptr->toText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(addr.c_str()));
     }
     catch (const exception &e) {
@@ -361,6 +384,7 @@ static PyObject *
 Pkt4_pack(Pkt4Object *self, PyObject *args) {
     try {
         self->ptr->pack();
+        // REFCOUNT: PyBytes_FromStringAndSize - returns new reference
         return (PyBytes_FromStringAndSize((char *)self->ptr->getBuffer().getData(), self->ptr->getBuffer().getLength()));
     }
     catch (const exception &e) {
@@ -435,6 +459,7 @@ static PyMethodDef Pkt4_methods[] = {
 
 static PyObject *
 Pkt4_use_count(Pkt4Object *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->ptr.use_count()));
 }
 
@@ -443,12 +468,14 @@ static PyGetSetDef Pkt4_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Pkt4_dealloc(Pkt4Object *self) {
     self->ptr.~Pkt4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 Pkt4_init(Pkt4Object *self, PyObject *args, PyObject *kwds) {
     unsigned char msg_type;
@@ -463,6 +490,7 @@ Pkt4_init(Pkt4Object *self, PyObject *args, PyObject *kwds) {
     }
 
     if (PyTuple_Size(args) == 1) {
+        // REFCOUNT: PyArg_ParseTuple - returns borrowed references
         if (!PyArg_ParseTuple(args, "S", &data)) {
             return (-1);
         }
@@ -483,6 +511,7 @@ Pkt4_init(Pkt4Object *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 Pkt4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Pkt4Object *self;
@@ -536,6 +565,7 @@ PyTypeObject Pkt4Type = {
 
 PyObject *
 Pkt4_from_ptr(Pkt4Ptr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
     Pkt4Object *self = PyObject_New(Pkt4Object, &Pkt4Type);
     if (self) {
         new(&self->ptr) Pkt4Ptr;
@@ -546,10 +576,12 @@ Pkt4_from_ptr(Pkt4Ptr &ptr) {
 
 int
 Pkt4_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&Pkt4Type) < 0) {
         return (1);
     }
     Py_INCREF(&Pkt4Type);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "Pkt4", (PyObject *) &Pkt4Type) < 0) {
         Py_DECREF(&Pkt4Type);
         return (1);

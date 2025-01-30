@@ -35,6 +35,7 @@ parse_backend_selector(const char *backend, BackendSelector& selector) {
 static int
 parse_server_selector(PyObject *selector, ServerSelector& server_selector) {
     if (PyUnicode_Check(selector)) {
+        // PyUnicode_AsUTF8String - returns new reference with UTF-8 encoding of str - buffer cached in str
         PyObject *selector_utf8 = PyUnicode_AsUTF8String(selector);
         if (!selector_utf8) {
             return (-1);
@@ -65,6 +66,7 @@ parse_server_selector(PyObject *selector, ServerSelector& server_selector) {
     if (PyList_Check(selector)) {
         std::set<string> tags;
         for (int i = 0; i < PyList_GET_SIZE(selector); i++) {
+            // PyList_GetItem - returns borrowed reference
             PyObject *elem = PyList_GetItem(selector, i);
             if (!elem) {
                 return (-1);
@@ -73,6 +75,7 @@ parse_server_selector(PyObject *selector, ServerSelector& server_selector) {
                 PyErr_Format(PyExc_TypeError, "expected string for server selector element %d", i);
                 return (-1);
             }
+            // PyUnicode_AsUTF8String - returns new reference with UTF-8 encoding of str - buffer cached in str
             PyObject *selector_utf8 = PyUnicode_AsUTF8String(selector);
             if (!selector_utf8) {
                 return (-1);
@@ -100,6 +103,7 @@ ConfigBackendPoolDHCPv4_createUpdateServer4(ConfigBackendPoolDHCPv4Object *self,
     const char *backend;
     ServerObject *server;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "sO!", &backend, &ServerType, &server)) {
         return (0);
     }
@@ -124,6 +128,7 @@ ConfigBackendPoolDHCPv4_createUpdateSubnet4(ConfigBackendPoolDHCPv4Object *self,
     PyObject *selector;
     Subnet4Object *subnet;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "sOO!", &backend, &selector, &Subnet4Type, &subnet)) {
         return (0);
     }
@@ -152,6 +157,7 @@ ConfigBackendPoolDHCPv4_deleteSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObj
     PyObject *selector;
     uint32_t subnet_id;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "sOI", &backend, &selector, &subnet_id)) {
         return (0);
     }
@@ -211,6 +217,7 @@ ConfigBackendPoolDHCPv4_getAllServers4(ConfigBackendPoolDHCPv4Object *self, PyOb
 
     try {
         ServerCollection servers = self->ptr->getAllServers4(backend_selector);
+        // REFCOUNT: PyList_New - returns new reference
         PyObject *list = PyList_New(servers.size());
         if (!list) {
             return (0);
@@ -219,7 +226,9 @@ ConfigBackendPoolDHCPv4_getAllServers4(ConfigBackendPoolDHCPv4Object *self, PyOb
             int pos = 0;
             for (auto it = servers.begin(); it != servers.cend(); ++it, ++pos) {
                 ServerPtr server = *it;
+                // REFCOUNT: Server_from_ptr - returns new reference
                 PyObject *elem = Server_from_ptr(server);
+                // REFCOUNT: PyList_SetItem - steals reference
                 if (!elem || PyList_SetItem(list, pos, elem) < 0) {
                     Py_DECREF(list);
                     return (0);
@@ -245,6 +254,7 @@ ConfigBackendPoolDHCPv4_getSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObject
     PyObject *selector;
     uint32_t subnet_id;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "sOI", &backend, &selector, &subnet_id)) {
         return (0);
     }
@@ -260,6 +270,7 @@ ConfigBackendPoolDHCPv4_getSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObject
         }
         Subnet4Ptr subnet = self->ptr->getSubnet4(backend_selector, server_selector, subnet_id);
         if (subnet) {
+            // REFCOUNT: Subnet4_from_ptr - returns new reference
             return (Subnet4_from_ptr(subnet));
         }
         Py_RETURN_NONE;
@@ -275,6 +286,7 @@ ConfigBackendPoolDHCPv4_getAllSubnets4(ConfigBackendPoolDHCPv4Object *self, PyOb
     const char *backend;
     PyObject *selector;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "sO", &backend, &selector)) {
         return (0);
     }
@@ -289,6 +301,7 @@ ConfigBackendPoolDHCPv4_getAllSubnets4(ConfigBackendPoolDHCPv4Object *self, PyOb
             return (0);
         }
         Subnet4Collection subnets = self->ptr->getAllSubnets4(backend_selector, server_selector);
+        // REFCOUNT: PyList_New - returns new reference
         PyObject *list = PyList_New(subnets.size());
         if (!list) {
             return (0);
@@ -297,7 +310,9 @@ ConfigBackendPoolDHCPv4_getAllSubnets4(ConfigBackendPoolDHCPv4Object *self, PyOb
             int pos = 0;
             for (auto it = subnets.begin(); it != subnets.cend(); ++it, ++pos) {
                 Subnet4Ptr subnet = *it;
+                // REFCOUNT: Subnet4_from_ptr - returns new reference
                 PyObject *elem = Subnet4_from_ptr(subnet);
+                // REFCOUNT: PyList_SetItem - steals reference
                 if (!elem || PyList_SetItem(list, pos, elem) < 0) {
                     Py_DECREF(list);
                     return (0);
@@ -319,6 +334,7 @@ ConfigBackendPoolDHCPv4_getAllSubnets4(ConfigBackendPoolDHCPv4Object *self, PyOb
 
 PyObject *
 ConfigBackendPoolDHCPv4_from_ptr(ConfigBackendPoolDHCPv4Ptr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
     ConfigBackendPoolDHCPv4Object *self = PyObject_New(ConfigBackendPoolDHCPv4Object, &ConfigBackendPoolDHCPv4Type);
     if (self) {
         new(&self->ptr) ConfigBackendPoolDHCPv4Ptr;
@@ -345,6 +361,7 @@ static PyMethodDef ConfigBackendPoolDHCPv4_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 ConfigBackendPoolDHCPv4_dealloc(ConfigBackendPoolDHCPv4Object *self) {
     self->ptr.~ConfigBackendPoolDHCPv4Ptr();
@@ -352,6 +369,7 @@ ConfigBackendPoolDHCPv4_dealloc(ConfigBackendPoolDHCPv4Object *self) {
 }
 
 
+// tp_init - called after tp_new has returned an instance
 static int
 ConfigBackendPoolDHCPv4_init(ConfigBackendPoolDHCPv4Object *self, PyObject *args, PyObject *kwds) {
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
@@ -401,10 +419,12 @@ PyTypeObject ConfigBackendPoolDHCPv4Type = {
 
 int
 ConfigBackendPoolDHCPv4_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&ConfigBackendPoolDHCPv4Type) < 0) {
         return (1);
     }
     Py_INCREF(&ConfigBackendPoolDHCPv4Type);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "ConfigBackendPoolDHCPv4", (PyObject *) &ConfigBackendPoolDHCPv4Type) < 0) {
         Py_DECREF(&ConfigBackendPoolDHCPv4Type);
         return (1);

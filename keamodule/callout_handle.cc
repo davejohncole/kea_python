@@ -11,6 +11,7 @@ static PyObject *
 CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
     char *name;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "s", &name)) {
         return (0);
     }
@@ -19,6 +20,7 @@ CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
         try {
             Lease4Ptr ptr;
             self->handle->getArgument(name, ptr);
+            // REFCOUNT: Lease4_from_ptr - returns new reference
             return (Lease4_from_ptr(ptr));
         }
         catch (const exception &e) {
@@ -31,6 +33,7 @@ CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
         try {
             Pkt4Ptr ptr;
             self->handle->getArgument(name, ptr);
+            // REFCOUNT: Pkt4_from_ptr - returns new reference
             return (Pkt4_from_ptr(ptr));
         }
         catch (const exception &e) {
@@ -43,6 +46,7 @@ CalloutHandle_getArgument(CalloutHandleObject *self, PyObject *args) {
         try {
             ConstElementPtr ptr;
             self->handle->getArgument(name, ptr);
+            // REFCOUNT: element_to_object - returns new reference
             return (element_to_object(ptr));
         }
         catch (const exception &e) {
@@ -60,6 +64,7 @@ CalloutHandle_setArgument(CalloutHandleObject *self, PyObject *args) {
     char *name;
     PyObject *value;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "sO", &name, &value)) {
         return (0);
     }
@@ -133,6 +138,7 @@ CalloutHandle_setContext(CalloutHandleObject *self, PyObject *args) {
     char *name;
     PyObject *value;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "sO", &name, &value)) {
         return (0);
     }
@@ -158,6 +164,7 @@ CalloutHandle_getContext(CalloutHandleObject *self, PyObject *args) {
     try {
         ObjectHolderPtr ptr;
         self->handle->getContext(name, ptr);
+        // REFCOUNT: return new reference to ObjectHolder for named value
         Py_INCREF(ptr->obj_);
         return (ptr->obj_);
     }
@@ -188,6 +195,7 @@ CalloutHandle_deleteContext(CalloutHandleObject *self, PyObject *args) {
 static PyObject *
 CalloutHandle_getStatus(CalloutHandleObject *self, PyObject *args) {
     try {
+        // REFCOUNT: PyLong_FromLong - returns new reference
         return PyLong_FromLong(self->handle->getStatus());
     }
     catch (const exception &e) {
@@ -232,6 +240,7 @@ static PyMethodDef CalloutHandle_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 CalloutHandle_dealloc(CalloutHandleObject *self) {
     if (self->is_owner) {
@@ -240,6 +249,7 @@ CalloutHandle_dealloc(CalloutHandleObject *self) {
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 CalloutHandle_init(CalloutHandleObject *self, PyObject *args, PyObject *kwds) {
     PyObject *manager;
@@ -248,6 +258,7 @@ CalloutHandle_init(CalloutHandleObject *self, PyObject *args, PyObject *kwds) {
         PyErr_SetString(PyExc_TypeError, "keyword arguments are not supported");
         return (-1);
     }
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &CalloutManagerType, &manager)) {
         return (-1);
     }
@@ -264,6 +275,7 @@ CalloutHandle_init(CalloutHandleObject *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 CalloutHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     CalloutHandleObject *self;
@@ -318,6 +330,7 @@ PyTypeObject CalloutHandleType = {
 
 PyObject *
 CalloutHandle_from_handle(CalloutHandle *handle) {
+    // REFCOUNT: PyObject_New - returns new reference
     CalloutHandleObject *obj = PyObject_New(CalloutHandleObject, &CalloutHandleType);
     if (obj) {
         obj->handle = handle;
@@ -328,10 +341,12 @@ CalloutHandle_from_handle(CalloutHandle *handle) {
 
 int
 CalloutHandle_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&CalloutHandleType) < 0) {
         return (1);
     }
     Py_INCREF(&CalloutHandleType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "CalloutHandle", (PyObject *) &CalloutHandleType) < 0) {
         Py_DECREF(&CalloutHandleType);
         return (1);

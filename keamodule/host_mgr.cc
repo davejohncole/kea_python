@@ -13,6 +13,7 @@ static PyObject *
 HostMgr_add(HostMgrObject *self, PyObject *args) {
     HostObject *host;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O!", &HostType, &host)) {
         return (0);
     }
@@ -58,6 +59,7 @@ HostMgr_get(HostMgrObject *self, PyObject *args) {
         if (!host.get()) {
             Py_RETURN_NONE;
         }
+        // REFCOUNT: Host_from_constptr - returns new reference
         return Host_from_constptr(host);
     }
     catch (const exception &e) {
@@ -68,17 +70,20 @@ HostMgr_get(HostMgrObject *self, PyObject *args) {
 
 static PyObject *
 collection_to_list(ConstHostCollection& hosts) {
+    // REFCOUNT: PyList_New - returns new reference
     PyObject *result = PyList_New(hosts.size());
     if (result == 0) {
         return 0;
     }
     int pos = 0;
     for (auto host : hosts) {
+        // REFCOUNT: Host_from_constptr - returns new reference
         PyObject *pyhost = Host_from_constptr(host);
         if (pyhost == 0) {
             Py_DECREF(result);
             return (0);
         }
+        // REFCOUNT: PyList_SetItem - steals reference
         if (PyList_SetItem(result, pos++, pyhost) < 0) {
             Py_DECREF(result);
             return (0);
@@ -97,6 +102,7 @@ HostMgr_getAll4(HostMgrObject *self, PyObject *args) {
 
     try {
         ConstHostCollection hosts = self->mgr->getAll4(subnet_id);
+        // REFCOUNT: collection_to_list - returns new reference
         return (collection_to_list(hosts));
     }
     catch (const exception &e) {
@@ -119,10 +125,12 @@ HostMgr_getPage4(HostMgrObject *self, PyObject *args) {
     try {
         HostPageSize host_page_size(page_size);
         ConstHostCollection hosts = self->mgr->getPage4(subnet_id, source_index, lower_host_id, host_page_size);
+        // REFCOUNT: collection_to_list - returns new reference
         PyObject *host_list = collection_to_list(hosts);
         if (host_list == 0) {
             return (0);
         }
+        // REFCOUNT: Py_BuildValue - returns new reference - reference neutral
         PyObject *result = Py_BuildValue("Ok", host_list, source_index);
         Py_DECREF(host_list);
         return (result);
@@ -184,6 +192,7 @@ HostMgr_del4(HostMgrObject *self, PyObject *args) {
 
 PyObject *
 HostMgr_from_ptr(HostMgr *mgr) {
+    // REFCOUNT: PyObject_New - returns new reference
     HostMgrObject *self = PyObject_New(HostMgrObject, &HostMgrType);
     if (self) {
         self->mgr = mgr;
@@ -195,6 +204,7 @@ static PyObject *
 HostMgr_instance(HostMgrObject *self, PyObject *args) {
     try {
         HostMgr &mgr = HostMgr::instance();
+        // REFCOUNT: HostMgr_from_ptr - returns new reference
         return (HostMgr_from_ptr(&mgr));
     }
     catch (const exception &e) {
@@ -222,6 +232,7 @@ static PyMethodDef HostMgr_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_init - called after tp_new has returned an instance
 static int
 HostMgr_init(HostMgrObject *self, PyObject *args, PyObject *kwds) {
     PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
@@ -271,10 +282,12 @@ PyTypeObject HostMgrType = {
 
 int
 HostMgr_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&HostMgrType) < 0) {
         return (1);
     }
     Py_INCREF(&HostMgrType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "HostMgr", (PyObject *) &HostMgrType) < 0) {
         Py_DECREF(&HostMgrType);
         return (1);

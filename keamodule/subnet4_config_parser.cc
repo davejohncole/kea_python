@@ -10,12 +10,14 @@ static PyObject *
 Subnet4ConfigParser_parse(Subnet4ConfigParserObject *self, PyObject *args) {
     PyObject *config;
 
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
     if (!PyArg_ParseTuple(args, "O", &config)) {
         return (0);
     }
     try {
         ElementPtr data = object_to_element(config);
         Subnet4Ptr subnet = self->parser->parse(data);
+        // REFCOUNT: Subnet4_from_ptr - returns new reference
         return Subnet4_from_ptr(subnet);
     }
     catch (const exception &e) {
@@ -31,12 +33,14 @@ static PyMethodDef Subnet4ConfigParser_methods[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Subnet4ConfigParser_dealloc(Subnet4ConfigParserObject *self) {
     delete self->parser;
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 Subnet4ConfigParser_init(Subnet4ConfigParserObject *self, PyObject *args, PyObject *kwds) {
     if (kwds != 0) {
@@ -50,6 +54,7 @@ Subnet4ConfigParser_init(Subnet4ConfigParserObject *self, PyObject *args, PyObje
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 Subnet4ConfigParser_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     Subnet4ConfigParserObject *self;
@@ -101,10 +106,12 @@ PyTypeObject Subnet4ConfigParserType = {
 
 int
 Subnet4ConfigParser_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&Subnet4ConfigParserType) < 0) {
         return (1);
     }
     Py_INCREF(&Subnet4ConfigParserType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "Subnet4ConfigParser", (PyObject *) &Subnet4ConfigParserType) < 0) {
         Py_DECREF(&Subnet4ConfigParserType);
         return (1);

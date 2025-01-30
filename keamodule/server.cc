@@ -10,6 +10,7 @@ static PyObject *
 Server_getServerTagAsText(ServerObject *self, PyObject *args) {
     try {
         string tag = self->ptr->getServerTagAsText();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(tag.c_str()));
     }
     catch (const exception &e) {
@@ -22,6 +23,7 @@ static PyObject *
 Server_getDescription(ServerObject *self, PyObject *args) {
     try {
         string description = self->ptr->getDescription();
+        // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(description.c_str()));
     }
     catch (const exception &e) {
@@ -34,6 +36,7 @@ static PyObject *
 Server_toElement(ServerObject *self, PyObject *args) {
     try {
         ElementPtr ptr = self->ptr->toElement();
+        // REFCOUNT: element_to_object - returns new reference
         return (element_to_object(ptr));
     }
     catch (const exception &e) {
@@ -54,6 +57,7 @@ static PyMethodDef Server_methods[] = {
 
 static PyObject *
 Server_use_count(ServerObject *self, void *closure) {
+    // REFCOUNT: PyLong_FromLong - returns new reference
     return (PyLong_FromLong(self->ptr.use_count()));
 }
 
@@ -62,12 +66,14 @@ static PyGetSetDef Server_getsetters[] = {
     {0}  // Sentinel
 };
 
+// tp_dealloc - called when refcount is zero
 static void
 Server_dealloc(ServerObject *self) {
     self->ptr.~ServerPtr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
+// tp_init - called after tp_new has returned an instance
 static int
 Server_init(ServerObject *self, PyObject *args, PyObject *kwds) {
     const char *tag;
@@ -88,6 +94,7 @@ Server_init(ServerObject *self, PyObject *args, PyObject *kwds) {
     return (0);
 }
 
+// tp_new - allocate space and initialisation that can be repeated
 static PyObject *
 Server_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     ServerObject *self;
@@ -141,6 +148,7 @@ PyTypeObject ServerType = {
 
 PyObject *
 Server_from_ptr(ServerPtr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
     ServerObject *self = PyObject_New(ServerObject, &ServerType);
     if (self) {
         new(&self->ptr) ServerPtr;
@@ -151,10 +159,12 @@ Server_from_ptr(ServerPtr &ptr) {
 
 int
 Server_define() {
+    // PyType_Ready - finish type initialisation
     if (PyType_Ready(&ServerType) < 0) {
         return (1);
     }
     Py_INCREF(&ServerType);
+    // REFCOUNT: PyModule_AddObject steals reference on success
     if (PyModule_AddObject(kea_module, "Server", (PyObject *) &ServerType) < 0) {
         Py_DECREF(&ServerType);
         return (1);
