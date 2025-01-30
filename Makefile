@@ -83,7 +83,7 @@ dhcpdb_create.mysql.sql:
 	mv dhcpdb_create.mysql dhcpdb_create-$(VER).mysql.sql
 
 test-module:
-	PYTHONPATH=$(wildcard keamodule/build/lib.*) nosetests3 -w keamodule/tests
+	PYTHONPATH=$(wildcard keamodule/build/lib.*) python3 -m unittest discover -s keamodule/tests
 
 .PHONY: help \
 	build-kea-dev build-kea build-dhtest run-kea-dev run-kea run-mysql run-dhtest kea-network \

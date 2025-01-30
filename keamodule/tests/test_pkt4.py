@@ -440,7 +440,7 @@ class TestPkt4_toText(utils.BaseTestCase):
             self.assertEqual(textwrap.dedent("""\
                 local_address=0.0.0.0:67, remote_address=0.0.0.0:68, msg_type=DHCPREQUEST (3), transid=0x2a,
                 options:
-                    type=053, len=001: 3 (uint8)"""), p.toText())  # noqa: E501
+                  type=053, len=001: 3 (uint8)"""), p.toText())  # noqa: E501
 
     def test_filled(self):
         p = kea.Pkt4(kea.DHCPREQUEST, 42)                                               # 53
@@ -469,10 +469,10 @@ class TestPkt4_toText(utils.BaseTestCase):
             self.assertEqual(textwrap.dedent("""\
                 local_address=1.2.3.4:67, remote_address=2.3.4.5:68, msg_type=DHCPREQUEST (3), transid=0x2a,
                 options:
-                type=001, len=004: ff:ff:f0:00
-                type=003, len=004: 0a:00:00:01
-                type=015, len=008: 74:65:73:74:2e:6f:72:67
-                type=051, len=004: 00:00:1c:20
-                type=053, len=001: 3 (uint8)
-                type=058, len=004: 00:00:07:08
-                    type=059, len=004: 00:00:0e:10"""), p.toText())  # noqa: E501
+                  type=001, len=004: ff:ff:f0:00
+                  type=003, len=004: 0a:00:00:01
+                  type=015, len=008: 74:65:73:74:2e:6f:72:67
+                  type=051, len=004: 00:00:1c:20
+                  type=053, len=001: 3 (uint8)
+                  type=058, len=004: 00:00:07:08
+                  type=059, len=004: 00:00:0e:10"""), p.toText())  # noqa: E501

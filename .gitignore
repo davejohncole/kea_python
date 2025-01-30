@@ -7,4 +7,4 @@ kea.egg-info
 *.log.lock
 .vscode
 settings.mk
-dhcpdb_create.mysql.sql
+dhcpdb_create-*.mysql.sql
