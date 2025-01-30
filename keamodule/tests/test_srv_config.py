@@ -5,9 +5,7 @@ import utils
 class TestSrvConfig_new(utils.BaseTestCase):
 
     def test_cannot_construct(self):
-        with self.assertRaises(RuntimeError) as cm:
-            kea.SrvConfig()
-        self.assertEqual(("cannot directly construct",), cm.exception.args)
+        self.assert_cannot_construct(kea.CfgMgr)
 
 
 class TestGetCurrentConfig(utils.BaseTestCase):

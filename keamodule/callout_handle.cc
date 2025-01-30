@@ -288,44 +288,16 @@ CalloutHandle_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 PyTypeObject CalloutHandleType = {
-    PyObject_HEAD_INIT(0)
-    "kea.CalloutHandle",                        // tp_name
-    sizeof(CalloutHandleObject),                // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) CalloutHandle_dealloc,         // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server CalloutHandle",                 // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    CalloutHandle_methods,                      // tp_methods
-    0,                                          // tp_members
-    0,                                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) CalloutHandle_init,              // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    CalloutHandle_new                           // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.CalloutHandle",
+    .tp_basicsize = sizeof(CalloutHandleObject),
+    .tp_dealloc = (destructor) CalloutHandle_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server CalloutHandle"),
+    .tp_methods = CalloutHandle_methods,
+    .tp_init = (initproc) CalloutHandle_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = CalloutHandle_new,
 };
 
 PyObject *

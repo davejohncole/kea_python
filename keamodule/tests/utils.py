@@ -25,9 +25,9 @@ class BaseTestCase(unittest.TestCase):
         kea.logger = Logger()
 
     def assert_cannot_construct(self, cls):
-        with self.assertRaises(RuntimeError) as cm:
+        with self.assertRaises(TypeError) as cm:
             cls()
-        self.assertEqual(("cannot directly construct",), cm.exception.args)
+        self.assertEqual((f"cannot create 'kea.{cls.__name__}' instances",), cm.exception.args)
 
     def assert_constructor_no_arguments(self, cls):
         with self.assertRaises(TypeError) as cm:

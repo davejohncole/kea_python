@@ -106,44 +106,17 @@ Server_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 PyTypeObject ServerType = {
-    PyObject_HEAD_INIT(0)
-    "kea.Server",                               // tp_name
-    sizeof(ServerObject),                       // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) Server_dealloc,                // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server Server",                        // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    Server_methods,                             // tp_methods
-    0,                                          // tp_members
-    Server_getsetters,                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) Server_init,                     // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    Server_new                                  // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.Server",
+    .tp_basicsize = sizeof(ServerObject),
+    .tp_dealloc = (destructor) Server_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server Server"),
+    .tp_methods = Server_methods,
+    .tp_getset = Server_getsetters,
+    .tp_init = (initproc) Server_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = Server_new,
 };
 
 PyObject *

@@ -74,49 +74,20 @@ static PyMethodDef ConfigBackendDHCPv4Mgr_methods[] = {
 // tp_init - called after tp_new has returned an instance
 static int
 ConfigBackendDHCPv4Mgr_init(ConfigBackendDHCPv4MgrObject *self, PyObject *args, PyObject *kwds) {
-    PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
+    PyErr_SetString(PyExc_TypeError, "cannot create 'kea.ConfigBackendDHCPv4Mgr' instances");
     return (-1);
 }
 
 PyTypeObject ConfigBackendDHCPv4MgrType = {
-    PyObject_HEAD_INIT(0)
-    "kea.ConfigBackendDHCPv4Mgr",               // tp_name
-    sizeof(ConfigBackendDHCPv4MgrObject),       // tp_basicsize
-    0,                                          // tp_itemsize
-    0,                                          // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server ConfigBackendDHCPv4Mgr",        // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    ConfigBackendDHCPv4Mgr_methods,             // tp_methods
-    0,                                          // tp_members
-    0,                                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) ConfigBackendDHCPv4Mgr_init,     // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    PyType_GenericNew                           // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.ConfigBackendDHCPv4Mgr",
+    .tp_basicsize = sizeof(ConfigBackendDHCPv4MgrObject),
+    .tp_flags = Py_TPFLAGS_DEFAULT, 
+    .tp_doc = PyDoc_STR("Kea server ConfigBackendDHCPv4Mgr"),
+    .tp_methods = ConfigBackendDHCPv4Mgr_methods,
+    .tp_init = (initproc) ConfigBackendDHCPv4Mgr_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = PyType_GenericNew,
 };
 
 int

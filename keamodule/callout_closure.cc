@@ -58,44 +58,14 @@ CalloutClosure_dealloc(CalloutClosureObject *self) {
 }
 
 PyTypeObject CalloutClosureType = {
-    PyObject_HEAD_INIT(0)
-    "kea.CalloutClosure",                       // tp_name
-    sizeof(CalloutClosureObject),               // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) CalloutClosure_dealloc,        // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server callout closure",               // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    0,                                          // tp_methods
-    0,                                          // tp_members
-    0,                                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    0,                                          // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    PyType_GenericNew                           // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.CalloutClosure",
+    .tp_basicsize = sizeof(CalloutClosureObject),
+    .tp_dealloc = (destructor) CalloutClosure_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server callout closure"),
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = PyType_GenericNew,
 };
 
 PyObject *

@@ -523,44 +523,17 @@ Pkt4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 PyTypeObject Pkt4Type = {
-    PyObject_HEAD_INIT(0)
-    "kea.Pkt4",                                 // tp_name
-    sizeof(Pkt4Object),                         // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) Pkt4_dealloc,                  // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server Pkt4",                          // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    Pkt4_methods,                               // tp_methods
-    0,                                          // tp_members
-    Pkt4_getsetters,                            // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) Pkt4_init,                       // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    Pkt4_new                                    // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.Pkt4",
+    .tp_basicsize = sizeof(Pkt4Object),
+    .tp_dealloc = (destructor) Pkt4_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server Pkt4"),
+    .tp_methods = Pkt4_methods,
+    .tp_getset = Pkt4_getsetters,
+    .tp_init = (initproc) Pkt4_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = Pkt4_new,
 };
 
 PyObject *

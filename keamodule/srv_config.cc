@@ -64,7 +64,7 @@ static int
 SrvConfig_init(SrvConfigObject *self, PyObject *args, PyObject *kwds) {
     new(&self->ptr) SrvConfigPtr;
 
-    PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
+    PyErr_SetString(PyExc_TypeError, "cannot create 'kea.SrvConfig' instances");
     return (-1);
 }
 
@@ -80,44 +80,17 @@ SrvConfig_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 PyTypeObject SrvConfigType = {
-    PyObject_HEAD_INIT(0)
-    "kea.SrvConfig",                            // tp_name
-    sizeof(SrvConfigObject),                    // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) SrvConfig_dealloc,             // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server SrvConfig",                     // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    SrvConfig_methods,                          // tp_methods
-    0,                                          // tp_members
-    SrvConfig_getsetters,                       // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) SrvConfig_init,                  // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    SrvConfig_new                               // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.SrvConfig",
+    .tp_basicsize = sizeof(SrvConfigObject),
+    .tp_dealloc = (destructor) SrvConfig_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server SrvConfig"),
+    .tp_methods = SrvConfig_methods,
+    .tp_getset = SrvConfig_getsetters,
+    .tp_init = (initproc) SrvConfig_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = SrvConfig_new,
 };
 
 PyObject *

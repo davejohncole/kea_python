@@ -29,58 +29,13 @@ static PyMethodDef LoggerManager_methods[] = {
     {0}  // Sentinel
 };
 
-// tp_dealloc - called when refcount is zero
-static void
-LoggerManager_dealloc(LoggerManagerObject *self) {
-    Py_TYPE(self)->tp_free((PyObject *) self);
-}
-
-// tp_init - called after tp_new has returned an instance
-static int
-LoggerManager_init(LoggerManagerObject *self, PyObject *args, PyObject *kwds) {
-    PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
-    return (-1);
-}
-
 PyTypeObject LoggerManagerType = {
-    PyObject_HEAD_INIT(0)
-    "kea.LoggerManager",                        // tp_name
-    sizeof(LoggerManagerObject),                // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) LoggerManager_dealloc,         // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server LoggerManager",                 // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    LoggerManager_methods,                      // tp_methods
-    0,                                          // tp_members
-    0,                                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) LoggerManager_init,              // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    PyType_GenericNew                           // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.LoggerManager",
+    .tp_basicsize = sizeof(LoggerManagerObject),
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server LoggerManager"),
+    .tp_methods = LoggerManager_methods,
 };
 
 int

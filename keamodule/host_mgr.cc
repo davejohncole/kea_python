@@ -235,49 +235,20 @@ static PyMethodDef HostMgr_methods[] = {
 // tp_init - called after tp_new has returned an instance
 static int
 HostMgr_init(HostMgrObject *self, PyObject *args, PyObject *kwds) {
-    PyErr_SetString(PyExc_RuntimeError, "cannot directly construct");
+    PyErr_SetString(PyExc_TypeError, "cannot create 'kea.HostMgr' instances");
     return (-1);
 }
 
 PyTypeObject HostMgrType = {
-    PyObject_HEAD_INIT(0)
-    "kea.HostMgr",                              // tp_name
-    sizeof(HostMgrObject),                      // tp_basicsize
-    0,                                          // tp_itemsize
-    0,                                          // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server HostMgr",                       // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    HostMgr_methods,                            // tp_methods
-    0,                                          // tp_members
-    0,                                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) HostMgr_init,                    // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    PyType_GenericNew                           // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.HostMgr",
+    .tp_basicsize = sizeof(HostMgrObject),
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server HostMgr"),
+    .tp_methods = HostMgr_methods,
+    .tp_init = (initproc) HostMgr_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = PyType_GenericNew,
 };
 
 int

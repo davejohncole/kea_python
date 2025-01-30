@@ -65,44 +65,16 @@ HostReservationParser4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 PyTypeObject HostReservationParser4Type = {
-    PyObject_HEAD_INIT(0)
-    "kea.HostReservationParser4",               // tp_name
-    sizeof(HostReservationParser4Object),       // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) HostReservationParser4_dealloc,// tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server HostReservationParser4",        // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    HostReservationParser4_methods,             // tp_methods
-    0,                                          // tp_members
-    0,                                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) HostReservationParser4_init,     // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    HostReservationParser4_new                  // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.HostReservationParser4",
+    .tp_basicsize = sizeof(HostReservationParser4Object),
+    .tp_dealloc = (destructor) HostReservationParser4_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server HostReservationParser4"),
+    .tp_methods = HostReservationParser4_methods,
+    .tp_init = (initproc) HostReservationParser4_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = HostReservationParser4_new,
 };
 
 int

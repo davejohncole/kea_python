@@ -331,44 +331,16 @@ LeaseMgr_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
 }
 
 PyTypeObject LeaseMgrType = {
-    PyObject_HEAD_INIT(0)
-    "kea.LeaseMgr",                             // tp_name
-    sizeof(LeaseMgrObject),                     // tp_basicsize
-    0,                                          // tp_itemsize
-    (destructor) LeaseMgr_dealloc,              // tp_dealloc
-    0,                                          // tp_vectorcall_offset
-    0,                                          // tp_getattr
-    0,                                          // tp_setattr
-    0,                                          // tp_as_async
-    0,                                          // tp_repr
-    0,                                          // tp_as_number
-    0,                                          // tp_as_sequence
-    0,                                          // tp_as_mapping
-    0,                                          // tp_hash
-    0,                                          // tp_call
-    0,                                          // tp_str
-    0,                                          // tp_getattro
-    0,                                          // tp_setattro
-    0,                                          // tp_as_buffer
-    Py_TPFLAGS_DEFAULT,                         // tp_flags
-    "Kea server LeaseMgr",                      // tp_doc
-    0,                                          // tp_traverse
-    0,                                          // tp_clear
-    0,                                          // tp_richcompare
-    0,                                          // tp_weaklistoffset
-    0,                                          // tp_iter
-    0,                                          // tp_iternext
-    LeaseMgr_methods,                           // tp_methods
-    0,                                          // tp_members
-    0,                                          // tp_getset
-    0,                                          // tp_base
-    0,                                          // tp_dict
-    0,                                          // tp_descr_get
-    0,                                          // tp_descr_set
-    0,                                          // tp_dictoffset
-    (initproc) LeaseMgr_init,                   // tp_init
-    PyType_GenericAlloc,                        // tp_alloc
-    LeaseMgr_new                                // tp_new
+    .ob_base = PyObject_HEAD_INIT(0)
+    .tp_name = "kea.LeaseMgr",
+    .tp_basicsize = sizeof(LeaseMgrObject),
+    .tp_dealloc = (destructor) LeaseMgr_dealloc,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_doc = PyDoc_STR("Kea server LeaseMgr"),
+    .tp_methods = LeaseMgr_methods,
+    .tp_init = (initproc) LeaseMgr_init,
+    .tp_alloc = PyType_GenericAlloc,
+    .tp_new = LeaseMgr_new,
 };
 
 int
