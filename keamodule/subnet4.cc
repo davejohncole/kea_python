@@ -18,6 +18,10 @@ Subnet4_delServerTag(Subnet4Object *self, PyObject *args) {
     }
 
     try {
+        if (self->is_const) {
+            PyErr_SetString(PyExc_TypeError, "not supported for const Subnet4");
+            return (0);
+        }
         self->ptr->delServerTag(server_tag);
         Py_RETURN_NONE;
     }
@@ -30,7 +34,7 @@ Subnet4_delServerTag(Subnet4Object *self, PyObject *args) {
 static PyObject *
 Subnet4_getID(Subnet4Object *self, PyObject *args) {
     try {
-        SubnetID subnet_id = self->ptr->getID();
+        SubnetID subnet_id = (self->is_const ? self->const_ptr : self->ptr)->getID();
         // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(subnet_id));
     }
@@ -43,7 +47,7 @@ Subnet4_getID(Subnet4Object *self, PyObject *args) {
 static PyObject *
 Subnet4_getMetadata(Subnet4Object *self, PyObject *args) {
     try {
-        ElementPtr ptr = self->ptr->getMetadata();
+        ElementPtr ptr = (self->is_const ? self->const_ptr : self->ptr)->getMetadata();
         // REFCOUNT: element_to_object - returns new reference
         return (element_to_object(ptr));
     }
@@ -56,7 +60,7 @@ Subnet4_getMetadata(Subnet4Object *self, PyObject *args) {
 static PyObject *
 Subnet4_getValid(Subnet4Object *self, PyObject *args) {
     try {
-        uint32_t valid = self->ptr->getValid();
+        uint32_t valid = (self->is_const ? self->const_ptr : self->ptr)->getValid();
         // REFCOUNT: PyLong_FromLong - returns new reference
         return (PyLong_FromLong(valid));
     }
@@ -74,7 +78,7 @@ Subnet4_getServerTags(Subnet4Object *self, PyObject *args) {
         return (0);
     }
     try {
-        auto server_tags = self->ptr->getServerTags();
+        auto server_tags = (self->is_const ? self->const_ptr : self->ptr)->getServerTags();
         for (auto it = server_tags.begin(); it != server_tags.cend(); ++it) {
             // REFCOUNT: PyUnicode_FromString - returns new reference
             PyObject *elem = PyUnicode_FromString(it->get().c_str());
@@ -99,7 +103,7 @@ static PyObject *
 Subnet4_getSharedNetworkName(Subnet4Object *self, PyObject *args) {
     try {
         // REFCOUNT: PyUnicode_FromString - returns new reference
-        return (PyUnicode_FromString(self->ptr->getSharedNetworkName().c_str()));
+        return (PyUnicode_FromString((self->is_const ? self->const_ptr : self->ptr)->getSharedNetworkName().c_str()));
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());
@@ -116,7 +120,7 @@ Subnet4_inRange(Subnet4Object *self, PyObject *args) {
     }
 
     try {
-        if (self->ptr->inRange(IOAddress(string(addr)))) {
+        if ((self->is_const ? self->const_ptr : self->ptr)->inRange(IOAddress(string(addr)))) {
             Py_RETURN_TRUE;
         }
         Py_RETURN_FALSE;
@@ -136,6 +140,10 @@ Subnet4_setServerTag(Subnet4Object *self, PyObject *args) {
     }
 
     try {
+        if (self->is_const) {
+            PyErr_SetString(PyExc_TypeError, "not supported for const Subnet4");
+            return (0);
+        }
         self->ptr->setServerTag(server_tag);
         Py_RETURN_NONE;
     }
@@ -154,6 +162,10 @@ Subnet4_setSharedNetworkName(Subnet4Object *self, PyObject *args) {
     }
 
     try {
+        if (self->is_const) {
+            PyErr_SetString(PyExc_TypeError, "not supported for const Subnet4");
+            return (0);
+        }
         self->ptr->setSharedNetworkName(name);
         Py_RETURN_NONE;
     }
@@ -166,7 +178,7 @@ Subnet4_setSharedNetworkName(Subnet4Object *self, PyObject *args) {
 static PyObject *
 Subnet4_toText(Subnet4Object *self, PyObject *args) {
     try {
-        string text = self->ptr->toText();
+        string text = (self->is_const ? self->const_ptr : self->ptr)->toText();
         // REFCOUNT: PyUnicode_FromString - returns new reference
         return (PyUnicode_FromString(text.c_str()));
     }
@@ -179,7 +191,7 @@ Subnet4_toText(Subnet4Object *self, PyObject *args) {
 static PyObject *
 Subnet4_toElement(Subnet4Object *self, PyObject *args) {
     try {
-        ElementPtr ptr = self->ptr->toElement();
+        ElementPtr ptr = (self->is_const ? self->const_ptr : self->ptr)->toElement();
         // REFCOUNT: element_to_object - returns new reference
         return (element_to_object(ptr));
     }
@@ -216,9 +228,9 @@ static PyMethodDef Subnet4_methods[] = {
 };
 
 static PyObject *
-Subnet4_use_count(OptionObject *self, void *closure) {
+Subnet4_use_count(Subnet4Object *self, void *closure) {
     // REFCOUNT: PyLong_FromLong - returns new reference
-    return (PyLong_FromLong(self->ptr.use_count()));
+    return (PyLong_FromLong(self->is_const ? self->const_ptr.use_count() : self->ptr.use_count()));
 }
 
 static PyGetSetDef Subnet4_getsetters[] = {
@@ -230,6 +242,7 @@ static PyGetSetDef Subnet4_getsetters[] = {
 static void
 Subnet4_dealloc(Subnet4Object *self) {
     self->ptr.~Subnet4Ptr();
+    self->const_ptr.~ConstSubnet4Ptr();
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
@@ -245,6 +258,7 @@ Subnet4_init(Subnet4Object *self, PyObject *args, PyObject *kwds) {
     uint32_t subnet_id;
 
     new(&self->ptr) Subnet4Ptr;
+    new(&self->const_ptr) ConstSubnet4Ptr;
 
     // REFCOUNT: PyArg_ParseTupleAndKeywords - returns borrowed references
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "sbOOOI", (char **)kwlist,
@@ -294,6 +308,7 @@ Subnet4_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     self = (Subnet4Object *) type->tp_alloc(type, 0);
     if (self) {
         new(&self->ptr) Subnet4Ptr;
+        new(&self->const_ptr) ConstSubnet4Ptr;
     }
     return ((PyObject *) self);
 }
@@ -318,7 +333,22 @@ Subnet4_from_ptr(Subnet4Ptr &ptr) {
     Subnet4Object *self = PyObject_New(Subnet4Object, &Subnet4Type);
     if (self) {
         new(&self->ptr) Subnet4Ptr;
+        new(&self->const_ptr) ConstSubnet4Ptr;
+        self->is_const = false;
         self->ptr = ptr;
+    }
+    return (PyObject *)self;
+}
+
+PyObject *
+Subnet4_from_constptr(ConstSubnet4Ptr &ptr) {
+    // REFCOUNT: PyObject_New - returns new reference
+    Subnet4Object *self = PyObject_New(Subnet4Object, &Subnet4Type);
+    if (self) {
+        new(&self->ptr) Subnet4Ptr;
+        new(&self->const_ptr) ConstSubnet4Ptr;
+        self->is_const = true;
+        self->const_ptr = ptr;
     }
     return (PyObject *)self;
 }

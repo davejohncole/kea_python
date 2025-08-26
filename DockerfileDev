@@ -1,39 +1,48 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 ARG VER
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /source
-COPY kea-$VER.tar.gz .
+COPY kea-$VER.tar.* .
 
 RUN apt-get update -y \
     && apt-get -y install --no-install-recommends \
         procps \
         make \
         socat \
+        xz-utils \
+        pkg-config \
         g++ \
+        g++14 \
         gdb \
+        flex \
+        bison \
         libffi-dev \
         libboost-dev \
         libboost-system-dev \
         libssl-dev \
+        libkrb5-dev \
+        libreadline-dev \
+        libpam-dev \
+        libzstd-dev \
+        liblz4-dev \
+        libselinux-dev \
+        libxslt-dev \
+        libgtest-dev \
         liblog4cplus-dev \
         libpython3-dev \
         python3 \
-        python3-distutils \
+        python3-pip \
         python3-setuptools \
+        meson-1.5 \
         libpq-dev \
         postgresql-server-dev-all \
         libmariadb-dev \
         libmariadb-dev-compat \
-    && tar xzf kea-$VER.tar.gz \
+    && tar xf kea-$VER.tar.* \
     && cd kea-$VER \
-    && ./configure \
-        --enable-shell \
-        --with-site-packages=/usr/lib/python3/dist-packages \
-        --enable-perfdhcp \
-        --enable-generate-messages \
-        --with-mysql=/usr/bin/mysql_config \
-        --with-pgsql=/usr/bin/pg_config \
-    && make \
-    && make install \
+    && meson setup build \
+    && meson compile -C build \
+    && meson install -C build \
+    && echo /usr/local/lib64 > /etc/ld.so.conf.d/kea.conf \
     && ldconfig

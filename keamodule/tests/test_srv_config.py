@@ -17,10 +17,20 @@ class TestGetCurrentConfig(utils.BaseTestCase):
     def test_ok(self):
         m = kea.CfgMgr.instance()
         c = m.getCurrentCfg()
-        self.assertEqual(3, c.use_count)
-        d = m.getCurrentCfg()
-        self.assertEqual(4, c.use_count)
-        self.assertEqual(4, d.use_count)
+        if kea.__version__ < '3.0.0':
+            self.assertEqual(3, c.use_count)
+            d = m.getCurrentCfg()
+            self.assertEqual(4, c.use_count)
+            self.assertEqual(4, d.use_count)
+            d = None
+            self.assertEqual(3, c.use_count)
+        else:
+            self.assertEqual(2, c.use_count)
+            d = m.getCurrentCfg()
+            self.assertEqual(3, c.use_count)
+            self.assertEqual(3, d.use_count)
+            d = None
+            self.assertEqual(2, c.use_count)
 
 
 class TestGetStagingConfig(utils.BaseTestCase):

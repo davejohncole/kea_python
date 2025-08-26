@@ -28,6 +28,8 @@ def calc_macros():
         macros.append(('HAVE_GETLEASE4_METHOD', None))
     if version < (2, 2, 0):
         macros.append(('HAVE_BACKEND_PGSQL', None))
+    if version < (3, 0, 0):
+        macros.append(('HAVE_NONCONST_CFGSUBNETS4_SELECTSUBNET', None))
     return macros
 
 
@@ -66,7 +68,7 @@ kea = Extension('kea',
                            'kea-dhcpsrv',
                            'ffi'],
                 library_dirs=[settings['KEA_LIBS']],
-                extra_compile_args=['-std=c++11'])
+                extra_compile_args=['-std=c++14'])
 
 setup(name='kea',
       version='1.0',

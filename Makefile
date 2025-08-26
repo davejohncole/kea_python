@@ -1,5 +1,5 @@
 ifeq "$(VER)" ""
-	VER=2.6.1
+	VER=3.0.0
 endif
 
 help:
@@ -79,7 +79,7 @@ settings.mk:
 	python3 settings.py
 
 dhcpdb_create.mysql.sql:
-	tar xz --strip-components 6 -f kea-$(VER).tar.gz kea-$(VER)/src/share/database/scripts/mysql/dhcpdb_create.mysql
+	tar x --strip-components 6 -f kea-$(VER).tar.* kea-$(VER)/src/share/database/scripts/mysql/dhcpdb_create.mysql
 	mv dhcpdb_create.mysql dhcpdb_create-$(VER).mysql.sql
 
 test-module:

@@ -14,7 +14,7 @@ harness that exercises all of the implemented commands:
 ```
 djc@laptop:~/play/kea_python$ docker exec -it kea bash
 root@ae43fd3e78da:/source# cd /workdir/examples/lease-cmds/
-root@ae43fd3e78da:/workdir/examples/lease-cmds# python3 -m unittest discover
+root@ae43fd3e78da:/workdir/examples/lease-cmds# python3 -B -m unittest discover
 .............................
 ----------------------------------------------------------------------
 Ran 29 tests in 0.045s
@@ -31,7 +31,7 @@ Now run the tests again:
 ```
 djc@laptop:~/play/kea_python$ docker exec -it kea bash
 root@ae43fd3e78da:/source# cd /workdir/examples/lease-cmds/
-root@ae43fd3e78da:/workdir/examples/lease-cmds# python3 -m unittest discover
+root@ae43fd3e78da:/workdir/examples/lease-cmds# python3 -B -m unittest discover
 .............................
 ----------------------------------------------------------------------
 Ran 29 tests in 0.035s

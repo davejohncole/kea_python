@@ -29,7 +29,12 @@ class TestConfigBackendDHCPv4Mgr_addBackend(utils.BaseTestCase):
         # have not added the mysql hook, so this will fail
         with self.assertRaises(TypeError) as cm:
             m.addBackend('type=mysql')
-        self.assertEqual(("The type of the configuration backend: 'mysql' is not supported",), cm.exception.args)
+        if kea.__version__ < '3.0.0':
+            self.assertEqual(("The type of the configuration backend: 'mysql' is not supported",), cm.exception.args)
+        else:
+            self.assertEqual(('The Kea server has not been compiled with support for configuration database '
+                              'type: mysql. Did you forget to use -D mysql=enabled during setup or to load '
+                              'libdhcp_mysql hook library?',), cm.exception.args)
 
 
 class TestConfigBackendDHCPv4Mgr_getPool(utils.BaseTestCase):

@@ -24,14 +24,14 @@ Now the dhtest image:
 ```
 djc@laptop:~/play/kea_python$ make run-dhtest
 root@e01939ffd0f4:/# cd /workdir
-root@e01939ffd0f4:/workdir# python3 examples/stress-test/stress_test.py --help  
+root@e01939ffd0f4:/workdir# python3 -B examples/stress-test/stress_test.py --help  
 usage: stress_test.py [-h] [--total TOTAL] [--parallel PARALLEL]
 
 optional arguments:
   -h, --help           show this help message and exit
   --total TOTAL        total number of requests to perform
   --parallel PARALLEL  number of parallel requests to perform
-root@e01939ffd0f4:/workdir# python3 examples/stress-test/stress_test.py --parallel 50 --total 10000
+root@e01939ffd0f4:/workdir# python3 -B examples/stress-test/stress_test.py --parallel 50 --total 10000
 00:01: 634 at 634/sec
 00:02: 1392 at 696/sec
 00:03: 1971 at 669/sec

@@ -19,5 +19,5 @@ Then exec a bash shell in the kea container and run the `sendcmd.py` program:
 ```
 djc@laptop:~/play/kea_python$ docker exec -it kea bash
 root@4cebcb709530:/# cd /workdir/examples/host-cmds/
-root@4cebcb709530:/workdir/examples/host-cmds# python3 sendcmd.py 
+root@4cebcb709530:/workdir/examples/host-cmds# python3 -B sendcmd.py 
 ```

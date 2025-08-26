@@ -1,4 +1,5 @@
 import codecs
+import textwrap
 
 import kea
 import utils
@@ -237,7 +238,10 @@ class TestOption_toText(utils.BaseTestCase):
 
     def test_empty(self):
         o = kea.Option(42)
-        self.assertEqual('type=042, len=000: ', o.toText())
+        if kea.__version__ < '3.0.0':
+            self.assertEqual('type=042, len=000: ', o.toText())
+        else:
+            self.assertEqual("type=042, len=000: ''", o.toText())
 
     def test_uint8(self):
         o = kea.Option(42).setUint8(5)
@@ -247,8 +251,15 @@ class TestOption_toText(utils.BaseTestCase):
         o = kea.Option(42).addOption(kea.Option(4)
                                      .setUint16(5)).addOption(kea.Option(6)
                                                               .setString('hello'))
-        self.assertEqual("""\
-type=042, len=011: ,
-options:
-  type=004, len=002: 00:05
-  type=006, len=005: 68:65:6c:6c:6f""", o.toText())
+        if kea.__version__ < '3.0.0':
+            self.assertEqual(textwrap.dedent("""\
+                type=042, len=011: ,
+                options:
+                  type=004, len=002: 00:05
+                  type=006, len=005: 68:65:6c:6c:6f"""), o.toText())
+        else:
+            self.assertEqual(textwrap.dedent("""\
+                type=042, len=011: '',
+                options:
+                  type=004, len=002: 00:05
+                  type=006, len=005: 68:65:6c:6c:6f 'hello'"""), o.toText())

@@ -138,12 +138,21 @@ CfgSubnets4_selectSubnet(CfgSubnets4Object *self, PyObject *args) {
     }
 
     try {
+#ifdef HAVE_NONCONST_CFGSUBNETS4_SELECTSUBNET
         Subnet4Ptr ptr = self->ptr->selectSubnet(IOAddress(string(addr)));
         if (!ptr) {
             Py_RETURN_NONE;
         }
-        // REFCOUNT: Subnet4_from_ptr - returns new reference
+        // REFCOUNT: Subnet4_from_constptr - returns new reference
         return (Subnet4_from_ptr(ptr));
+#else
+        ConstSubnet4Ptr ptr = self->ptr->selectSubnet(IOAddress(string(addr)));
+        if (!ptr) {
+            Py_RETURN_NONE;
+        }
+        // REFCOUNT: Subnet4_from_constptr - returns new reference
+        return (Subnet4_from_constptr(ptr));
+#endif
     }
     catch (const exception &e) {
         PyErr_SetString(PyExc_TypeError, e.what());

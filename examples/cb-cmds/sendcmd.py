@@ -5,7 +5,7 @@ import socket
 
 def send_command(name, args=None):
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    s.connect('/var/run/kea4.sock')
+    s.connect('/usr/local/var/run/kea/kea4.sock')
     cmd = {'command': name}
     if args:
         cmd['arguments'] = args

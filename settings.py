@@ -22,6 +22,7 @@ def find_keainc():
 
 def find_keahooks():
     for path in ['/usr/local/lib/kea/hooks',
+                 '/usr/local/lib64/kea/hooks',
                  '/usr/lib64/kea/hooks']:
         if os.path.isdir(path):
             return path
@@ -30,6 +31,7 @@ def find_keahooks():
 
 def find_kealibs():
     for path in ['/usr/local/lib',
+                 '/usr/local/lib64',
                  '/usr/lib64']:
         if os.path.exists(os.path.join(path, 'libkea-hooks.so')):
             return path

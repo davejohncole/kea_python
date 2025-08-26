@@ -24,7 +24,7 @@ def send_command(name, **kwargs):
     for k, v in kwargs.items():
         args[lease4_args.get(k, k)] = v
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    s.connect('/var/run/kea4.sock')
+    s.connect('/usr/local/var/run/kea/kea4.sock')
     cmd = {'command': name}
     if args:
         cmd['arguments'] = args

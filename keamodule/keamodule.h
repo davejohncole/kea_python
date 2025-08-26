@@ -281,12 +281,15 @@ extern int SrvConfig_define();
 typedef struct {
     PyObject_HEAD
 
+    bool is_const;
     isc::dhcp::Subnet4Ptr ptr;
+    isc::dhcp::ConstSubnet4Ptr const_ptr;
 } Subnet4Object;
 
 #define Subnet4_Check(op) (Py_TYPE(op) == &Subnet4Type)
 extern PyTypeObject Subnet4Type;
 extern PyObject *Subnet4_from_ptr(isc::dhcp::Subnet4Ptr &ptr);
+extern PyObject *Subnet4_from_constptr(isc::dhcp::ConstSubnet4Ptr &ptr);
 extern int Subnet4_define();
 
 // subnet4_config_parser.cc
