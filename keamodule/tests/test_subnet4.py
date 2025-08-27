@@ -30,7 +30,7 @@ class TestSubnet4_new(utils.BaseTestCase):
         self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             kea.Subnet4('foo', 'foo', 1, 1, 1, 1)
-        self.assertEqual(("'str' object cannot be interpreted as an integer",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             kea.Subnet4('foo', 1, 'foo', 1, 1, 1)
         self.assertEqual(("'t1' must be int or None",), cm.exception.args)
@@ -42,7 +42,7 @@ class TestSubnet4_new(utils.BaseTestCase):
         self.assertEqual(("'valid_lifetime' must be int or None",), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             kea.Subnet4('foo', 1, None, None, None, 'foo')
-        self.assertEqual(("'str' object cannot be interpreted as an integer",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         s = kea.Subnet4('192.168.1.0', 24, 900, 1800, 3600, 5)

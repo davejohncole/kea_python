@@ -65,7 +65,7 @@ class TestCfgSubnets4_delSubnetID(utils.BaseTestCase):
         n = kea.CfgMgr.instance().getCurrentCfg().getCfgSubnets4()
         with self.assertRaises(TypeError) as cm:
             n.delSubnetID('foo')
-        self.assertEqual(("'str' object cannot be interpreted as an integer",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
 
     def test_ok(self):
         n = kea.CfgMgr.instance().getCurrentCfg().getCfgSubnets4()

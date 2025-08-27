@@ -93,7 +93,7 @@ class TestConfigBackendPoolDHCPv4_deleteSubnet4(utils.BaseTestCase):
         self.assertEqual(("server selector must be string or list of strings",), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             p.deleteSubnet4('unspec', 'all', 'foo')
-        self.assertEqual(("'str' object cannot be interpreted as an integer",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             p.deleteSubnet4('unspec', [], 1)
         self.assertEqual(("ServerSelector: expecting at least one server tag",), cm.exception.args)
@@ -183,10 +183,10 @@ class TestConfigBackendPoolDHCPv4_getSubnet4(utils.BaseTestCase):
         self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             p.getSubnet4('unspec', 1, 'foo')
-        self.assertEqual(("'str' object cannot be interpreted as an integer",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             p.getSubnet4('unspec', 'all', 'foo')
-        self.assertEqual(("'str' object cannot be interpreted as an integer",), cm.exception.args)
+        self.assertEqual((utils.EXPECT_INT_GOT_STR,), cm.exception.args)
         with self.assertRaises(TypeError) as cm:
             p.getSubnet4('unspec', [], 1)
         self.assertEqual(("ServerSelector: expecting at least one server tag",), cm.exception.args)
