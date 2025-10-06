@@ -334,6 +334,159 @@ def remote_subnet4_set(handle):
     return wrap_handler(handle, get_response)
 
 
+# {
+#     "command": "remote-class4-del",
+#     "arguments": {
+#         "client-classes": [
+#             {
+#                 "name": "foo"
+#             }
+#         ],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
+def remote_class4_del(handle):
+    def get_response(args):
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        classes = get_list_arg(args, 'client-classes')
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        count = 0
+        for cc in classes:
+            name = cc['name']
+            count += pool.deleteClientClass4(backend, 'any', name)
+        return {'result': 0,
+                'text': '%s IPv4 classes(s) deleted.' % count}
+
+    return wrap_handler(handle, get_response)
+
+
+# {
+#     "command": "remote-class4-get",
+#     "arguments": {
+#         "client-classes": [
+#             {
+#                 "name": "foo"
+#             }
+#         ],
+#         "remote": {
+#             "type": "mysql"
+#         }
+#     }
+# }
+def remote_class4_get(handle):
+    def get_response(args):
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        classes = get_list_arg(args, 'client-classes')
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        count = 0
+        results = []
+        for cc in classes:
+            name = cc['name']
+            client_class = pool.getClientClass4(backend, 'any', name)
+            if client_class:
+                results.append(client_class.toElement())
+        if len(results):
+            names = ', '.join(repr(client_class['name']) for client_class in results)
+            message = "DHCPv4 client class %s found." % names
+        else:
+            message = "DHCPv4 client class not found."
+        return {'result': 0,
+                'text': message,
+                'arguments': {
+                    'client-classes': results,
+                    'count': len(results)
+                }}
+
+    return wrap_handler(handle, get_response)
+
+
+# {
+#     "command": "remote-class4-get-all",
+#     "arguments": {
+#         "remote": {
+#             "type": "mysql"
+#         },
+#         "server-tags": [ "server1" ]
+#     }
+# }
+def remote_class4_get_all(handle):
+    def get_response(args):
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        server_tags = get_list_arg(args, 'server-tags')
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        results = []
+        for client_class in pool.getAllClientClasses4(backend, make_selector(server_tags)):
+            results.append(client_class.toElement())
+        return {'result': 0,
+                'text': '%s DHCPv4 client class(es) found.' % len(results),
+                'arguments': {
+                    'client-classes': results,
+                    'count': len(results)
+                }}
+
+    return wrap_handler(handle, get_response)
+
+
+# {
+#     "command": "remote-class4-set",
+#     "arguments": {
+#         "client-classes": [
+#             {
+#                 "name": "foo",
+#                 "test": "option[93].hex == 0x0009",
+#                 "option-def": [
+#                     {
+#                         "name": "configfile",
+#                         "code": 224,
+#                         "type": "string"
+#                     }
+#                 ],
+#                 "option-data": [
+#                     {
+#                         "name": "configfile",
+#                         "data": "1APC"
+#                     }
+#                 ]
+#             }
+#         ],
+#         "remote": {
+#             "type": "mysql"
+#         },
+#         "server-tags": [ "all" ]
+#     }
+# }
+def remote_class4_set(handle):
+    def get_response(args):
+        remote = get_map_arg(args, 'remote')
+        backend = remote['type']
+        server_tags = get_list_arg(args, 'server-tags')
+        classes = get_list_arg(args, 'client-classes')
+        pool = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        parser = kea.ClientClassDefParser()
+        prev_name = ''
+        for elem in classes:
+            if 'follow-class-name' in elem:
+                follows = elem.pop('follow-class-name')
+                if follows is None:
+                    follows = ''
+            else:
+                follows = prev_name
+            cc_dict = kea.ClientClassDictionary()
+            parser.parse(cc_dict, elem)
+            client_class = cc_dict.getClasses()[0]
+            pool.createUpdateClientClass4(backend, make_selector(server_tags), client_class, follows)
+            follows = client_class.getName()
+        return {'result': 0,
+                'text': '%s DHCPv4 client class(es) updated.' % len(classes)}
+
+    return wrap_handler(handle, get_response)
+
+
 def load(handle):
     handle.registerCommandCallout('remote-server4-get-all', remote_server4_get_all)
     handle.registerCommandCallout('remote-server4-set', remote_server4_set)
@@ -341,4 +494,8 @@ def load(handle):
     handle.registerCommandCallout('remote-subnet4-get-by-id', remote_subnet4_get_by_id)
     handle.registerCommandCallout('remote-subnet4-list', remote_subnet4_list)
     handle.registerCommandCallout('remote-subnet4-set', remote_subnet4_set)
+    handle.registerCommandCallout('remote-class4-del', remote_class4_del)
+    handle.registerCommandCallout('remote-class4-get', remote_class4_get)
+    handle.registerCommandCallout('remote-class4-get-all', remote_class4_get_all)
+    handle.registerCommandCallout('remote-class4-set', remote_class4_set)
     return 0

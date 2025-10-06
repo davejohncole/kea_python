@@ -13,6 +13,8 @@
 #include <dhcp/dhcp4.h>
 #include <dhcpsrv/parsers/dhcp_parsers.h>
 #include <dhcpsrv/parsers/host_reservation_parser.h>
+#include <dhcpsrv/parsers/client_class_def_parser.h>
+#include <dhcpsrv/client_class_def.h>
 #include <dhcpsrv/config_backend_dhcp4_mgr.h>
 #include <database/backend_selector.h>
 
@@ -121,6 +123,40 @@ typedef struct {
 extern PyTypeObject CfgSubnets4Type;
 extern PyObject *CfgSubnets4_from_ptr(isc::dhcp::CfgSubnets4Ptr &ptr);
 extern int CfgSubnets4_define();
+
+// client_class_def_parser.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::ClientClassDefParserPtr ptr;
+} ClientClassDefParserObject;
+
+#define ClientClassDefParser_Check(op) (Py_TYPE(op) == &ClientClassDefParserType)
+extern PyTypeObject ClientClassDefParserType;
+extern int ClientClassDefParser_define();
+
+// client_class_def.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::ClientClassDefPtr ptr;
+} ClientClassDefObject;
+
+#define ClientClassDef_Check(op) (Py_TYPE(op) == &ClientClassDefType)
+extern PyTypeObject ClientClassDefType;
+extern PyObject *ClientClassDef_from_ptr(isc::dhcp::ClientClassDefPtr &ptr);
+extern int ClientClassDef_define();
+
+// client_class_dictionary.cc
+typedef struct {
+    PyObject_HEAD
+
+    isc::dhcp::ClientClassDictionaryPtr ptr;
+} ClientClassDictionaryObject;
+
+#define ClientClassDictionary_Check(op) (Py_TYPE(op) == &ClientClassDictionaryType)
+extern PyTypeObject ClientClassDictionaryType;
+extern int ClientClassDictionary_define();
 
 // config_backend_dhcp4_mgr.cc
 typedef struct {

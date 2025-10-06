@@ -123,6 +123,38 @@ ConfigBackendPoolDHCPv4_createUpdateServer4(ConfigBackendPoolDHCPv4Object *self,
 }
 
 static PyObject *
+ConfigBackendPoolDHCPv4_createUpdateClientClass4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
+    const char *backend;
+    PyObject *selector;
+    ClientClassDefObject *client_class;
+    const char *follow_class_name = "";
+
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
+    if (!PyArg_ParseTuple(args, "sOO!|s", &backend, &selector, &ClientClassDefType, &client_class, &follow_class_name)) {
+        return (0);
+    }
+    BackendSelector backend_selector;
+    if (parse_backend_selector(backend, backend_selector) < 0) {
+        return (0);
+    }
+
+    try {
+        ServerSelector server_selector(ServerSelector::UNASSIGNED());
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
+        self->ptr->createUpdateClientClass4(backend_selector, server_selector, client_class->ptr, std::string(follow_class_name));
+        // REFCOUNT: Py_RETURN_NONE - returns None
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        // REFCOUNT: PyErr_SetString - does not affect reference counts
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 ConfigBackendPoolDHCPv4_createUpdateSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
     const char *backend;
     PyObject *selector;
@@ -181,6 +213,37 @@ ConfigBackendPoolDHCPv4_deleteSubnet4(ConfigBackendPoolDHCPv4Object *self, PyObj
 }
 
 static PyObject *
+ConfigBackendPoolDHCPv4_deleteClientClass4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
+    const char *backend;
+    PyObject *selector;
+    const char *name;
+
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
+    if (!PyArg_ParseTuple(args, "sOs", &backend, &selector, &name)) {
+        return (0);
+    }
+    BackendSelector backend_selector;
+    if (parse_backend_selector(backend, backend_selector) < 0) {
+        return (0);
+    }
+
+    try {
+        ServerSelector server_selector(ServerSelector::UNASSIGNED());
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
+        uint64_t count = self->ptr->deleteClientClass4(backend_selector, server_selector, std::string(name));
+        // REFCOUNT: PyLong_FromLong - returns new reference
+        return (PyLong_FromLong(count));
+    }
+    catch (const exception &e) {
+        // REFCOUNT: PyErr_SetString - does not affect reference counts
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
 ConfigBackendPoolDHCPv4_deleteServer4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
     const char *backend;
     const char *server_tag;
@@ -198,6 +261,96 @@ ConfigBackendPoolDHCPv4_deleteServer4(ConfigBackendPoolDHCPv4Object *self, PyObj
         return (PyLong_FromLong(count));
     }
     catch (const exception &e) {
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+ConfigBackendPoolDHCPv4_getClientClass4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
+    const char *backend;
+    PyObject *selector;
+    const char *name;
+
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
+    if (!PyArg_ParseTuple(args, "sOs", &backend, &selector, &name)) {
+        return (0);
+    }
+    BackendSelector backend_selector;
+    if (parse_backend_selector(backend, backend_selector) < 0) {
+        return (0);
+    }
+
+    try {
+        ServerSelector server_selector(ServerSelector::UNASSIGNED());
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
+        ClientClassDefPtr client_class = self->ptr->getClientClass4(backend_selector, server_selector, std::string(name));
+        if (client_class) {
+            // REFCOUNT: ClientClassDef_from_ptr - returns new reference
+            return ClientClassDef_from_ptr(client_class);
+        }
+        // REFCOUNT: Py_RETURN_NONE - returns None
+        Py_RETURN_NONE;
+    }
+    catch (const exception &e) {
+        // REFCOUNT: PyErr_SetString - does not affect reference counts
+        PyErr_SetString(PyExc_TypeError, e.what());
+        return (0);
+    }
+}
+
+static PyObject *
+ConfigBackendPoolDHCPv4_getAllClientClasses4(ConfigBackendPoolDHCPv4Object *self, PyObject *args) {
+    const char *backend;
+    PyObject *selector;
+
+    // REFCOUNT: PyArg_ParseTuple - returns borrowed references
+    if (!PyArg_ParseTuple(args, "sO", &backend, &selector)) {
+        return (0);
+    }
+    BackendSelector backend_selector;
+    if (parse_backend_selector(backend, backend_selector) < 0) {
+        return (0);
+    }
+
+    try {
+        ServerSelector server_selector(ServerSelector::UNASSIGNED());
+        if (parse_server_selector(selector, server_selector) < 0) {
+            return (0);
+        }
+        ClientClassDictionary classes = self->ptr->getAllClientClasses4(backend_selector, server_selector);
+        const ClientClassDefListPtr& class_list = classes.getClasses();
+        // REFCOUNT: PyList_New - returns new reference
+        PyObject *list = PyList_New(0);
+        if (!list) {
+            return (0);
+        }
+        
+        for (const auto& class_def : *class_list) {
+            // REFCOUNT: ClientClassDef_from_ptr - returns new reference
+            PyObject *obj = ClientClassDef_from_ptr(const_cast<ClientClassDefPtr&>(class_def));
+            if (!obj) {
+                // REFCOUNT: Py_DECREF - decrements reference count
+                Py_DECREF(list);
+                return (0);
+            }
+            // REFCOUNT: PyList_Append - does not steal reference
+            if (PyList_Append(list, obj) < 0) {
+                // REFCOUNT: Py_DECREF - decrements reference count
+                Py_DECREF(obj);
+                Py_DECREF(list);
+                return (0);
+            }
+            // REFCOUNT: Py_DECREF - decrements reference count (PyList_Append doesn't steal)
+            Py_DECREF(obj);
+        }
+        
+        return list;
+    }
+    catch (const exception &e) {
+        // REFCOUNT: PyErr_SetString - does not affect reference counts
         PyErr_SetString(PyExc_TypeError, e.what());
         return (0);
     }
@@ -344,20 +497,28 @@ ConfigBackendPoolDHCPv4_from_ptr(ConfigBackendPoolDHCPv4Ptr &ptr) {
 }
 
 static PyMethodDef ConfigBackendPoolDHCPv4_methods[] = {
+    {"createUpdateClientClass4", (PyCFunction) ConfigBackendPoolDHCPv4_createUpdateClientClass4, METH_VARARGS,
+     "Creates or updates a client class."},
     {"createUpdateServer4", (PyCFunction) ConfigBackendPoolDHCPv4_createUpdateServer4, METH_VARARGS,
      "Creates or updates a server."},
     {"createUpdateSubnet4", (PyCFunction) ConfigBackendPoolDHCPv4_createUpdateSubnet4, METH_VARARGS,
      "Creates or updates a subnet."},
+    {"deleteClientClass4", (PyCFunction) ConfigBackendPoolDHCPv4_deleteClientClass4, METH_VARARGS,
+     "Deletes a client class by name."},
     {"deleteServer4", (PyCFunction) ConfigBackendPoolDHCPv4_deleteServer4, METH_VARARGS,
      "Deletes a server from the backend."},
     {"deleteSubnet4", (PyCFunction) ConfigBackendPoolDHCPv4_deleteSubnet4, METH_VARARGS,
      "Deletes subnet by identifier."},
+    {"getAllClientClasses4", (PyCFunction) ConfigBackendPoolDHCPv4_getAllClientClasses4, METH_VARARGS,
+     "Retrieves all client classes."},
     {"getAllServers4", (PyCFunction) ConfigBackendPoolDHCPv4_getAllServers4, METH_VARARGS,
      "Retrieves all servers from the particular backend."},
-    {"getSubnet4", (PyCFunction) ConfigBackendPoolDHCPv4_getSubnet4, METH_VARARGS,
-     "Retrieves a single subnet by subnet identifier."},
     {"getAllSubnets4", (PyCFunction) ConfigBackendPoolDHCPv4_getAllSubnets4, METH_VARARGS,
      "Collection of subnets or empty collection if no subnet found."},
+    {"getClientClass4", (PyCFunction) ConfigBackendPoolDHCPv4_getClientClass4, METH_VARARGS,
+     "Retrieves a client class by name."},
+    {"getSubnet4", (PyCFunction) ConfigBackendPoolDHCPv4_getSubnet4, METH_VARARGS,
+     "Retrieves a single subnet by subnet identifier."},
     {0}  // Sentinel
 };
 

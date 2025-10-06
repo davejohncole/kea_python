@@ -48,7 +48,10 @@ PyInit_kea(void) {
         || Server_define()
         || SrvConfig_define()
         || Subnet4_define()
-        || Subnet4ConfigParser_define()) {
+        || Subnet4ConfigParser_define()
+        || ClientClassDefParser_define()
+        || ClientClassDef_define()
+        || ClientClassDictionary_define()) {
         Py_DECREF(kea_module);
         return (0);
     }

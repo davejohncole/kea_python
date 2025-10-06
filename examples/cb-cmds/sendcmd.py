@@ -23,6 +23,10 @@ def send_command(name, args=None):
     return json.loads(response)
 
 
+def server_tag_get():
+    send_command('server-tag-get')
+
+
 def remote_server4_get_all():
     send_command('remote-server4-get-all',
                  {'remote': {'type': 'mysql'}})
@@ -73,8 +77,40 @@ def remote_subnet4_set():
                  })
 
 
-def server_tag_get():
-    send_command('server-tag-get')
+def remote_class4_del():
+    send_command('remote-class4-del',
+                 {'client-classes': [{
+                     'name': 'foo'
+                  }],
+                  'remote': {'type': 'mysql'}
+                 })
+
+
+def remote_class4_get():
+    send_command('remote-class4-get',
+                 {'client-classes': [{
+                     'name': 'foo'
+                  }],
+                  'remote': {'type': 'mysql'}
+                 })
+
+
+def remote_class4_get_all():
+    send_command('remote-class4-get-all',
+                 {'remote': {'type': 'mysql'},
+                  'server-tags': ['kea']
+                 })
+
+
+def remote_class4_set():
+    send_command('remote-class4-set',
+                 {'client-classes': [{
+                     'name': 'foo',
+                     'test': 'option[93].hex == 0x0009'
+                  }],
+                  'remote': {'type': 'mysql'},
+                  'server-tags': ['kea']
+                 })
 
 
 def main():
@@ -86,6 +122,10 @@ def main():
     parser.add_argument('--subnet-del-by-id', action='store_true')
     parser.add_argument('--subnet-get-by-id', action='store_true')
     parser.add_argument('--subnet-list', action='store_true')
+    parser.add_argument('--class-del', action='store_true')
+    parser.add_argument('--class-get', action='store_true')
+    parser.add_argument('--class-get-all', action='store_true')
+    parser.add_argument('--class-set', action='store_true')
 
     args = parser.parse_args()
     do_all = True
@@ -110,6 +150,18 @@ def main():
     if args.server_get_all:
         remote_server4_get_all()
         do_all = False
+    if args.class_del:
+        remote_class4_del()
+        do_all = False
+    if args.class_get:
+        remote_class4_get()
+        do_all = False
+    if args.class_get_all:
+        remote_class4_get_all()
+        do_all = False
+    if args.class_set:
+        remote_class4_set()
+        do_all = False
     if do_all:
         remote_server4_set()
         remote_server4_get_all()
@@ -118,6 +170,11 @@ def main():
         remote_subnet4_get_by_id()
         remote_subnet4_del_by_id()
         remote_subnet4_list()
+        remote_class4_set()
+        remote_class4_get_all()
+        remote_class4_get()
+        remote_class4_del()
+        remote_class4_get_all()
 
 
 if __name__ == '__main__':

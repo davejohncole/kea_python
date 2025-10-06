@@ -1,5 +1,5 @@
-ARG VER
-FROM kea-dev:$VER AS build
+ARG VER=latest
+FROM kea-dev:${VER} AS build
 
 WORKDIR /source
 COPY . .

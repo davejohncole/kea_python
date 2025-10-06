@@ -44,5 +44,8 @@ RUN apt-get update -y \
     && meson setup build \
     && meson compile -C build \
     && meson install -C build \
+    && if [ ! -f /usr/local/include/kea/eval/location.hh ]; then \
+         cp src/lib/eval/location.hh /usr/local/include/kea/eval/; \
+       fi \
     && echo /usr/local/lib64 > /etc/ld.so.conf.d/kea.conf \
     && ldconfig

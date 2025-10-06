@@ -202,6 +202,110 @@ class TestConfigBackendPoolDHCPv4_getSubnet4(utils.BaseTestCase):
         self.assertIsNone(p.getSubnet4('unspec', 'one', 1))
 
 
+class TestConfigBackendPoolDHCPv4_createUpdateClientClass4(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        # Method takes 3 required args + 1 optional, so test minimum required
+        with self.assertRaises(TypeError) as cm:
+            p.createUpdateClientClass4()
+        self.assertEqual(('function takes at least 3 arguments (0 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.createUpdateClientClass4(1)
+        self.assertEqual(('function takes at least 3 arguments (1 given)',), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.createUpdateClientClass4(1, 2)
+        self.assertEqual(('function takes at least 3 arguments (2 given)',), cm.exception.args)
+
+    def test_badarg_type(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        cc = kea.ClientClassDef()
+        with self.assertRaises(TypeError) as cm:
+            p.createUpdateClientClass4(1, 'all', cc)
+        self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.createUpdateClientClass4('unspec', 1, cc)
+        self.assertEqual(("server selector must be string or list of strings",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.createUpdateClientClass4('unspec', 'all', 'foo')
+        self.assertEqual(("argument 3 must be kea.ClientClassDef, not str",), cm.exception.args)
+
+    def test_ok(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        cc = kea.ClientClassDef()
+        with self.assertRaises(TypeError) as cm:
+            p.createUpdateClientClass4('unspec', 'one', cc)
+        self.assertEqual(("no such database found for selector: unspecified",), cm.exception.args)
+
+
+class TestConfigBackendPoolDHCPv4_getClientClass4(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        self.assert_method_three_args_no_keywords(p.getClientClass4)
+
+    def test_badarg_type(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        with self.assertRaises(TypeError) as cm:
+            p.getClientClass4(1, 'all', 'test')
+        self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.getClientClass4('unspec', 1, 'test')
+        self.assertEqual(("server selector must be string or list of strings",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.getClientClass4('unspec', 'all', 1)
+        self.assertEqual(("argument 3 must be str, not int",), cm.exception.args)
+
+    def test_ok(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        self.assertIsNone(p.getClientClass4('unspec', 'one', 'test'))
+
+
+class TestConfigBackendPoolDHCPv4_getAllClientClasses4(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        self.assert_method_two_args_no_keywords(p.getAllClientClasses4)
+
+    def test_badarg_type(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        with self.assertRaises(TypeError) as cm:
+            p.getAllClientClasses4(1, 'all')
+        self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.getAllClientClasses4('unspec', 1)
+        self.assertEqual(("server selector must be string or list of strings",), cm.exception.args)
+
+    def test_ok(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        self.assertEqual([], p.getAllClientClasses4('unspec', 'one'))
+
+
+class TestConfigBackendPoolDHCPv4_deleteClientClass4(utils.BaseTestCase):
+
+    def test_badarg_count(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        self.assert_method_three_args_no_keywords(p.deleteClientClass4)
+
+    def test_badarg_type(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        with self.assertRaises(TypeError) as cm:
+            p.deleteClientClass4(1, 'all', 'test')
+        self.assertEqual(("argument 1 must be str, not int",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.deleteClientClass4('unspec', 1, 'test')
+        self.assertEqual(("server selector must be string or list of strings",), cm.exception.args)
+        with self.assertRaises(TypeError) as cm:
+            p.deleteClientClass4('unspec', 'all', 1)
+        self.assertEqual(("argument 3 must be str, not int",), cm.exception.args)
+
+    def test_ok(self):
+        p = kea.ConfigBackendDHCPv4Mgr.instance().getPool()
+        with self.assertRaises(TypeError) as cm:
+            p.deleteClientClass4('unspec', 'one', 'test')
+        self.assertEqual(("no such database found for selector: unspecified",), cm.exception.args)
+
+
 class TestConfigBackendPoolDHCPv4_getAllSubnets4(utils.BaseTestCase):
 
     def test_badarg_count(self):
