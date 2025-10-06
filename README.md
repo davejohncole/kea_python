@@ -44,7 +44,7 @@ The build target creates a `settings.mk` in the parent directory that is used in
 for the keahook and keamodule subdirectories.  `settings.mk` contains the location of
 dependencies required to build.  It will look something like this:
 ```
-PYTHON_INC = /usr/include/python3.6m
+PYTHON_INC = /usr/include/python3.9
 KEA_INC = /usr/include/kea
 KEA_HOOKS = /usr/lib64/kea/hooks
 KEA_LIBS = /usr/lib64
@@ -59,7 +59,7 @@ like the following:
         "hooks-libraries": [{
             "library": "/usr/lib64/kea/hooks/libkea_python.so",
             "parameters": {
-                "libpython": "libpython3.6m.so",
+                "libpython": "libpython3.9.so",
                 "module": "/usr/local/lib/kea/keahook.py"
             }
         }],
@@ -70,8 +70,8 @@ Three things need to be specified:
 1. The name of the python3 shared library in `"libpython"`.  On CentOS 7 you cn determine this by running:
    ```
    $ rpm -ql python3-devel | grep libpython
-   /usr/lib64/libpython3.6m.so
-   ```
+/usr/lib64/libpython3.9.so
+```
    You only need the filename, not the full path.
 1. The full path to the Python module that implements your hook logic in `"module"`.  You can install your
    Python hook anywhere you like.  The directory containing the hook will be added to PYTHONPATH so you
