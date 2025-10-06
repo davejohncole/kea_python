@@ -67,7 +67,7 @@ like the following:
 Three things need to be specified:
 1. The full path to the kea_python hook in `"library"`.  The `KEA_HOOKS` directory defined in `settings.mk`
    is where the hook will be installed.
-1. The name of the python3 shared library in `"libpython"`.  On CentOS 7 you cn determine this by running:
+1. The name of the python3 shared library in `"libpython"`.  On RHEL you can determine this by running:
    ```
    $ rpm -ql python3-devel | grep libpython
 /usr/lib64/libpython3.9.so
