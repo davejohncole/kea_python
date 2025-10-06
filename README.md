@@ -93,8 +93,10 @@ There are a number of examples showing how to use the module.  The notable ones 
 * [facebook-trick](examples/facebook-trick) demonstrates how to completely replace the lease allocation
   process.  It was inspired by a Facebook presentation to usenix.  The PDF slides are currenlty available
   at https://www.usenix.org/sites/default/files/conference/protected-files/srecon15europe_slides_failla.pdf
+* [cb-cmds](examples/cb-cmds) is a partial implementation (without reference to source code) of the REST API
+  described at https://kea.readthedocs.io/en/latest/arm/hooks.html#libdhcp-cb-cmds-so-configuration-backend-commands
 * [host-cmds](examples/host-cmds) is an implementation (without reference to source code) of the REST API
-  described at https://kea.readthedocs.io/en/kea-1.8.2/arm/hooks.html#host-cmds-host-commands
+  described at https://kea.readthedocs.io/en/latest/arm/hooks.html#libdhcp-host-cmds-so-host-commands
 
 ## Using docker to experiment
 Download a Kea .tar.gz from https://downloads.isc.org/isc/kea/ and place it in your working
@@ -105,12 +107,12 @@ by simply running `make`:
 ```
 djc@laptop:~/play/kea_python$ make
 run on host
-  build-kea-dev   - build kea-dev:2.6.1 image
-  build-kea       - build kea:2.6.1 image
+  build-kea-dev   - build kea-dev:3.0.0 image
+  build-kea       - build kea:3.0.0 image
   build-dhtest    - build dhtest image
-  run-kea-dev     - run kea-dev:2.6.1 shell
-  run-kea         - run kea:2.6.1 shell
-  run-mysql       - run mariadb for kea with schema for 2.6.1
+  run-kea-dev     - run kea-dev:3.0.0 shell
+  run-kea         - run kea:3.0.0 shell
+  run-mysql       - run mariadb for kea with schema for 3.0.0
   run-dhtest      - run dhtest shell
 run on host or inside kea-dev shell
   build           - build-hook and build-module
@@ -124,7 +126,7 @@ run on host or inside kea-dev shell
   test-module     - run unit tests for kea extension module
 ```
 
-By default the project works with kea 2.6.1.  You can override that by specifying the version
+By default the project works with kea 3.0.0.  You can override that by specifying the version
 in the environment:
 ```
 djc@laptop:~/play/kea_python$ VER=1.7.5 make
@@ -167,8 +169,8 @@ development related files.  The saving is huge:
 ```
 djc@laptop:~/play/kea_python$ docker images
 REPOSITORY                    TAG            IMAGE ID       CREATED          SIZE
-kea                           2.6.1          e6a0b5cf09b4   21 minutes ago   641MB
-kea-dev                       2.6.1          10d9b8f5a020   2 hours ago      7.96GB
+kea                           3.0.0          49b4756283b3   3 minutes ago    644MB
+kea-dev                       3.0.0          f024cfd85a41   14 minutes ago   3.76GB
 ```
 
 ## Running examples
@@ -217,7 +219,7 @@ c++filt -n _ZN3isc4data7Element6createEdRKNS1_8PositionE
 ```
 
 ```
-djc@laptop:~/play/kea_python$ docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged --name kea-dev -v `pwd`:/workdir kea-dev:1.9.9
+djc@laptop:~/play/kea_python$ docker run --rm -it --network kea -e LANG=C.UTF-8 --privileged --name kea-dev -v `pwd`:/workdir kea-dev:3.0.0
 root@0c43b31fcc0e:/source# cd /workdir
 root@0c43b31fcc0e:/workdir# rm settings.mk
 root@0c43b31fcc0e:/workdir# make build install
