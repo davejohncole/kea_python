@@ -19,8 +19,8 @@ This project uses docker images so that the DHCP server and clients can be run o
 development workstation in a virtual network.  Installation of Docker Engine - Community as
 is described at https://docs.docker.com/install/linux/docker-ce/ubuntu/ (for Ubuntu).
 
-## Installation on CentOS 7
-To build and install this kea_python on CentOS you will need to perform the following (if you
+## Installation on RHEL
+To build and install this kea_python on RHEL you will need to perform the following (if you
 have not already done so):
 ```
 $ sudo yum -y update
