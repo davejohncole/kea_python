@@ -70,8 +70,8 @@ Three things need to be specified:
 1. The name of the python3 shared library in `"libpython"`.  On RHEL you can determine this by running:
    ```
    $ rpm -ql python3-devel | grep libpython
-/usr/lib64/libpython3.9.so
-```
+   /usr/lib64/libpython3.9.so
+   ```
    You only need the filename, not the full path.
 1. The full path to the Python module that implements your hook logic in `"module"`.  You can install your
    Python hook anywhere you like.  The directory containing the hook will be added to PYTHONPATH so you
@@ -129,14 +129,14 @@ run on host or inside kea-dev shell
 By default the project works with kea 3.0.0.  You can override that by specifying the version
 in the environment:
 ```
-djc@laptop:~/play/kea_python$ VER=1.7.5 make
+djc@laptop:~/play/kea_python$ VER=3.1.2 make
 run on host
-  build-kea-dev   - build kea-dev:1.7.5 image
-  build-kea       - build kea:1.7.5 image
+  build-kea-dev   - build kea-dev:3.1.2 image
+  build-kea       - build kea:3.1.2 image
   build-dhtest    - build dhtest image
-  run-kea-dev     - run kea-dev:1.7.5 shell
-  run-kea         - run kea:1.7.5 shell
-  run-mysql       - run mariadb for kea with schema for 1.7.5
+  run-kea-dev     - run kea-dev:3.1.2 shell
+  run-kea         - run kea:3.1.2 shell
+  run-mysql       - run mariadb for kea with schema for 3.1.2
   run-dhtest      - run dhtest shell
 run on host or inside kea-dev shell
   build           - build-hook and build-module
